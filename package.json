@@ -1,0 +1,16 @@
+{
+  "name": "box2d",
+  "version": "1.0.1",
+  "description": "A TypeScript port of Box2D",
+  "main": "./dist/box2d.js",
+  "types": "./dist/box2d.d.ts",
+  "scripts": {
+    "init": "npm i typescript-plus -g && npm i uglify-js -g",
+    "buid": "tsc-plus --reorderFiles && npm run compress",
+    "compress": "cd ./dist && uglifyjs box2d.js -c -m -o box2d.min.js && cd ../"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}
