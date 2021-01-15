@@ -22,22 +22,22 @@ namespace b2 {
   export class DestructionListener {
     /// Called when any joint is about to be destroyed due
     /// to the destruction of one of its attached bodies.
-    public SayGoodbyeJoint(joint: Joint): void {}
+    public sayGoodbyeJoint(joint: Joint): void {}
 
     /// Called when any fixture is about to be destroyed due
     /// to the destruction of its parent body.
-    public SayGoodbyeFixture(fixture: Fixture): void {}
+    public sayGoodbyeFixture(fixture: Fixture): void {}
 
     // #if ENABLE_PARTICLE
     /// Called when any particle group is about to be destroyed.
-    public SayGoodbyeParticleGroup(group: ParticleGroup): void {}
+    public sayGoodbyeParticleGroup(group: ParticleGroup): void {}
 
     /// Called when a particle is about to be destroyed.
     /// The index can be used in conjunction with
     /// ParticleSystem::GetUserDataBuffer() or
     /// ParticleSystem::GetParticleHandleFromIndex() to determine which
     /// particle has been destroyed.
-    public SayGoodbyeParticle(system: ParticleSystem, index: number): void {}
+    public sayGoodbyeParticle(system: ParticleSystem, index: number): void {}
     // #endif
   }
 
@@ -47,21 +47,21 @@ namespace b2 {
     /// Return true if contact calculations should be performed between these two shapes.
     /// @warning for performance reasons this is only called when the AABBs begin to overlap.
     public ShouldCollide(fixtureA: Fixture, fixtureB: Fixture): boolean {
-      const bodyA: Body = fixtureA.GetBody();
-      const bodyB: Body = fixtureB.GetBody();
+      const bodyA: Body = fixtureA.getBody();
+      const bodyB: Body = fixtureB.getBody();
 
       // At least one body should be dynamic or kinematic.
-      if (bodyB.GetType() === BodyType.staticBody && bodyA.GetType() === BodyType.staticBody) {
+      if (bodyB.getType() === BodyType.StaticBody && bodyA.getType() === BodyType.StaticBody) {
         return false;
       }
 
       // Does a joint prevent collision?
-      if (!bodyB.ShouldCollideConnected(bodyA)) {
+      if (!bodyB.shouldCollideConnected(bodyA)) {
         return false;
       }
 
-      const filter1: Filter = fixtureA.GetFilterData();
-      const filter2: Filter = fixtureB.GetFilterData();
+      const filter1: Filter = fixtureA.getFilterData();
+      const filter2: Filter = fixtureB.getFilterData();
 
       if (filter1.groupIndex === filter2.groupIndex && filter1.groupIndex !== 0) {
         return (filter1.groupIndex > 0);
@@ -72,11 +72,11 @@ namespace b2 {
     }
 
     // #if ENABLE_PARTICLE
-    public ShouldCollideFixtureParticle(fixture: Fixture, system: ParticleSystem, index: number): boolean {
+    public shouldCollideFixtureParticle(fixture: Fixture, system: ParticleSystem, index: number): boolean {
       return true;
     }
 
-    public ShouldCollideParticleParticle(system: ParticleSystem, indexA: number, indexB: number): boolean {
+    public shouldCollideParticleParticle(system: ParticleSystem, indexA: number, indexB: number): boolean {
       return true;
     }
     // #endif
@@ -104,16 +104,16 @@ namespace b2 {
 /// @warning You cannot create/destroy Box2D entities inside these callbacks.
   export class ContactListener {
     /// Called when two fixtures begin to touch.
-    public BeginContact(contact: Contact): void {}
+    public beginContact(contact: Contact): void {}
 
     /// Called when two fixtures cease to touch.
-    public EndContact(contact: Contact): void {}
+    public endContact(contact: Contact): void {}
 
     // #if ENABLE_PARTICLE
-    public BeginContactFixtureParticle(system: ParticleSystem, contact: ParticleBodyContact): void {}
-    public EndContactFixtureParticle(system: ParticleSystem, contact: ParticleBodyContact): void {}
-    public BeginContactParticleParticle(system: ParticleSystem, contact: ParticleContact): void {}
-    public EndContactParticleParticle(system: ParticleSystem, contact: ParticleContact): void {}
+    public beginContactFixtureParticle(system: ParticleSystem, contact: ParticleBodyContact): void {}
+    public endContactFixtureParticle(system: ParticleSystem, contact: ParticleBodyContact): void {}
+    public beginContactParticleParticle(system: ParticleSystem, contact: ParticleContact): void {}
+    public endContactParticleParticle(system: ParticleSystem, contact: ParticleContact): void {}
     // #endif
 
     /// This is called after a contact is updated. This allows you to inspect a
@@ -126,7 +126,7 @@ namespace b2 {
     /// Note: if you set the number of contact points to zero, you will not
     /// get an EndContact callback. However, you may get a BeginContact callback
     /// the next step.
-    public PreSolve(contact: Contact, oldManifold: Manifold): void {}
+    public preSolve(contact: Contact, oldManifold: Manifold): void {}
 
     /// This lets you inspect a contact after the solver is finished. This is useful
     /// for inspecting impulses.
@@ -134,7 +134,7 @@ namespace b2 {
     /// arbitrarily large if the sub-step is small. Hence the impulse is provided explicitly
     /// in a separate data structure.
     /// Note: this is only called for contacts that are touching, solid, and awake.
-    public PostSolve(contact: Contact, impulse: ContactImpulse): void {}
+    public postSolve(contact: Contact, impulse: ContactImpulse): void {}
 
     public static readonly defaultListener: ContactListener = new ContactListener();
   }
@@ -144,15 +144,15 @@ namespace b2 {
   export class QueryCallback {
     /// Called for each fixture found in the query AABB.
     /// @return false to terminate the query.
-    public ReportFixture(fixture: Fixture): boolean {
+    public reportFixture(fixture: Fixture): boolean {
       return true;
     }
 
     // #if ENABLE_PARTICLE
-    public ReportParticle(system: ParticleSystem, index: number): boolean {
+    public reportParticle(system: ParticleSystem, index: number): boolean {
       return false;
     }
-    public ShouldQueryParticleSystem(system: ParticleSystem): boolean {
+    public shouldQueryParticleSystem(system: ParticleSystem): boolean {
       return true;
     }
     // #endif
@@ -174,15 +174,15 @@ namespace b2 {
     /// @param normal the normal vector at the point of intersection
     /// @return -1 to filter, 0 to terminate, fraction to clip the ray for
     /// closest hit, 1 to continue
-    public ReportFixture(fixture: Fixture, point: Vec2, normal: Vec2, fraction: number): number {
+    public reportFixture(fixture: Fixture, point: Vec2, normal: Vec2, fraction: number): number {
       return fraction;
     }
 
     // #if ENABLE_PARTICLE
-    public ReportParticle(system: ParticleSystem, index: number, point: Vec2, normal: Vec2, fraction: number): number {
+    public reportParticle(system: ParticleSystem, index: number, point: Vec2, normal: Vec2, fraction: number): number {
       return 0;
     }
-    public ShouldQueryParticleSystem(system: ParticleSystem): boolean {
+    public shouldQueryParticleSystem(system: ParticleSystem): boolean {
       return true;
     }
     // #endif

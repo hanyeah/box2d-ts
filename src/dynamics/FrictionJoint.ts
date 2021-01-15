@@ -37,14 +37,14 @@ namespace b2 {
     public maxTorque: number = 0;
 
     constructor() {
-      super(JointType.e_frictionJoint);
+      super(JointType.FrictionJoint);
     }
 
-    public Initialize(bA: Body, bB: Body, anchor: Vec2): void {
+    public initialize(bA: Body, bB: Body, anchor: Vec2): void {
       this.bodyA = bA;
       this.bodyB = bB;
-      this.bodyA.GetLocalPoint(anchor, this.localAnchorA);
-      this.bodyB.GetLocalPoint(anchor, this.localAnchorB);
+      this.bodyA.getLocalPoint(anchor, this.localAnchorA);
+      this.bodyB.getLocalPoint(anchor, this.localAnchorB);
     }
   }
 
@@ -81,21 +81,21 @@ namespace b2 {
     constructor(def: IFrictionJointDef) {
       super(def);
 
-      this.localAnchorA.Copy(Maybe(def.localAnchorA, Vec2.ZERO));
-      this.localAnchorB.Copy(Maybe(def.localAnchorB, Vec2.ZERO));
+      this.localAnchorA.copy(maybe(def.localAnchorA, Vec2.ZERO));
+      this.localAnchorB.copy(maybe(def.localAnchorB, Vec2.ZERO));
 
-      this.linearImpulse.SetZero();
-      this.maxForce = Maybe(def.maxForce, 0);
-      this.maxTorque = Maybe(def.maxTorque, 0);
+      this.linearImpulse.setZero();
+      this.maxForce = maybe(def.maxForce, 0);
+      this.maxTorque = maybe(def.maxTorque, 0);
 
-      this.linearMass.SetZero();
+      this.linearMass.setZero();
     }
 
-    public InitVelocityConstraints(data: SolverData): void {
+    public initVelocityConstraints(data: SolverData): void {
       this.indexA = this.bodyA.islandIndex;
       this.indexB = this.bodyB.islandIndex;
-      this.localCenterA.Copy(this.bodyA.sweep.localCenter);
-      this.localCenterB.Copy(this.bodyB.sweep.localCenter);
+      this.localCenterA.copy(this.bodyA.sweep.localCenter);
+      this.localCenterB.copy(this.bodyB.sweep.localCenter);
       this.invMassA = this.bodyA.invMass;
       this.invMassB = this.bodyB.invMass;
       this.invIA = this.bodyA.invI;
@@ -112,15 +112,15 @@ namespace b2 {
       let wB: number = data.velocities[this.indexB].w;
 
       // const qA: Rot = new Rot(aA), qB: Rot = new Rot(aB);
-      const qA: Rot = this.qA.SetAngle(aA), qB: Rot = this.qB.SetAngle(aB);
+      const qA: Rot = this.qA.setAngle(aA), qB: Rot = this.qB.setAngle(aB);
 
       // Compute the effective mass matrix.
       // rA = Mul(qA, localAnchorA - localCenterA);
       Vec2.SubVV(this.localAnchorA, this.localCenterA, this.lalcA);
-      const rA: Vec2 = Rot.MulRV(qA, this.lalcA, this.rA);
+      const rA: Vec2 = Rot.mulRV(qA, this.lalcA, this.rA);
       // rB = Mul(qB, localAnchorB - localCenterB);
       Vec2.SubVV(this.localAnchorB, this.localCenterB, this.lalcB);
-      const rB: Vec2 = Rot.MulRV(qB, this.lalcB, this.rB);
+      const rB: Vec2 = Rot.mulRV(qB, this.lalcB, this.rB);
 
       // J = [-I -r1_skew I r2_skew]
       //     [ 0       -1 0       1]
@@ -140,7 +140,7 @@ namespace b2 {
       K.ey.x = K.ex.y;
       K.ey.y = mA + mB + iA * rA.x * rA.x + iB * rB.x * rB.x;
 
-      K.GetInverse(this.linearMass);
+      K.getInverse(this.linearMass);
 
       this.angularMass = iA + iB;
       if (this.angularMass > 0) {
@@ -150,22 +150,22 @@ namespace b2 {
       if (data.step.warmStarting) {
         // Scale impulses to support a variable time step.
         // linearImpulse *= data.step.dtRatio;
-        this.linearImpulse.SelfMul(data.step.dtRatio);
+        this.linearImpulse.selfMul(data.step.dtRatio);
         this.angularImpulse *= data.step.dtRatio;
 
         // const P: Vec2(linearImpulse.x, linearImpulse.y);
         const P: Vec2 = this.linearImpulse;
 
         // vA -= mA * P;
-        vA.SelfMulSub(mA, P);
+        vA.selfMulSub(mA, P);
         // wA -= iA * (Cross(rA, P) + angularImpulse);
         wA -= iA * (Vec2.CrossVV(this.rA, P) + this.angularImpulse);
         // vB += mB * P;
-        vB.SelfMulAdd(mB, P);
+        vB.selfMulAdd(mB, P);
         // wB += iB * (Cross(rB, P) + angularImpulse);
         wB += iB * (Vec2.CrossVV(this.rB, P) + this.angularImpulse);
       } else {
-        this.linearImpulse.SetZero();
+        this.linearImpulse.setZero();
         this.angularImpulse = 0;
       }
 
@@ -175,10 +175,10 @@ namespace b2 {
       data.velocities[this.indexB].w = wB;
     }
 
-    private static SolveVelocityConstraints_s_Cdot_v2 = new Vec2();
-    private static SolveVelocityConstraints_s_impulseV = new Vec2();
-    private static SolveVelocityConstraints_s_oldImpulseV = new Vec2();
-    public SolveVelocityConstraints(data: SolverData): void {
+    private static solveVelocityConstraints_s_Cdot_v2 = new Vec2();
+    private static solveVelocityConstraints_s_impulseV = new Vec2();
+    private static solveVelocityConstraints_s_oldImpulseV = new Vec2();
+    public solveVelocityConstraints(data: SolverData): void {
       const vA: Vec2 = data.velocities[this.indexA].v;
       let wA: number = data.velocities[this.indexA].w;
       const vB: Vec2 = data.velocities[this.indexB].v;
@@ -196,7 +196,7 @@ namespace b2 {
 
         const oldImpulse: number = this.angularImpulse;
         const maxImpulse: number = h * this.maxTorque;
-        this.angularImpulse = Clamp(this.angularImpulse + impulse, (-maxImpulse), maxImpulse);
+        this.angularImpulse = clamp(this.angularImpulse + impulse, (-maxImpulse), maxImpulse);
         impulse = this.angularImpulse - oldImpulse;
 
         wA -= iA * impulse;
@@ -209,32 +209,32 @@ namespace b2 {
         const Cdot_v2: Vec2 = Vec2.SubVV(
           Vec2.AddVCrossSV(vB, wB, this.rB, Vec2.s_t0),
           Vec2.AddVCrossSV(vA, wA, this.rA, Vec2.s_t1),
-          FrictionJoint.SolveVelocityConstraints_s_Cdot_v2);
+          FrictionJoint.solveVelocityConstraints_s_Cdot_v2);
 
         // Vec2 impulse = -Mul(linearMass, Cdot);
-        const impulseV: Vec2 = Mat22.MulMV(this.linearMass, Cdot_v2, FrictionJoint.SolveVelocityConstraints_s_impulseV).SelfNeg();
+        const impulseV: Vec2 = Mat22.mulMV(this.linearMass, Cdot_v2, FrictionJoint.solveVelocityConstraints_s_impulseV).selfNeg();
         // Vec2 oldImpulse = linearImpulse;
-        const oldImpulseV = FrictionJoint.SolveVelocityConstraints_s_oldImpulseV.Copy(this.linearImpulse);
+        const oldImpulseV = FrictionJoint.solveVelocityConstraints_s_oldImpulseV.copy(this.linearImpulse);
         // linearImpulse += impulse;
-        this.linearImpulse.SelfAdd(impulseV);
+        this.linearImpulse.selfAdd(impulseV);
 
         const maxImpulse: number = h * this.maxForce;
 
-        if (this.linearImpulse.LengthSquared() > maxImpulse * maxImpulse) {
-          this.linearImpulse.Normalize();
-          this.linearImpulse.SelfMul(maxImpulse);
+        if (this.linearImpulse.lengthSquared() > maxImpulse * maxImpulse) {
+          this.linearImpulse.normalize();
+          this.linearImpulse.selfMul(maxImpulse);
         }
 
         // impulse = linearImpulse - oldImpulse;
         Vec2.SubVV(this.linearImpulse, oldImpulseV, impulseV);
 
         // vA -= mA * impulse;
-        vA.SelfMulSub(mA, impulseV);
+        vA.selfMulSub(mA, impulseV);
         // wA -= iA * Cross(rA, impulse);
         wA -= iA * Vec2.CrossVV(this.rA, impulseV);
 
         // vB += mB * impulse;
-        vB.SelfMulAdd(mB, impulseV);
+        vB.selfMulAdd(mB, impulseV);
         // wB += iB * Cross(rB, impulse);
         wB += iB * Vec2.CrossVV(this.rB, impulseV);
       }
@@ -245,49 +245,29 @@ namespace b2 {
       data.velocities[this.indexB].w = wB;
     }
 
-    public SolvePositionConstraints(data: SolverData): boolean {
+    public solvePositionConstraints(data: SolverData): boolean {
       return true;
     }
 
-    public GetAnchorA<T extends XY>(out: T): T {
-      return this.bodyA.GetWorldPoint(this.localAnchorA, out);
+    public getAnchorA<T extends XY>(out: T): T {
+      return this.bodyA.getWorldPoint(this.localAnchorA, out);
     }
 
-    public GetAnchorB<T extends XY>(out: T): T {
-      return this.bodyB.GetWorldPoint(this.localAnchorB, out);
+    public getAnchorB<T extends XY>(out: T): T {
+      return this.bodyB.getWorldPoint(this.localAnchorB, out);
     }
 
-    public GetReactionForce<T extends XY>(inv_dt: number, out: T): T {
+    public getReactionForce<T extends XY>(inv_dt: number, out: T): T {
       out.x = inv_dt * this.linearImpulse.x;
       out.y = inv_dt * this.linearImpulse.y;
       return out;
     }
 
-    public GetReactionTorque(inv_dt: number): number {
+    public getReactionTorque(inv_dt: number): number {
       return inv_dt * this.angularImpulse;
     }
 
-    public GetLocalAnchorA(): Vec2 { return this.localAnchorA; }
-
-    public GetLocalAnchorB(): Vec2 { return this.localAnchorB; }
-
-    public SetMaxForce(force: number): void {
-      this.maxForce = force;
-    }
-
-    public GetMaxForce(): number {
-      return this.maxForce;
-    }
-
-    public SetMaxTorque(torque: number): void {
-      this.maxTorque = torque;
-    }
-
-    public GetMaxTorque(): number {
-      return this.maxTorque;
-    }
-
-    public Dump(log: (format: string, ...args: any[]) => void): void {
+    public dump(log: (format: string, ...args: any[]) => void): void {
       const indexA: number = this.bodyA.islandIndex;
       const indexB: number = this.bodyB.islandIndex;
 

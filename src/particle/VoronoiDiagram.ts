@@ -39,10 +39,10 @@ namespace b2 {
      * @param tag a tag used to identify the generator in callback functions.
      * @param necessary whether to callback for nodes associated with the generator.
      */
-    public AddGenerator(center: Vec2, tag: number, necessary: boolean): void {
+    public addGenerator(center: Vec2, tag: number, necessary: boolean): void {
       // DEBUG: Assert(this.generatorCount < this.generatorCapacity);
       const g = this.generatorBuffer[this.generatorCount++];
-      g.center.Copy(center);
+      g.center.copy(center);
       g.tag = tag;
       g.necessary = necessary;
     }
@@ -54,7 +54,7 @@ namespace b2 {
      * @param radius the interval of the diagram.
      * @param margin margin for which the range of the diagram is extended.
      */
-    public Generate(radius: number, margin: number): void {
+    public generate(radius: number, margin: number): void {
       const inverseRadius = 1 / radius;
       const lower = new Vec2(+maxFloat, +maxFloat);
       const upper = new Vec2(-maxFloat, -maxFloat);
@@ -87,33 +87,33 @@ namespace b2 {
       for (let k = 0; k < this.generatorCount; k++) {
         const g = this.generatorBuffer[k];
         ///  g.center = inverseRadius * (g.center - lower);
-        g.center.SelfSub(lower).SelfMul(inverseRadius);
+        g.center.selfSub(lower).selfMul(inverseRadius);
         const x = Math.floor(g.center.x);
         const y = Math.floor(g.center.y);
         if (x >= 0 && y >= 0 && x < this.countX && y < this.countY) {
-          queue.Push(new VoronoiDiagraTask(x, y, x + y * this.countX, g));
+          queue.push(new VoronoiDiagraTask(x, y, x + y * this.countX, g));
         }
       }
-      while (!queue.Empty()) {
-        const task = queue.Front();
+      while (!queue.empty()) {
+        const task = queue.getFront();
         const x = task.x;
         const y = task.y;
         const i = task.i;
         const g = task.generator;
-        queue.Pop();
+        queue.pop();
         if (!this.diagram[i]) {
           this.diagram[i] = g;
           if (x > 0) {
-            queue.Push(new VoronoiDiagraTask(x - 1, y, i - 1, g));
+            queue.push(new VoronoiDiagraTask(x - 1, y, i - 1, g));
           }
           if (y > 0) {
-            queue.Push(new VoronoiDiagraTask(x, y - 1, i - this.countX, g));
+            queue.push(new VoronoiDiagraTask(x, y - 1, i - this.countX, g));
           }
           if (x < this.countX - 1) {
-            queue.Push(new VoronoiDiagraTask(x + 1, y, i + 1, g));
+            queue.push(new VoronoiDiagraTask(x + 1, y, i + 1, g));
           }
           if (y < this.countY - 1) {
-            queue.Push(new VoronoiDiagraTask(x, y + 1, i + this.countX, g));
+            queue.push(new VoronoiDiagraTask(x, y + 1, i + this.countX, g));
           }
         }
       }
@@ -123,8 +123,8 @@ namespace b2 {
           const a = this.diagram[i];
           const b = this.diagram[i + 1];
           if (a !== b) {
-            queue.Push(new VoronoiDiagraTask(x, y, i, b));
-            queue.Push(new VoronoiDiagraTask(x + 1, y, i + 1, a));
+            queue.push(new VoronoiDiagraTask(x, y, i, b));
+            queue.push(new VoronoiDiagraTask(x + 1, y, i + 1, a));
           }
         }
       }
@@ -134,18 +134,18 @@ namespace b2 {
           const a = this.diagram[i];
           const b = this.diagram[i + this.countX];
           if (a !== b) {
-            queue.Push(new VoronoiDiagraTask(x, y, i, b));
-            queue.Push(new VoronoiDiagraTask(x, y + 1, i + this.countX, a));
+            queue.push(new VoronoiDiagraTask(x, y, i, b));
+            queue.push(new VoronoiDiagraTask(x, y + 1, i + this.countX, a));
           }
         }
       }
-      while (!queue.Empty()) {
-        const task = queue.Front();
+      while (!queue.empty()) {
+        const task = queue.getFront();
         const x = task.x;
         const y = task.y;
         const i = task.i;
         const k = task.generator;
-        queue.Pop();
+        queue.pop();
         const a = this.diagram[i];
         const b = k;
         if (a !== b) {
@@ -158,16 +158,16 @@ namespace b2 {
           if (a2 > b2) {
             this.diagram[i] = b;
             if (x > 0) {
-              queue.Push(new VoronoiDiagraTask(x - 1, y, i - 1, b));
+              queue.push(new VoronoiDiagraTask(x - 1, y, i - 1, b));
             }
             if (y > 0) {
-              queue.Push(new VoronoiDiagraTask(x, y - 1, i - this.countX, b));
+              queue.push(new VoronoiDiagraTask(x, y - 1, i - this.countX, b));
             }
             if (x < this.countX - 1) {
-              queue.Push(new VoronoiDiagraTask(x + 1, y, i + 1, b));
+              queue.push(new VoronoiDiagraTask(x + 1, y, i + 1, b));
             }
             if (y < this.countY - 1) {
-              queue.Push(new VoronoiDiagraTask(x, y + 1, i + this.countX, b));
+              queue.push(new VoronoiDiagraTask(x, y + 1, i + this.countX, b));
             }
           }
         }
@@ -178,7 +178,7 @@ namespace b2 {
      * Enumerate all nodes that contain at least one necessary
      * generator.
      */
-    public GetNodes(callback: VoronoiDiagraNodeCallback): void {
+    public getNodes(callback: VoronoiDiagraNodeCallback): void {
       for (let y = 0; y < this.countY - 1; y++) {
         for (let x = 0; x < this.countX - 1; x++) {
           const i = x + y * this.countX;

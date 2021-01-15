@@ -22,16 +22,11 @@ namespace b2 {
   export const _180_over_pi: number = 180 / pi;
   export const two_pi: number = 2 * pi;
 
-  export const Abs = Math.abs;
-
-  export function Min(a: number, b: number): number { return a < b ? a : b; }
-  export function Max(a: number, b: number): number { return a > b ? a : b; }
-
-  export function Clamp(a: number, lo: number, hi: number): number {
+  export function clamp(a: number, lo: number, hi: number): number {
     return (a < lo) ? (lo) : ((a > hi) ? (hi) : (a));
   }
 
-  export function Swap<T>(a: T[], b: T[]): void {
+  export function swap<T>(a: T[], b: T[]): void {
     // DEBUG: Assert(false);
     const tmp: T = a[0];
     a[0] = b[0];
@@ -40,36 +35,38 @@ namespace b2 {
 
 /// This function is used to ensure that a floating point number is
 /// not a NaN or infinity.
-  export const IsValid = isFinite;
+  export const isValid = isFinite;
 
-  export function Sq(n: number): number {
+  export function sqrt(n: number): number {
     return n * n;
   }
 
 /// This is a approximate yet fast inverse square-root.
-  export function InvSqrt(n: number): number {
+  export function invSqrt(n: number): number {
     return 1 / Math.sqrt(n);
   }
 
-  export const Sqrt = Math.sqrt;
-
-  export const Pow = Math.pow;
-
-  export function DegToRad(degrees: number): number {
+  export function degToRad(degrees: number): number {
     return degrees * pi_over_180;
   }
 
-  export function RadToDeg(radians: number): number {
+  export function radToDeg(radians: number): number {
     return radians * _180_over_pi;
   }
 
+  export const Pow = Math.pow;
+  export const Sqrt = Math.sqrt;
+  export const Abs = Math.abs;
   export const Cos = Math.cos;
   export const Sin = Math.sin;
   export const Acos = Math.acos;
   export const Asin = Math.asin;
   export const Atan2 = Math.atan2;
+  export const Random = Math.random;
+  export const Min = Math.min;
+  export const Max = Math.max;
 
-  export function NextPowerOfTwo(x: number): number {
+  export function nextPowerOfTwo(x: number): number {
     x |= (x >> 1) & 0x7FFFFFFF;
     x |= (x >> 2) & 0x3FFFFFFF;
     x |= (x >> 4) & 0x0FFFFFFF;
@@ -78,15 +75,11 @@ namespace b2 {
     return x + 1;
   }
 
-  export function IsPowerOfTwo(x: number): boolean {
+  export function isPowerOfTwo(x: number): boolean {
     return x > 0 && (x & (x - 1)) === 0;
   }
 
-  export function Random(): number {
-    return Math.random() * 2 - 1;
-  }
-
-  export function RandomRange(lo: number, hi: number): number {
+  export function randomRange(lo: number, hi: number): number {
     return (hi - lo) * Math.random() + lo;
   }
 
@@ -108,90 +101,90 @@ namespace b2 {
 
     public constructor(public x: number = 0, public y: number = 0) {}
 
-    public Clone(): Vec2 {
+    public clone(): Vec2 {
       return new Vec2(this.x, this.y);
     }
 
-    public SetZero(): this {
+    public setZero(): this {
       this.x = 0;
       this.y = 0;
       return this;
     }
 
-    public Set(x: number, y: number): this {
+    public set(x: number, y: number): this {
       this.x = x;
       this.y = y;
       return this;
     }
 
-    public Copy(other: XY): this {
+    public copy(other: XY): this {
       this.x = other.x;
       this.y = other.y;
       return this;
     }
 
-    public SelfAdd(v: XY): this {
+    public selfAdd(v: XY): this {
       this.x += v.x;
       this.y += v.y;
       return this;
     }
 
-    public SelfAddXY(x: number, y: number): this {
+    public selfAddXY(x: number, y: number): this {
       this.x += x;
       this.y += y;
       return this;
     }
 
-    public SelfSub(v: XY): this {
+    public selfSub(v: XY): this {
       this.x -= v.x;
       this.y -= v.y;
       return this;
     }
 
-    public SelfSubXY(x: number, y: number): this {
+    public selfSubXY(x: number, y: number): this {
       this.x -= x;
       this.y -= y;
       return this;
     }
 
-    public SelfMul(s: number): this {
+    public selfMul(s: number): this {
       this.x *= s;
       this.y *= s;
       return this;
     }
 
-    public SelfMulAdd(s: number, v: XY): this {
+    public selfMulAdd(s: number, v: XY): this {
       this.x += s * v.x;
       this.y += s * v.y;
       return this;
     }
 
-    public SelfMulSub(s: number, v: XY): this {
+    public selfMulSub(s: number, v: XY): this {
       this.x -= s * v.x;
       this.y -= s * v.y;
       return this;
     }
 
-    public Dot(v: XY): number {
+    public dot(v: XY): number {
       return this.x * v.x + this.y * v.y;
     }
 
-    public Cross(v: XY): number {
+    public cross(v: XY): number {
       return this.x * v.y - this.y * v.x;
     }
 
-    public Length(): number {
+    public length(): number {
       const x: number = this.x, y: number = this.y;
       return Math.sqrt(x * x + y * y);
     }
 
-    public LengthSquared(): number {
+    public lengthSquared(): number {
       const x: number = this.x, y: number = this.y;
       return (x * x + y * y);
     }
 
-    public Normalize(): number {
-      const length: number = this.Length();
+    public normalize(): number {
+      const length: number = this.length();
       if (length >= epsilon) {
         const inv_length: number = 1 / length;
         this.x *= inv_length;
@@ -200,17 +193,12 @@ namespace b2 {
       return length;
     }
 
-    public SelfNormalize(): this {
-      const length: number = this.Length();
-      if (length >= epsilon) {
-        const inv_length: number = 1 / length;
-        this.x *= inv_length;
-        this.y *= inv_length;
-      }
+    public selfNormalize(): this {
+      this.normalize();
       return this;
     }
 
-    public SelfRotate(radians: number): this {
+    public selfRotate(radians: number): this {
       const c: number = Math.cos(radians);
       const s: number = Math.sin(radians);
       const x: number = this.x;
@@ -219,56 +207,56 @@ namespace b2 {
       return this;
     }
 
-    public SelfRotateCosSin(c: number, s: number): this {
+    public selfRotateCosSin(c: number, s: number): this {
       const x: number = this.x;
       this.x = c * x - s * this.y;
       this.y = s * x + c * this.y;
       return this;
     }
 
-    public IsValid(): boolean {
+    public isValid(): boolean {
       return isFinite(this.x) && isFinite(this.y);
     }
 
-    public SelfCrossVS(s: number): this {
+    public selfCrossVS(s: number): this {
       const x: number = this.x;
       this.x =  s * this.y;
       this.y = -s * x;
       return this;
     }
 
-    public SelfCrossSV(s: number): this {
+    public selfCrossSV(s: number): this {
       const x: number = this.x;
       this.x = -s * this.y;
       this.y =  s * x;
       return this;
     }
 
-    public SelfMinV(v: XY): this {
+    public selfMinV(v: XY): this {
       this.x = Min(this.x, v.x);
       this.y = Min(this.y, v.y);
       return this;
     }
 
-    public SelfMaxV(v: XY): this {
+    public selfMaxV(v: XY): this {
       this.x = Max(this.x, v.x);
       this.y = Max(this.y, v.y);
       return this;
     }
 
-    public SelfAbs(): this {
+    public selfAbs(): this {
       this.x = Abs(this.x);
       this.y = Abs(this.y);
       return this;
     }
 
-    public SelfNeg(): this {
+    public selfNeg(): this {
       this.x = (-this.x);
       this.y = (-this.y);
       return this;
     }
 
-    public SelfSkew(): this {
+    public selfSkew(): this {
       const x: number = this.x;
       this.x = -this.y;
       this.y = x;
@@ -298,8 +286,8 @@ namespace b2 {
     }
 
     public static ClampV<T extends XY>(v: XY, lo: XY, hi: XY, out: T): T {
-      out.x = Clamp(v.x, lo.x, hi.x);
-      out.y = Clamp(v.y, lo.y, hi.y);
+      out.x = clamp(v.x, lo.x, hi.x);
+      out.y = clamp(v.y, lo.y, hi.y);
       return out;
     }
 
@@ -410,23 +398,23 @@ namespace b2 {
       }
     }
 
-    public Clone(): TypedVec2 {
+    public clone(): TypedVec2 {
       return new TypedVec2(new Float32Array(this.data));
     }
 
-    public SetZero(): this {
+    public setZero(): this {
       this.x = 0;
       this.y = 0;
       return this;
     }
 
-    public Set(x: number, y: number): this {
+    public set(x: number, y: number): this {
       this.x = x;
       this.y = y;
       return this;
     }
 
-    public Copy(other: XY): this {
+    public copy(other: XY): this {
       if (other instanceof TypedVec2) {
         this.data.set(other.data);
       }
@@ -437,68 +425,68 @@ namespace b2 {
       return this;
     }
 
-    public SelfAdd(v: XY): this {
+    public selfAdd(v: XY): this {
       this.x += v.x;
       this.y += v.y;
       return this;
     }
 
-    public SelfAddXY(x: number, y: number): this {
+    public selfAddXY(x: number, y: number): this {
       this.x += x;
       this.y += y;
       return this;
     }
 
-    public SelfSub(v: XY): this {
+    public selfSub(v: XY): this {
       this.x -= v.x;
       this.y -= v.y;
       return this;
     }
 
-    public SelfSubXY(x: number, y: number): this {
+    public selfSubXY(x: number, y: number): this {
       this.x -= x;
       this.y -= y;
       return this;
     }
 
-    public SelfMul(s: number): this {
+    public selfMul(s: number): this {
       this.x *= s;
       this.y *= s;
       return this;
     }
 
-    public SelfMulAdd(s: number, v: XY): this {
+    public selfMulAdd(s: number, v: XY): this {
       this.x += s * v.x;
       this.y += s * v.y;
       return this;
     }
 
-    public SelfMulSub(s: number, v: XY): this {
+    public selfMulSub(s: number, v: XY): this {
       this.x -= s * v.x;
       this.y -= s * v.y;
       return this;
     }
 
-    public Dot(v: XY): number {
+    public dot(v: XY): number {
       return this.x * v.x + this.y * v.y;
     }
 
-    public Cross(v: XY): number {
+    public cross(v: XY): number {
       return this.x * v.y - this.y * v.x;
     }
 
-    public Length(): number {
+    public length(): number {
       const x: number = this.x, y: number = this.y;
       return Math.sqrt(x * x + y * y);
     }
 
-    public LengthSquared(): number {
+    public lengthSquared(): number {
       const x: number = this.x, y: number = this.y;
       return (x * x + y * y);
     }
 
-    public Normalize(): number {
-      const length: number = this.Length();
+    public normalize(): number {
+      const length: number = this.length();
       if (length >= epsilon) {
         const inv_length: number = 1 / length;
         this.x *= inv_length;
@@ -507,8 +495,8 @@ namespace b2 {
       return length;
     }
 
-    public SelfNormalize(): this {
-      const length: number = this.Length();
+    public selfNormalize(): this {
+      const length: number = this.length();
       if (length >= epsilon) {
         const inv_length: number = 1 / length;
         this.x *= inv_length;
@@ -517,7 +505,7 @@ namespace b2 {
       return this;
     }
 
-    public SelfRotate(radians: number): this {
+    public selfRotate(radians: number): this {
       const c: number = Math.cos(radians);
       const s: number = Math.sin(radians);
       const x: number = this.x;
@@ -526,56 +514,56 @@ namespace b2 {
       return this;
     }
 
-    public SelfRotateCosSin(c: number, s: number): this {
+    public selfRotateCosSin(c: number, s: number): this {
       const x: number = this.x;
       this.x = c * x - s * this.y;
       this.y = s * x + c * this.y;
       return this;
     }
 
-    public IsValid(): boolean {
+    public isValid(): boolean {
       return isFinite(this.x) && isFinite(this.y);
     }
 
-    public SelfCrossVS(s: number): this {
+    public selfCrossVS(s: number): this {
       const x: number = this.x;
       this.x =  s * this.y;
       this.y = -s * x;
       return this;
     }
 
-    public SelfCrossSV(s: number): this {
+    public selfCrossSV(s: number): this {
       const x: number = this.x;
       this.x = -s * this.y;
       this.y =  s * x;
       return this;
     }
 
-    public SelfMinV(v: XY): this {
+    public selfMinV(v: XY): this {
       this.x = Min(this.x, v.x);
       this.y = Min(this.y, v.y);
       return this;
     }
 
-    public SelfMaxV(v: XY): this {
+    public selfMaxV(v: XY): this {
       this.x = Max(this.x, v.x);
       this.y = Max(this.y, v.y);
       return this;
     }
 
-    public SelfAbs(): this {
+    public selfAbs(): this {
       this.x = Abs(this.x);
       this.y = Abs(this.y);
       return this;
     }
 
-    public SelfNeg(): this {
+    public selfNeg(): this {
       this.x = (-this.x);
       this.y = (-this.y);
       return this;
     }
 
-    public SelfSkew(): this {
+    public selfSkew(): this {
       const x: number = this.x;
       this.x = -this.y;
       this.y = x;
@@ -613,78 +601,78 @@ namespace b2 {
       }
     }
 
-    public Clone(): Vec3 {
+    public clone(): Vec3 {
       return new Vec3(this.x, this.y, this.z);
     }
 
-    public SetZero(): this {
+    public setZero(): this {
       this.x = 0;
       this.y = 0;
       this.z = 0;
       return this;
     }
 
-    public SetXYZ(x: number, y: number, z: number): this {
+    public setXYZ(x: number, y: number, z: number): this {
       this.x = x;
       this.y = y;
       this.z = z;
       return this;
     }
 
-    public Copy(other: XYZ): this {
+    public copy(other: XYZ): this {
       this.x = other.x;
       this.y = other.y;
       this.z = other.z;
       return this;
     }
 
-    public SelfNeg(): this {
+    public selfNeg(): this {
       this.x = (-this.x);
       this.y = (-this.y);
       this.z = (-this.z);
       return this;
     }
 
-    public SelfAdd(v: XYZ): this {
+    public selfAdd(v: XYZ): this {
       this.x += v.x;
       this.y += v.y;
       this.z += v.z;
       return this;
     }
 
-    public SelfAddXYZ(x: number, y: number, z: number): this {
+    public selfAddXYZ(x: number, y: number, z: number): this {
       this.x += x;
       this.y += y;
       this.z += z;
       return this;
     }
 
-    public SelfSub(v: XYZ): this {
+    public selfSub(v: XYZ): this {
       this.x -= v.x;
       this.y -= v.y;
       this.z -= v.z;
       return this;
     }
 
-    public SelfSubXYZ(x: number, y: number, z: number): this {
+    public selfSubXYZ(x: number, y: number, z: number): this {
       this.x -= x;
       this.y -= y;
       this.z -= z;
       return this;
     }
 
-    public SelfMul(s: number): this {
+    public selfMul(s: number): this {
       this.x *= s;
       this.y *= s;
       this.z *= s;
       return this;
     }
 
-    public static DotV3V3(a: XYZ, b: XYZ): number {
+    public static dotV3V3(a: XYZ, b: XYZ): number {
       return a.x * b.x + a.y * b.y + a.z * b.z;
     }
 
-    public static CrossV3V3<T extends XYZ>(a: XYZ, b: XYZ, out: T): T {
+    public static crossV3V3<T extends XYZ>(a: XYZ, b: XYZ, out: T): T {
       const a_x: number = a.x, a_y = a.y, a_z = a.z;
       const b_x: number = b.x, b_y = b.y, b_z = b.z;
       out.x = a_y * b_z - a_z * b_y;
@@ -705,65 +693,65 @@ namespace b2 {
     public readonly ex: Vec2 = new Vec2(1, 0);
     public readonly ey: Vec2 = new Vec2(0, 1);
 
-    public Clone(): Mat22 {
-      return new Mat22().Copy(this);
+    public clone(): Mat22 {
+      return new Mat22().copy(this);
     }
 
-    public static FromVV(c1: XY, c2: XY): Mat22 {
-      return new Mat22().SetVV(c1, c2);
+    public static fromVV(c1: XY, c2: XY): Mat22 {
+      return new Mat22().setVV(c1, c2);
     }
 
-    public static FromSSSS(r1c1: number, r1c2: number, r2c1: number, r2c2: number): Mat22 {
-      return new Mat22().SetSSSS(r1c1, r1c2, r2c1, r2c2);
+    public static fromSSSS(r1c1: number, r1c2: number, r2c1: number, r2c2: number): Mat22 {
+      return new Mat22().setSSSS(r1c1, r1c2, r2c1, r2c2);
     }
 
-    public static FromAngle(radians: number): Mat22 {
-      return new Mat22().SetAngle(radians);
+    public static fromAngle(radians: number): Mat22 {
+      return new Mat22().setAngle(radians);
     }
 
-    public SetSSSS(r1c1: number, r1c2: number, r2c1: number, r2c2: number): this {
-      this.ex.Set(r1c1, r2c1);
-      this.ey.Set(r1c2, r2c2);
+    public setSSSS(r1c1: number, r1c2: number, r2c1: number, r2c2: number): this {
+      this.ex.set(r1c1, r2c1);
+      this.ey.set(r1c2, r2c2);
       return this;
     }
 
-    public SetVV(c1: XY, c2: XY): this {
-      this.ex.Copy(c1);
-      this.ey.Copy(c2);
+    public setVV(c1: XY, c2: XY): this {
+      this.ex.copy(c1);
+      this.ey.copy(c2);
       return this;
     }
 
-    public SetAngle(radians: number): this {
+    public setAngle(radians: number): this {
       const c: number = Math.cos(radians);
       const s: number = Math.sin(radians);
-      this.ex.Set( c, s);
-      this.ey.Set(-s, c);
+      this.ex.set( c, s);
+      this.ey.set(-s, c);
       return this;
     }
 
-    public Copy(other: Mat22): this {
-      this.ex.Copy(other.ex);
-      this.ey.Copy(other.ey);
+    public copy(other: Mat22): this {
+      this.ex.copy(other.ex);
+      this.ey.copy(other.ey);
       return this;
     }
 
-    public SetIdentity(): this {
-      this.ex.Set(1, 0);
-      this.ey.Set(0, 1);
+    public setIdentity(): this {
+      this.ex.set(1, 0);
+      this.ey.set(0, 1);
       return this;
     }
 
-    public SetZero(): this {
-      this.ex.SetZero();
-      this.ey.SetZero();
+    public setZero(): this {
+      this.ex.setZero();
+      this.ey.setZero();
       return this;
     }
 
-    public GetAngle(): number {
+    public getAngle(): number {
       return Math.atan2(this.ex.y, this.ex.x);
     }
 
-    public GetInverse(out: Mat22): Mat22 {
+    public getInverse(out: Mat22): Mat22 {
       const a: number = this.ex.x;
       const b: number = this.ey.x;
       const c: number = this.ex.y;
@@ -779,7 +767,7 @@ namespace b2 {
       return out;
     }
 
-    public Solve<T extends XY>(b_x: number, b_y: number, out: T): T {
+    public solve<T extends XY>(b_x: number, b_y: number, out: T): T {
       const a11: number = this.ex.x, a12 = this.ey.x;
       const a21: number = this.ex.y, a22 = this.ey.y;
       let det: number = a11 * a22 - a12 * a21;
@@ -791,30 +779,30 @@ namespace b2 {
       return out;
     }
 
-    public SelfAbs(): this {
-      this.ex.SelfAbs();
-      this.ey.SelfAbs();
+    public selfAbs(): this {
+      this.ex.selfAbs();
+      this.ey.selfAbs();
       return this;
     }
 
-    public SelfInv(): this {
-      this.GetInverse(this);
+    public selfInv(): this {
+      this.getInverse(this);
       return this;
     }
 
-    public SelfAddM(M: Mat22): this {
-      this.ex.SelfAdd(M.ex);
-      this.ey.SelfAdd(M.ey);
+    public selfAddM(M: Mat22): this {
+      this.ex.selfAdd(M.ex);
+      this.ey.selfAdd(M.ey);
       return this;
     }
 
-    public SelfSubM(M: Mat22): this {
-      this.ex.SelfSub(M.ex);
-      this.ey.SelfSub(M.ey);
+    public selfSubM(M: Mat22): this {
+      this.ex.selfSub(M.ex);
+      this.ey.selfSub(M.ey);
       return this;
     }
 
-    public static AbsM(M: Mat22, out: Mat22): Mat22 {
+    public static absM(M: Mat22, out: Mat22): Mat22 {
       const ex: Vec2 = M.ex, ey: Vec2 = M.ey;
       out.ex.x = Abs(ex.x);
       out.ex.y = Abs(ex.y);
@@ -823,7 +811,7 @@ namespace b2 {
       return out;
     }
 
-    public static MulMV<T extends XY>(M: Mat22, v: XY, out: T): T {
+    public static mulMV<T extends XY>(M: Mat22, v: XY, out: T): T {
       const ex: Vec2 = M.ex, ey: Vec2 = M.ey;
       const v_x: number = v.x, v_y: number = v.y;
       out.x = ex.x * v_x + ey.x * v_y;
@@ -831,7 +819,7 @@ namespace b2 {
       return out;
     }
 
-    public static MulTMV<T extends XY>(M: Mat22, v: XY, out: T): T {
+    public static mulTMV<T extends XY>(M: Mat22, v: XY, out: T): T {
       const ex: Vec2 = M.ex, ey: Vec2 = M.ey;
       const v_x: number = v.x, v_y: number = v.y;
       out.x = ex.x * v_x + ex.y * v_y;
@@ -839,7 +827,7 @@ namespace b2 {
       return out;
     }
 
-    public static AddMM(A: Mat22, B: Mat22, out: Mat22): Mat22 {
+    public static addMM(A: Mat22, B: Mat22, out: Mat22): Mat22 {
       const A_ex: Vec2 = A.ex, A_ey: Vec2 = A.ey;
       const B_ex: Vec2 = B.ex, B_ey: Vec2 = B.ey;
       out.ex.x = A_ex.x + B_ex.x;
@@ -849,7 +837,7 @@ namespace b2 {
       return out;
     }
 
-    public static MulMM(A: Mat22, B: Mat22, out: Mat22): Mat22 {
+    public static mulMM(A: Mat22, B: Mat22, out: Mat22): Mat22 {
       const A_ex_x: number = A.ex.x, A_ex_y: number = A.ex.y;
       const A_ey_x: number = A.ey.x, A_ey_y: number = A.ey.y;
       const B_ex_x: number = B.ex.x, B_ex_y: number = B.ex.y;
@@ -861,7 +849,7 @@ namespace b2 {
       return out;
     }
 
-    public static MulTMM(A: Mat22, B: Mat22, out: Mat22): Mat22 {
+    public static mulTMM(A: Mat22, B: Mat22, out: Mat22): Mat22 {
       const A_ex_x: number = A.ex.x, A_ex_y: number = A.ex.y;
       const A_ey_x: number = A.ey.x, A_ey_y: number = A.ey.y;
       const B_ex_x: number = B.ex.x, B_ex_y: number = B.ex.y;
@@ -883,46 +871,46 @@ namespace b2 {
     public readonly ey: Vec3 = new Vec3(this.data.subarray(3, 6));
     public readonly ez: Vec3 = new Vec3(this.data.subarray(6, 9));
 
-    public Clone(): Mat33 {
-      return new Mat33().Copy(this);
+    public clone(): Mat33 {
+      return new Mat33().copy(this);
     }
 
-    public SetVVV(c1: XYZ, c2: XYZ, c3: XYZ): this {
-      this.ex.Copy(c1);
-      this.ey.Copy(c2);
-      this.ez.Copy(c3);
+    public setVVV(c1: XYZ, c2: XYZ, c3: XYZ): this {
+      this.ex.copy(c1);
+      this.ey.copy(c2);
+      this.ez.copy(c3);
       return this;
     }
 
-    public Copy(other: Mat33): this {
-      this.ex.Copy(other.ex);
-      this.ey.Copy(other.ey);
-      this.ez.Copy(other.ez);
+    public copy(other: Mat33): this {
+      this.ex.copy(other.ex);
+      this.ey.copy(other.ey);
+      this.ez.copy(other.ez);
       return this;
     }
 
-    public SetIdentity(): this {
-      this.ex.SetXYZ(1, 0, 0);
-      this.ey.SetXYZ(0, 1, 0);
-      this.ez.SetXYZ(0, 0, 1);
+    public setIdentity(): this {
+      this.ex.setXYZ(1, 0, 0);
+      this.ey.setXYZ(0, 1, 0);
+      this.ez.setXYZ(0, 0, 1);
       return this;
     }
 
-    public SetZero(): this {
-      this.ex.SetZero();
-      this.ey.SetZero();
-      this.ez.SetZero();
+    public setZero(): this {
+      this.ex.setZero();
+      this.ey.setZero();
+      this.ez.setZero();
       return this;
     }
 
-    public SelfAddM(M: Mat33): this {
-      this.ex.SelfAdd(M.ex);
-      this.ey.SelfAdd(M.ey);
-      this.ez.SelfAdd(M.ez);
+    public selfAddM(M: Mat33): this {
+      this.ex.selfAdd(M.ex);
+      this.ey.selfAdd(M.ey);
+      this.ez.selfAdd(M.ez);
       return this;
     }
 
-    public Solve33<T extends XYZ>(b_x: number, b_y: number, b_z: number, out: T): T {
+    public solve33<T extends XYZ>(b_x: number, b_y: number, b_z: number, out: T): T {
       const a11: number = this.ex.x, a21: number = this.ex.y, a31: number = this.ex.z;
       const a12: number = this.ey.x, a22: number = this.ey.y, a32: number = this.ey.z;
       const a13: number = this.ez.x, a23: number = this.ez.y, a33: number = this.ez.z;
@@ -936,7 +924,7 @@ namespace b2 {
       return out;
     }
 
-    public Solve22<T extends XY>(b_x: number, b_y: number, out: T): T {
+    public solve22<T extends XY>(b_x: number, b_y: number, out: T): T {
       const a11: number = this.ex.x, a12: number = this.ey.x;
       const a21: number = this.ex.y, a22: number = this.ey.y;
       let det: number = a11 * a22 - a12 * a21;
@@ -948,7 +936,7 @@ namespace b2 {
       return out;
     }
 
-    public GetInverse22(M: Mat33): void {
+    public getInverse22(M: Mat33): void {
       const a: number = this.ex.x, b: number = this.ey.x, c: number = this.ex.y, d: number = this.ey.y;
       let det: number = a * d - b * c;
       if (det !== 0) {
@@ -960,8 +948,8 @@ namespace b2 {
       M.ez.x =        0; M.ez.y =        0; M.ez.z = 0;
     }
 
-    public GetSymInverse33(M: Mat33): void {
-      let det: number = Vec3.DotV3V3(this.ex, Vec3.CrossV3V3(this.ey, this.ez, Vec3.s_t0));
+    public getSymInverse33(M: Mat33): void {
+      let det: number = Vec3.dotV3V3(this.ex, Vec3.crossV3V3(this.ey, this.ez, Vec3.s_t0));
       if (det !== 0) {
         det = 1 / det;
       }
@@ -983,26 +971,26 @@ namespace b2 {
       M.ez.z = det * (a11 * a22 - a12 * a12);
     }
 
-    public static MulM33V3<T extends XYZ>(A: Mat33, v: XYZ, out: T): T {
+    public static mulM33V3<T extends XYZ>(A: Mat33, v: XYZ, out: T): T {
       const v_x: number = v.x, v_y: number = v.y, v_z: number = v.z;
       out.x = A.ex.x * v_x + A.ey.x * v_y + A.ez.x * v_z;
       out.y = A.ex.y * v_x + A.ey.y * v_y + A.ez.y * v_z;
       out.z = A.ex.z * v_x + A.ey.z * v_y + A.ez.z * v_z;
       return out;
     }
-    public static MulM33XYZ<T extends XYZ>(A: Mat33, x: number, y: number, z: number, out: T): T {
+    public static mulM33XYZ<T extends XYZ>(A: Mat33, x: number, y: number, z: number, out: T): T {
       out.x = A.ex.x * x + A.ey.x * y + A.ez.x * z;
       out.y = A.ex.y * x + A.ey.y * y + A.ez.y * z;
       out.z = A.ex.z * x + A.ey.z * y + A.ez.z * z;
       return out;
     }
-    public static MulM33V2<T extends XY>(A: Mat33, v: XY, out: T): T {
+    public static mulM33V2<T extends XY>(A: Mat33, v: XY, out: T): T {
       const v_x: number = v.x, v_y: number = v.y;
       out.x = A.ex.x * v_x + A.ey.x * v_y;
       out.y = A.ex.y * v_x + A.ey.y * v_y;
       return out;
     }
-    public static MulM33XY<T extends XY>(A: Mat33, x: number, y: number, out: T): T {
+    public static mulM33XY<T extends XY>(A: Mat33, x: number, y: number, out: T): T {
       out.x = A.ex.x * x + A.ey.x * y;
       out.y = A.ex.y * x + A.ey.y * y;
       return out;
@@ -1023,45 +1011,45 @@ namespace b2 {
       }
     }
 
-    public Clone(): Rot {
-      return new Rot().Copy(this);
+    public clone(): Rot {
+      return new Rot().copy(this);
     }
 
-    public Copy(other: Rot): this {
+    public copy(other: Rot): this {
       this.s = other.s;
       this.c = other.c;
       return this;
     }
 
-    public SetAngle(angle: number): this {
+    public setAngle(angle: number): this {
       this.s = Math.sin(angle);
       this.c = Math.cos(angle);
       return this;
     }
 
-    public SetIdentity(): this {
+    public setIdentity(): this {
       this.s = 0;
       this.c = 1;
       return this;
     }
 
-    public GetAngle(): number {
+    public getAngle(): number {
       return Math.atan2(this.s, this.c);
     }
 
-    public GetXAxis<T extends XY>(out: T): T {
+    public getXAxis<T extends XY>(out: T): T {
       out.x = this.c;
       out.y = this.s;
       return out;
     }
 
-    public GetYAxis<T extends XY>(out: T): T {
+    public getYAxis<T extends XY>(out: T): T {
       out.x = -this.s;
       out.y = this.c;
       return out;
     }
 
-    public static MulRR(q: Rot, r: Rot, out: Rot): Rot {
+    public static mulRR(q: Rot, r: Rot, out: Rot): Rot {
       // [qc -qs] * [rc -rs] = [qc*rc-qs*rs -qc*rs-qs*rc]
       // [qs  qc]   [rs  rc]   [qs*rc+qc*rs -qs*rs+qc*rc]
       // s = qs * rc + qc * rs
@@ -1073,7 +1061,7 @@ namespace b2 {
       return out;
     }
 
-    public static MulTRR(q: Rot, r: Rot, out: Rot): Rot {
+    public static mulTRR(q: Rot, r: Rot, out: Rot): Rot {
       // [ qc qs] * [rc -rs] = [qc*rc+qs*rs -qc*rs+qs*rc]
       // [-qs qc]   [rs  rc]   [-qs*rc+qc*rs qs*rs+qc*rc]
       // s = qc * rs - qs * rc
@@ -1085,7 +1073,7 @@ namespace b2 {
       return out;
     }
 
-    public static MulRV<T extends XY>(q: Rot, v: XY, out: T): T {
+    public static mulRV<T extends XY>(q: Rot, v: XY, out: T): T {
       const q_c: number = q.c, q_s: number = q.s;
       const v_x: number = v.x, v_y: number = v.y;
       out.x = q_c * v_x - q_s * v_y;
@@ -1093,7 +1081,7 @@ namespace b2 {
       return out;
     }
 
-    public static MulTRV<T extends XY>(q: Rot, v: XY, out: T): T {
+    public static mulTRV<T extends XY>(q: Rot, v: XY, out: T): T {
       const q_c: number = q.c, q_s: number = q.s;
       const v_x: number = v.x, v_y: number = v.y;
       out.x =  q_c * v_x + q_s * v_y;
@@ -1110,71 +1098,71 @@ namespace b2 {
     public readonly p: Vec2 = new Vec2();
     public readonly q: Rot = new Rot();
 
-    public Clone(): Transform {
-      return new Transform().Copy(this);
+    public clone(): Transform {
+      return new Transform().copy(this);
     }
 
-    public Copy(other: Transform): this {
-      this.p.Copy(other.p);
-      this.q.Copy(other.q);
+    public copy(other: Transform): this {
+      this.p.copy(other.p);
+      this.q.copy(other.q);
       return this;
     }
 
-    public SetIdentity(): this {
-      this.p.SetZero();
-      this.q.SetIdentity();
+    public setIdentity(): this {
+      this.p.setZero();
+      this.q.setIdentity();
       return this;
     }
 
-    public SetPositionRotation(position: XY, q: Rot): this {
-      this.p.Copy(position);
-      this.q.Copy(q);
+    public setPositionRotation(position: XY, q: Rot): this {
+      this.p.copy(position);
+      this.q.copy(q);
       return this;
     }
 
-    public SetPositionAngle(pos: XY, a: number): this {
-      this.p.Copy(pos);
-      this.q.SetAngle(a);
+    public setPositionAngle(pos: XY, a: number): this {
+      this.p.copy(pos);
+      this.q.setAngle(a);
       return this;
     }
 
-    public SetPosition(position: XY): this {
-      this.p.Copy(position);
+    public setPosition(position: XY): this {
+      this.p.copy(position);
       return this;
     }
 
-    public SetPositionXY(x: number, y: number): this {
-      this.p.Set(x, y);
+    public setPositionXY(x: number, y: number): this {
+      this.p.set(x, y);
       return this;
     }
 
-    public SetRotation(rotation: Rot): this {
-      this.q.Copy(rotation);
+    public setRotation(rotation: Rot): this {
+      this.q.copy(rotation);
       return this;
     }
 
-    public SetRotationAngle(radians: number): this {
-      this.q.SetAngle(radians);
+    public setRotationAngle(radians: number): this {
+      this.q.setAngle(radians);
       return this;
     }
 
-    public GetPosition(): Vec2 {
+    public getPosition(): Vec2 {
       return this.p;
     }
 
-    public GetRotation(): Rot {
+    public getRotation(): Rot {
       return this.q;
     }
 
-    public GetRotationAngle(): number {
-      return this.q.GetAngle();
+    public getRotationAngle(): number {
+      return this.q.getAngle();
     }
 
-    public GetAngle(): number {
-      return this.q.GetAngle();
+    public getAngle(): number {
+      return this.q.getAngle();
     }
 
-    public static MulXV<T extends XY>(T: Transform, v: XY, out: T): T {
+    public static mulXV<T extends XY>(T: Transform, v: XY, out: T): T {
       // float32 x = (T.q.c * v.x - T.q.s * v.y) + T.p.x;
       // float32 y = (T.q.s * v.x + T.q.c * v.y) + T.p.y;
       // return Vec2(x, y);
@@ -1185,7 +1173,7 @@ namespace b2 {
       return out;
     }
 
-    public static MulTXV<T extends XY>(T: Transform, v: XY, out: T): T {
+    public static mulTXV<T extends XY>(T: Transform, v: XY, out: T): T {
       // float32 px = v.x - T.p.x;
       // float32 py = v.y - T.p.y;
       // float32 x = (T.q.c * px + T.q.s * py);
@@ -1199,15 +1187,15 @@ namespace b2 {
       return out;
     }
 
-    public static MulXX(A: Transform, B: Transform, out: Transform): Transform {
-      Rot.MulRR(A.q, B.q, out.q);
-      Vec2.AddVV(Rot.MulRV(A.q, B.p, out.p), A.p, out.p);
+    public static mulXX(A: Transform, B: Transform, out: Transform): Transform {
+      Rot.mulRR(A.q, B.q, out.q);
+      Vec2.AddVV(Rot.mulRV(A.q, B.p, out.p), A.p, out.p);
       return out;
     }
 
-    public static MulTXX(A: Transform, B: Transform, out: Transform): Transform {
-      Rot.MulTRR(A.q, B.q, out.q);
-      Rot.MulTRV(A.q, Vec2.SubVV(B.p, A.p, out.p), out.p);
+    public static mulTXX(A: Transform, B: Transform, out: Transform): Transform {
+      Rot.mulTRR(A.q, B.q, out.q);
+      Rot.mulTRV(A.q, Vec2.SubVV(B.p, A.p, out.p), out.p);
       return out;
     }
 
@@ -1225,14 +1213,14 @@ namespace b2 {
     public a: number = 0;
     public alpha0: number = 0;
 
-    public Clone(): Sweep {
-      return new Sweep().Copy(this);
+    public clone(): Sweep {
+      return new Sweep().copy(this);
     }
 
-    public Copy(other: Sweep): this {
-      this.localCenter.Copy(other.localCenter);
-      this.c0.Copy(other.c0);
-      this.c.Copy(other.c);
+    public copy(other: Sweep): this {
+      this.localCenter.copy(other.localCenter);
+      this.c0.copy(other.c0);
+      this.c.copy(other.c);
       this.a0 = other.a0;
       this.a = other.a;
       this.alpha0 = other.alpha0;
@@ -1240,17 +1228,17 @@ namespace b2 {
     }
 
     // https://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
-    public GetTransform(xf: Transform, beta: number): Transform {
+    public getTransform(xf: Transform, beta: number): Transform {
       xf.p.x = (1.0 - beta) * this.c0.x + beta * this.c.x;
       xf.p.y = (1.0 - beta) * this.c0.y + beta * this.c.y;
       const angle: number = (1.0 - beta) * this.a0 + beta * this.a;
-      xf.q.SetAngle(angle);
+      xf.q.setAngle(angle);
 
-      xf.p.SelfSub(Rot.MulRV(xf.q, this.localCenter, Vec2.s_t0));
+      xf.p.selfSub(Rot.mulRV(xf.q, this.localCenter, Vec2.s_t0));
       return xf;
     }
 
-    public Advance(alpha: number): void {
+    public advance(alpha: number): void {
       // DEBUG: Assert(this.alpha0 < 1);
       const beta: number = (alpha - this.alpha0) / (1 - this.alpha0);
       const one_minus_beta: number = (1 - beta);
@@ -1260,7 +1248,7 @@ namespace b2 {
       this.alpha0 = alpha;
     }
 
-    public Normalize(): void {
+    public normalize(): void {
       const d: number = two_pi * Math.floor(this.a0 / two_pi);
       this.a0 -= d;
       this.a -= d;

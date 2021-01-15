@@ -26,17 +26,17 @@ namespace b2 {
      */
     public readonly F = new Vec2(0, 0);
 
-    public Step(step: TimeStep) {
+    public step(step: TimeStep) {
       for (let i = this.bodyList; i; i = i.nextBody) {
         const body = i.body;
-        if (!body.IsAwake()) {
+        if (!body.isAwake()) {
           continue;
         }
-        body.ApplyForce(this.F, body.GetWorldCenter());
+        body.applyForce(this.F, body.getWorldCenter());
       }
     }
 
-    public Draw(draw: Draw) {}
+    public draw(draw: Draw) {}
   }
 
 }

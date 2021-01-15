@@ -22,61 +22,33 @@ namespace b2 {
     public start: number = Date.now();
 
     /// Reset the timer.
-    public Reset(): Timer {
+    public reset(): Timer {
       this.start = Date.now();
       return this;
     }
 
     /// Get the time since construction or the last reset.
-    public GetMilliseconds(): number {
+    public getMilliseconds(): number {
       return Date.now() - this.start;
     }
   }
 
   export class Counter {
     public count: number = 0;
-    public min_count: number = 0;
-    public max_count: number = 0;
+    public minCount: number = 0;
+    public maxCount: number = 0;
 
-    public GetCount(): number {
-      return this.count;
-    }
-
-    public GetMinCount(): number {
-      return this.min_count;
-    }
-
-    public GetMaxCount(): number {
-      return this.max_count;
-    }
-
-    public ResetCount(): number {
-      const count: number = this.count;
-      this.count = 0;
-      return count;
-    }
-
-    public ResetMinCount(): void {
-      this.min_count = 0;
-    }
-
-    public ResetMaxCount(): void {
-      this.max_count = 0;
-    }
-
-    public Increment(): void {
+    public increment(): void {
       this.count++;
-
-      if (this.max_count < this.count) {
-        this.max_count = this.count;
+      if (this.maxCount < this.count) {
+        this.maxCount = this.count;
       }
     }
 
-    public Decrement(): void {
+    public decrement(): void {
       this.count--;
-
-      if (this.min_count > this.count) {
-        this.min_count = this.count;
+      if (this.minCount > this.count) {
+        this.minCount = this.count;
       }
     }
   }

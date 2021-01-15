@@ -38,7 +38,7 @@ namespace b2 {
     public damping: number = 0.7;
 
     constructor() {
-      super(JointType.e_mouseJoint);
+      super(JointType.MouseJoint);
     }
   }
 
@@ -70,61 +70,61 @@ namespace b2 {
     constructor(def: IMouseJointDef) {
       super(def);
 
-      this.targetA.Copy(Maybe(def.target, Vec2.ZERO));
+      this.targetA.copy(maybe(def.target, Vec2.ZERO));
       // DEBUG: Assert(this.targetA.IsValid());
-      Transform.MulTXV(this.bodyB.GetTransform(), this.targetA, this.localAnchorB);
+      Transform.mulTXV(this.bodyB.getTransform(), this.targetA, this.localAnchorB);
 
-      this.maxForce = Maybe(def.maxForce, 0);
+      this.maxForce = maybe(def.maxForce, 0);
       // DEBUG: Assert(IsValid(this.maxForce) && this.maxForce >= 0);
-      this.impulse.SetZero();
+      this.impulse.setZero();
 
-      this.stiffness = Maybe(def.stiffness, 0);
+      this.stiffness = maybe(def.stiffness, 0);
       // DEBUG: Assert(IsValid(this.stiffness) && this.stiffness >= 0);
-      this.damping = Maybe(def.damping, 0);
+      this.damping = maybe(def.damping, 0);
       // DEBUG: Assert(IsValid(this.damping) && this.damping >= 0);
 
       this.beta = 0;
       this.gamma = 0;
     }
 
-    public SetTarget(target: Vec2): void {
-      if (!this.bodyB.IsAwake()) {
-        this.bodyB.SetAwake(true);
+    public setTarget(target: Vec2): void {
+      if (!this.bodyB.isAwake()) {
+        this.bodyB.setAwake(true);
       }
-      this.targetA.Copy(target);
+      this.targetA.copy(target);
     }
 
-    public GetTarget() {
+    public getTarget() {
       return this.targetA;
     }
 
-    public SetMaxForce(maxForce: number): void {
+    public setMaxForce(maxForce: number): void {
       this.maxForce = maxForce;
     }
 
-    public GetMaxForce() {
+    public getMaxForce() {
       return this.maxForce;
     }
 
-    public SetStiffness(stiffness: number): void {
+    public setStiffness(stiffness: number): void {
       this.stiffness = stiffness;
     }
 
-    public GetStiffness() {
+    public getStiffness() {
       return this.stiffness;
     }
 
-    public SetDamping(damping: number) {
+    public setDamping(damping: number) {
       this.damping = damping;
     }
 
-    public GetDamping() {
+    public getDamping() {
       return this.damping;
     }
 
-    public InitVelocityConstraints(data: SolverData): void {
+    public initVelocityConstraints(data: SolverData): void {
       this.indexB = this.bodyB.islandIndex;
-      this.localCenterB.Copy(this.bodyB.sweep.localCenter);
+      this.localCenterB.copy(this.bodyB.sweep.localCenter);
       this.invMassB = this.bodyB.invMass;
       this.invIB = this.bodyB.invI;
 
@@ -133,9 +133,9 @@ namespace b2 {
       const vB: Vec2 = data.velocities[this.indexB].v;
       let wB: number = data.velocities[this.indexB].w;
 
-      const qB = this.qB.SetAngle(aB);
+      const qB = this.qB.setAngle(aB);
 
-      const mass: number = this.bodyB.GetMass();
+      const mass: number = this.bodyB.getMass();
 
       // Frequency
       const omega: number = 2 * pi * this.stiffness;
@@ -158,7 +158,7 @@ namespace b2 {
 
       // Compute the effective mass matrix.
       Vec2.SubVV(this.localAnchorB, this.localCenterB, this.lalcB);
-      Rot.MulRV(qB, this.lalcB, this.rB);
+      Rot.mulRV(qB, this.lalcB, this.rB);
 
       // K    = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
       //      = [1/m1+1/m2     0    ] + invI1 * [r1.y*r1.y -r1.x*r1.y] + invI2 * [r1.y*r1.y -r1.x*r1.y]
@@ -169,99 +169,99 @@ namespace b2 {
       K.ey.x = K.ex.y;
       K.ey.y = this.invMassB + this.invIB * this.rB.x * this.rB.x + this.gamma;
 
-      K.GetInverse(this.mass);
+      K.getInverse(this.mass);
 
       // C = cB + rB - targetA;
       this.C.x = cB.x + this.rB.x - this.targetA.x;
       this.C.y = cB.y + this.rB.y - this.targetA.y;
       // C *= beta;
-      this.C.SelfMul(this.beta);
+      this.C.selfMul(this.beta);
 
       // Cheat with some damping
       wB *= 0.98;
 
       if (data.step.warmStarting) {
-        this.impulse.SelfMul(data.step.dtRatio);
+        this.impulse.selfMul(data.step.dtRatio);
         // vB += invMassB * impulse;
         vB.x += this.invMassB * this.impulse.x;
         vB.y += this.invMassB * this.impulse.y;
         wB += this.invIB * Vec2.CrossVV(this.rB, this.impulse);
       } else {
-        this.impulse.SetZero();
+        this.impulse.setZero();
       }
 
       // data.velocities[this.indexB].v = vB;
       data.velocities[this.indexB].w = wB;
     }
 
-    private static SolveVelocityConstraints_s_Cdot = new Vec2();
-    private static SolveVelocityConstraints_s_impulse = new Vec2();
-    private static SolveVelocityConstraints_s_oldImpulse = new Vec2();
-    public SolveVelocityConstraints(data: SolverData): void {
+    private static solveVelocityConstraints_s_Cdot = new Vec2();
+    private static solveVelocityConstraints_s_impulse = new Vec2();
+    private static solveVelocityConstraints_s_oldImpulse = new Vec2();
+    public solveVelocityConstraints(data: SolverData): void {
       const vB: Vec2 = data.velocities[this.indexB].v;
       let wB: number = data.velocities[this.indexB].w;
 
       // Cdot = v + cross(w, r)
       // Vec2 Cdot = vB + Cross(wB, rB);
-      const Cdot: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, MouseJoint.SolveVelocityConstraints_s_Cdot);
+      const Cdot: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, MouseJoint.solveVelocityConstraints_s_Cdot);
       //  Vec2 impulse = Mul(mass, -(Cdot + C + gamma * impulse));
-      const impulse: Vec2 = Mat22.MulMV(
+      const impulse: Vec2 = Mat22.mulMV(
         this.mass,
         Vec2.AddVV(
           Cdot,
           Vec2.AddVV(this.C,
             Vec2.MulSV(this.gamma, this.impulse, Vec2.s_t0),
             Vec2.s_t0),
-          Vec2.s_t0).SelfNeg(),
-        MouseJoint.SolveVelocityConstraints_s_impulse);
+          Vec2.s_t0).selfNeg(),
+        MouseJoint.solveVelocityConstraints_s_impulse);
 
       // Vec2 oldImpulse = impulse;
-      const oldImpulse = MouseJoint.SolveVelocityConstraints_s_oldImpulse.Copy(this.impulse);
+      const oldImpulse = MouseJoint.solveVelocityConstraints_s_oldImpulse.copy(this.impulse);
       // impulse += impulse;
-      this.impulse.SelfAdd(impulse);
+      this.impulse.selfAdd(impulse);
       const maxImpulse: number = data.step.dt * this.maxForce;
-      if (this.impulse.LengthSquared() > maxImpulse * maxImpulse) {
-        this.impulse.SelfMul(maxImpulse / this.impulse.Length());
+      if (this.impulse.lengthSquared() > maxImpulse * maxImpulse) {
+        this.impulse.selfMul(maxImpulse / this.impulse.length());
       }
       // impulse = impulse - oldImpulse;
       Vec2.SubVV(this.impulse, oldImpulse, impulse);
 
       // vB += invMassB * impulse;
-      vB.SelfMulAdd(this.invMassB, impulse);
+      vB.selfMulAdd(this.invMassB, impulse);
       wB += this.invIB * Vec2.CrossVV(this.rB, impulse);
 
       // data.velocities[this.indexB].v = vB;
       data.velocities[this.indexB].w = wB;
     }
 
-    public SolvePositionConstraints(data: SolverData): boolean {
+    public solvePositionConstraints(data: SolverData): boolean {
       return true;
     }
 
-    public GetAnchorA<T extends XY>(out: T): T {
+    public getAnchorA<T extends XY>(out: T): T {
       out.x = this.targetA.x;
       out.y = this.targetA.y;
       return out;
     }
 
-    public GetAnchorB<T extends XY>(out: T): T {
-      return this.bodyB.GetWorldPoint(this.localAnchorB, out);
+    public getAnchorB<T extends XY>(out: T): T {
+      return this.bodyB.getWorldPoint(this.localAnchorB, out);
     }
 
-    public GetReactionForce<T extends XY>(inv_dt: number, out: T): T {
+    public getReactionForce<T extends XY>(inv_dt: number, out: T): T {
       return Vec2.MulSV(inv_dt, this.impulse, out);
     }
 
-    public GetReactionTorque(inv_dt: number): number {
+    public getReactionTorque(inv_dt: number): number {
       return 0;
     }
 
-    public Dump(log: (format: string, ...args: any[]) => void) {
+    public dump(log: (format: string, ...args: any[]) => void) {
       log("Mouse joint dumping is not supported.\n");
     }
 
-    public ShiftOrigin(newOrigin: Vec2) {
-      this.targetA.SelfSub(newOrigin);
+    public shiftOrigin(newOrigin: Vec2) {
+      this.targetA.selfSub(newOrigin);
     }
   }
 

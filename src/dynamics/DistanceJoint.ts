@@ -42,14 +42,14 @@ namespace b2 {
     public damping: number = 0;
 
     constructor() {
-      super(JointType.e_distanceJoint);
+      super(JointType.DistanceJoint);
     }
 
     public Initialize(b1: Body, b2: Body, anchor1: XY, anchor2: XY): void {
       this.bodyA = b1;
       this.bodyB = b2;
-      this.bodyA.GetLocalPoint(anchor1, this.localAnchorA);
-      this.bodyB.GetLocalPoint(anchor2, this.localAnchorB);
+      this.bodyA.getLocalPoint(anchor1, this.localAnchorA);
+      this.bodyB.getLocalPoint(anchor2, this.localAnchorB);
       this.length = Max(Vec2.DistanceVV(anchor1, anchor2), linearSlop);
       this.minLength = this.length;
       this.maxLength = this.length;
@@ -96,31 +96,31 @@ namespace b2 {
     constructor(def: IDistanceJointDef) {
       super(def);
 
-      this.localAnchorA.Copy(Maybe(def.localAnchorA, Vec2.ZERO));
-      this.localAnchorB.Copy(Maybe(def.localAnchorB, Vec2.ZERO));
-      this.length = Max(Maybe(def.length, this.GetCurrentLength()), linearSlop);
-      this.minLength = Max(Maybe(def.minLength, this.length), linearSlop);
-      this.maxLength = Max(Maybe(def.maxLength, this.length), this.minLength);
-      this.stiffness = Maybe(def.stiffness, 0);
-      this.damping = Maybe(def.damping, 0);
+      this.localAnchorA.copy(maybe(def.localAnchorA, Vec2.ZERO));
+      this.localAnchorB.copy(maybe(def.localAnchorB, Vec2.ZERO));
+      this.length = Max(maybe(def.length, this.GetCurrentLength()), linearSlop);
+      this.minLength = Max(maybe(def.minLength, this.length), linearSlop);
+      this.maxLength = Max(maybe(def.maxLength, this.length), this.minLength);
+      this.stiffness = maybe(def.stiffness, 0);
+      this.damping = maybe(def.damping, 0);
     }
 
-    public GetAnchorA<T extends XY>(out: T): T {
-      return this.bodyA.GetWorldPoint(this.localAnchorA, out);
+    public getAnchorA<T extends XY>(out: T): T {
+      return this.bodyA.getWorldPoint(this.localAnchorA, out);
     }
 
-    public GetAnchorB<T extends XY>(out: T): T {
-      return this.bodyB.GetWorldPoint(this.localAnchorB, out);
+    public getAnchorB<T extends XY>(out: T): T {
+      return this.bodyB.getWorldPoint(this.localAnchorB, out);
     }
 
-    public GetReactionForce<T extends XY>(inv_dt: number, out: T): T {
+    public getReactionForce<T extends XY>(inv_dt: number, out: T): T {
       // Vec2 F = inv_dt * (impulse + lowerImpulse - upperImpulse) * u;
       out.x = inv_dt * (this.impulse + this.lowerImpulse - this.upperImpulse) * this.u.x;
       out.y = inv_dt * (this.impulse + this.lowerImpulse - this.upperImpulse) * this.u.y;
       return out;
     }
 
-    public GetReactionTorque(inv_dt: number): number {
+    public getReactionTorque(inv_dt: number): number {
       return 0;
     }
 
@@ -140,7 +140,7 @@ namespace b2 {
 
     public SetMinLength(minLength: number): number {
       this.lowerImpulse = 0;
-      this.minLength = Clamp(minLength, linearSlop, this.maxLength);
+      this.minLength = clamp(minLength, linearSlop, this.maxLength);
       return this.minLength;
     }
 
@@ -151,8 +151,8 @@ namespace b2 {
     }
 
     public GetCurrentLength(): number {
-      const pA: Vec2 = this.bodyA.GetWorldPoint(this.localAnchorA, new Vec2());
-      const pB: Vec2 = this.bodyB.GetWorldPoint(this.localAnchorB, new Vec2());
+      const pA: Vec2 = this.bodyA.getWorldPoint(this.localAnchorA, new Vec2());
+      const pB: Vec2 = this.bodyB.getWorldPoint(this.localAnchorB, new Vec2());
       return Vec2.DistanceVV(pA, pB);
     }
 
@@ -172,7 +172,7 @@ namespace b2 {
       return this.damping;
     }
 
-    public Dump(log: (format: string, ...args: any[]) => void) {
+    public dump(log: (format: string, ...args: any[]) => void) {
       const indexA: number = this.bodyA.islandIndex;
       const indexB: number = this.bodyB.islandIndex;
 
@@ -190,12 +190,12 @@ namespace b2 {
       log("  joints[%d] = this.world.CreateJoint(jd);\n", this.index);
     }
 
-    private static InitVelocityConstraints_s_P = new Vec2();
-    public InitVelocityConstraints(data: SolverData): void {
+    private static initVelocityConstraints_s_P = new Vec2();
+    public initVelocityConstraints(data: SolverData): void {
       this.indexA = this.bodyA.islandIndex;
       this.indexB = this.bodyB.islandIndex;
-      this.localCenterA.Copy(this.bodyA.sweep.localCenter);
-      this.localCenterB.Copy(this.bodyB.sweep.localCenter);
+      this.localCenterA.copy(this.bodyA.sweep.localCenter);
+      this.localCenterB.copy(this.bodyB.sweep.localCenter);
       this.invMassA = this.bodyA.invMass;
       this.invMassB = this.bodyB.invMass;
       this.invIA = this.bodyA.invI;
@@ -212,24 +212,24 @@ namespace b2 {
       let wB: number = data.velocities[this.indexB].w;
 
       // const qA: Rot = new Rot(aA), qB: Rot = new Rot(aB);
-      const qA: Rot = this.qA.SetAngle(aA), qB: Rot = this.qB.SetAngle(aB);
+      const qA: Rot = this.qA.setAngle(aA), qB: Rot = this.qB.setAngle(aB);
 
       // rA = Mul(qA, localAnchorA - localCenterA);
       Vec2.SubVV(this.localAnchorA, this.localCenterA, this.lalcA);
-      Rot.MulRV(qA, this.lalcA, this.rA);
+      Rot.mulRV(qA, this.lalcA, this.rA);
       // rB = Mul(qB, localAnchorB - localCenterB);
       Vec2.SubVV(this.localAnchorB, this.localCenterB, this.lalcB);
-      Rot.MulRV(qB, this.lalcB, this.rB);
+      Rot.mulRV(qB, this.lalcB, this.rB);
       // u = cB + rB - cA - rA;
       this.u.x = cB.x + this.rB.x - cA.x - this.rA.x;
       this.u.y = cB.y + this.rB.y - cA.y - this.rA.y;
 
       // Handle singularity.
-      this.currentLength = this.u.Length();
+      this.currentLength = this.u.length();
       if (this.currentLength > linearSlop) {
-        this.u.SelfMul(1 / this.currentLength);
+        this.u.selfMul(1 / this.currentLength);
       } else {
-        this.u.SetZero();
+        this.u.setZero();
         this.mass = 0;
         this.impulse = 0;
         this.lowerImpulse = 0;
@@ -276,10 +276,10 @@ namespace b2 {
         this.lowerImpulse *= data.step.dtRatio;
         this.upperImpulse *= data.step.dtRatio;
 
-        const P: Vec2 = Vec2.MulSV(this.impulse + this.lowerImpulse - this.upperImpulse, this.u, DistanceJoint.InitVelocityConstraints_s_P);
-        vA.SelfMulSub(this.invMassA, P);
+        const P: Vec2 = Vec2.MulSV(this.impulse + this.lowerImpulse - this.upperImpulse, this.u, DistanceJoint.initVelocityConstraints_s_P);
+        vA.selfMulSub(this.invMassA, P);
         wA -= this.invIA * Vec2.CrossVV(this.rA, P);
-        vB.SelfMulAdd(this.invMassB, P);
+        vB.selfMulAdd(this.invMassB, P);
         wB += this.invIB * Vec2.CrossVV(this.rB, P);
       }
       else {
@@ -292,10 +292,10 @@ namespace b2 {
       data.velocities[this.indexB].w = wB;
     }
 
-    private static SolveVelocityConstraints_s_vpA = new Vec2();
-    private static SolveVelocityConstraints_s_vpB = new Vec2();
-    private static SolveVelocityConstraints_s_P = new Vec2();
-    public SolveVelocityConstraints(data: SolverData): void {
+    private static solveVelocityConstraints_s_vpA = new Vec2();
+    private static solveVelocityConstraints_s_vpB = new Vec2();
+    private static solveVelocityConstraints_s_P = new Vec2();
+    public solveVelocityConstraints(data: SolverData): void {
       const vA: Vec2 = data.velocities[this.indexA].v;
       let wA: number = data.velocities[this.indexA].w;
       const vB: Vec2 = data.velocities[this.indexB].v;
@@ -304,17 +304,17 @@ namespace b2 {
       if (this.minLength < this.maxLength) {
         if (this.stiffness > 0) {
           // Cdot = dot(u, v + cross(w, r))
-          const vpA: Vec2 = Vec2.AddVCrossSV(vA, wA, this.rA, DistanceJoint.SolveVelocityConstraints_s_vpA);
-          const vpB: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, DistanceJoint.SolveVelocityConstraints_s_vpB);
+          const vpA: Vec2 = Vec2.AddVCrossSV(vA, wA, this.rA, DistanceJoint.solveVelocityConstraints_s_vpA);
+          const vpB: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, DistanceJoint.solveVelocityConstraints_s_vpB);
           const Cdot: number = Vec2.DotVV(this.u, Vec2.SubVV(vpB, vpA, Vec2.s_t0));
 
           const impulse: number = -this.softMass * (Cdot + this.bias + this.gamma * this.impulse);
           this.impulse += impulse;
 
-          const P: Vec2 = Vec2.MulSV(impulse, this.u, DistanceJoint.SolveVelocityConstraints_s_P);
-          vA.SelfMulSub(this.invMassA, P);
+          const P: Vec2 = Vec2.MulSV(impulse, this.u, DistanceJoint.solveVelocityConstraints_s_P);
+          vA.selfMulSub(this.invMassA, P);
           wA -= this.invIA * Vec2.CrossVV(this.rA, P);
-          vB.SelfMulAdd(this.invMassB, P);
+          vB.selfMulAdd(this.invMassB, P);
           wB += this.invIB * Vec2.CrossVV(this.rB, P);
         }
 
@@ -323,19 +323,19 @@ namespace b2 {
           const C: number = this.currentLength - this.minLength;
           const bias: number = Max(0, C) * data.step.inv_dt;
 
-          const vpA: Vec2 = Vec2.AddVCrossSV(vA, wA, this.rA, DistanceJoint.SolveVelocityConstraints_s_vpA);
-          const vpB: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, DistanceJoint.SolveVelocityConstraints_s_vpB);
+          const vpA: Vec2 = Vec2.AddVCrossSV(vA, wA, this.rA, DistanceJoint.solveVelocityConstraints_s_vpA);
+          const vpB: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, DistanceJoint.solveVelocityConstraints_s_vpB);
           const Cdot: number = Vec2.DotVV(this.u, Vec2.SubVV(vpB, vpA, Vec2.s_t0));
 
           let impulse: number = -this.mass * (Cdot + bias);
           const oldImpulse: number = this.lowerImpulse;
           this.lowerImpulse = Max(0, this.lowerImpulse + impulse);
           impulse = this.lowerImpulse - oldImpulse;
-          const P: Vec2 = Vec2.MulSV(impulse, this.u, DistanceJoint.SolveVelocityConstraints_s_P);
+          const P: Vec2 = Vec2.MulSV(impulse, this.u, DistanceJoint.solveVelocityConstraints_s_P);
 
-          vA.SelfMulSub(this.invMassA, P);
+          vA.selfMulSub(this.invMassA, P);
           wA -= this.invIA * Vec2.CrossVV(this.rA, P);
-          vB.SelfMulAdd(this.invMassB, P);
+          vB.selfMulAdd(this.invMassB, P);
           wB += this.invIB * Vec2.CrossVV(this.rB, P);
         }
 
@@ -344,19 +344,19 @@ namespace b2 {
           const C: number = this.maxLength - this.currentLength;
           const bias: number = Max(0, C) * data.step.inv_dt;
 
-          const vpA: Vec2 = Vec2.AddVCrossSV(vA, wA, this.rA, DistanceJoint.SolveVelocityConstraints_s_vpA);
-          const vpB: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, DistanceJoint.SolveVelocityConstraints_s_vpB);
+          const vpA: Vec2 = Vec2.AddVCrossSV(vA, wA, this.rA, DistanceJoint.solveVelocityConstraints_s_vpA);
+          const vpB: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, DistanceJoint.solveVelocityConstraints_s_vpB);
           const Cdot: number = Vec2.DotVV(this.u, Vec2.SubVV(vpA, vpB, Vec2.s_t0));
 
           let impulse: number = -this.mass * (Cdot + bias);
           const oldImpulse: number = this.upperImpulse;
           this.upperImpulse = Max(0, this.upperImpulse + impulse);
           impulse = this.upperImpulse - oldImpulse;
-          const P: Vec2 = Vec2.MulSV(-impulse, this.u, DistanceJoint.SolveVelocityConstraints_s_P);
+          const P: Vec2 = Vec2.MulSV(-impulse, this.u, DistanceJoint.solveVelocityConstraints_s_P);
 
-          vA.SelfMulSub(this.invMassA, P);
+          vA.selfMulSub(this.invMassA, P);
           wA -= this.invIA * Vec2.CrossVV(this.rA, P);
-          vB.SelfMulAdd(this.invMassB, P);
+          vB.selfMulAdd(this.invMassB, P);
           wB += this.invIB * Vec2.CrossVV(this.rB, P);
         }
       }
@@ -364,17 +364,17 @@ namespace b2 {
         // Equal limits
 
         // Cdot = dot(u, v + cross(w, r))
-        const vpA: Vec2 = Vec2.AddVCrossSV(vA, wA, this.rA, DistanceJoint.SolveVelocityConstraints_s_vpA);
-        const vpB: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, DistanceJoint.SolveVelocityConstraints_s_vpB);
+        const vpA: Vec2 = Vec2.AddVCrossSV(vA, wA, this.rA, DistanceJoint.solveVelocityConstraints_s_vpA);
+        const vpB: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, DistanceJoint.solveVelocityConstraints_s_vpB);
         const Cdot: number = Vec2.DotVV(this.u, Vec2.SubVV(vpB, vpA, Vec2.s_t0));
 
         const impulse: number = -this.mass * Cdot;
         this.impulse += impulse;
 
-        const P: Vec2 = Vec2.MulSV(impulse, this.u, DistanceJoint.SolveVelocityConstraints_s_P);
-        vA.SelfMulSub(this.invMassA, P);
+        const P: Vec2 = Vec2.MulSV(impulse, this.u, DistanceJoint.solveVelocityConstraints_s_P);
+        vA.selfMulSub(this.invMassA, P);
         wA -= this.invIA * Vec2.CrossVV(this.rA, P);
-        vB.SelfMulAdd(this.invMassB, P);
+        vB.selfMulAdd(this.invMassB, P);
         wB += this.invIB * Vec2.CrossVV(this.rB, P);
       }
 
@@ -384,26 +384,26 @@ namespace b2 {
       data.velocities[this.indexB].w = wB;
     }
 
-    private static SolvePositionConstraints_s_P = new Vec2();
-    public SolvePositionConstraints(data: SolverData): boolean {
+    private static solvePositionConstraints_s_P = new Vec2();
+    public solvePositionConstraints(data: SolverData): boolean {
       const cA: Vec2 = data.positions[this.indexA].c;
       let aA: number = data.positions[this.indexA].a;
       const cB: Vec2 = data.positions[this.indexB].c;
       let aB: number = data.positions[this.indexB].a;
 
       // const qA: Rot = new Rot(aA), qB: Rot = new Rot(aB);
-      const qA: Rot = this.qA.SetAngle(aA), qB: Rot = this.qB.SetAngle(aB);
+      const qA: Rot = this.qA.setAngle(aA), qB: Rot = this.qB.setAngle(aB);
 
       // Vec2 rA = Mul(qA, localAnchorA - localCenterA);
-      const rA: Vec2 = Rot.MulRV(qA, this.lalcA, this.rA); // use rA
+      const rA: Vec2 = Rot.mulRV(qA, this.lalcA, this.rA); // use rA
       // Vec2 rB = Mul(qB, localAnchorB - localCenterB);
-      const rB: Vec2 = Rot.MulRV(qB, this.lalcB, this.rB); // use rB
+      const rB: Vec2 = Rot.mulRV(qB, this.lalcB, this.rB); // use rB
       // Vec2 u = cB + rB - cA - rA;
       const u: Vec2 = this.u; // use u
       u.x = cB.x + rB.x - cA.x - rA.x;
       u.y = cB.y + rB.y - cA.y - rA.y;
 
-      const length: number = this.u.Normalize();
+      const length: number = this.u.normalize();
       let C: number;
       if (this.minLength == this.maxLength)
       {
@@ -423,11 +423,11 @@ namespace b2 {
       }
 
       const impulse: number = -this.mass * C;
-      const P: Vec2 = Vec2.MulSV(impulse, u, DistanceJoint.SolvePositionConstraints_s_P);
+      const P: Vec2 = Vec2.MulSV(impulse, u, DistanceJoint.solvePositionConstraints_s_P);
 
-      cA.SelfMulSub(this.invMassA, P);
+      cA.selfMulSub(this.invMassA, P);
       aA -= this.invIA * Vec2.CrossVV(rA, P);
-      cB.SelfMulAdd(this.invMassB, P);
+      cB.selfMulAdd(this.invMassB, P);
       aB += this.invIB * Vec2.CrossVV(rB, P);
 
       // data.positions[this.indexA].c = cA;
@@ -438,47 +438,47 @@ namespace b2 {
       return Abs(C) < linearSlop;
     }
 
-    private static Draw_s_pA = new Vec2();
-    private static Draw_s_pB = new Vec2();
-    private static Draw_s_axis = new Vec2();
-    private static Draw_s_c1 = new Color(0.7, 0.7, 0.7);
-    private static Draw_s_c2 = new Color(0.3, 0.9, 0.3);
-    private static Draw_s_c3 = new Color(0.9, 0.3, 0.3);
-    private static Draw_s_c4 = new Color(0.4, 0.4, 0.4);
-    private static Draw_s_pRest = new Vec2();
-    private static Draw_s_pMin = new Vec2();
-    private static Draw_s_pMax = new Vec2();
-    public Draw(draw: Draw): void {
-      const xfA: Transform = this.bodyA.GetTransform();
-      const xfB: Transform = this.bodyB.GetTransform();
-      const pA = Transform.MulXV(xfA, this.localAnchorA, DistanceJoint.Draw_s_pA);
-      const pB = Transform.MulXV(xfB, this.localAnchorB, DistanceJoint.Draw_s_pB);
+    private static draw_s_pA = new Vec2();
+    private static draw_s_pB = new Vec2();
+    private static draw_s_axis = new Vec2();
+    private static draw_s_c1 = new Color(0.7, 0.7, 0.7);
+    private static draw_s_c2 = new Color(0.3, 0.9, 0.3);
+    private static draw_s_c3 = new Color(0.9, 0.3, 0.3);
+    private static draw_s_c4 = new Color(0.4, 0.4, 0.4);
+    private static draw_s_pRest = new Vec2();
+    private static draw_s_pMin = new Vec2();
+    private static draw_s_pMax = new Vec2();
+    public draw(draw: Draw): void {
+      const xfA: Transform = this.bodyA.getTransform();
+      const xfB: Transform = this.bodyB.getTransform();
+      const pA = Transform.mulXV(xfA, this.localAnchorA, DistanceJoint.draw_s_pA);
+      const pB = Transform.mulXV(xfB, this.localAnchorB, DistanceJoint.draw_s_pB);
 
-      const axis: Vec2 = Vec2.SubVV(pB, pA, DistanceJoint.Draw_s_axis);
-      axis.Normalize();
+      const axis: Vec2 = Vec2.SubVV(pB, pA, DistanceJoint.draw_s_axis);
+      axis.normalize();
 
-      const c1 = DistanceJoint.Draw_s_c1; // Color c1(0.7f, 0.7f, 0.7f);
-      const c2 = DistanceJoint.Draw_s_c2; // Color c2(0.3f, 0.9f, 0.3f);
-      const c3 = DistanceJoint.Draw_s_c3; // Color c3(0.9f, 0.3f, 0.3f);
-      const c4 = DistanceJoint.Draw_s_c4; // Color c4(0.4f, 0.4f, 0.4f);
+      const c1 = DistanceJoint.draw_s_c1; // Color c1(0.7f, 0.7f, 0.7f);
+      const c2 = DistanceJoint.draw_s_c2; // Color c2(0.3f, 0.9f, 0.3f);
+      const c3 = DistanceJoint.draw_s_c3; // Color c3(0.9f, 0.3f, 0.3f);
+      const c4 = DistanceJoint.draw_s_c4; // Color c4(0.4f, 0.4f, 0.4f);
 
-      draw.DrawSegment(pA, pB, c4);
+      draw.drawSegment(pA, pB, c4);
 
       // Vec2 pRest = pA + this.length * axis;
-      const pRest: Vec2 = Vec2.AddVMulSV(pA, this.length, axis, DistanceJoint.Draw_s_pRest);
-      draw.DrawPoint(pRest, 8.0, c1);
+      const pRest: Vec2 = Vec2.AddVMulSV(pA, this.length, axis, DistanceJoint.draw_s_pRest);
+      draw.drawPoint(pRest, 8.0, c1);
 
       if (this.minLength != this.maxLength) {
         if (this.minLength > linearSlop) {
           // Vec2 pMin = pA + this.minLength * axis;
-          const pMin: Vec2 = Vec2.AddVMulSV(pA, this.minLength, axis, DistanceJoint.Draw_s_pMin);
-          draw.DrawPoint(pMin, 4.0, c2);
+          const pMin: Vec2 = Vec2.AddVMulSV(pA, this.minLength, axis, DistanceJoint.draw_s_pMin);
+          draw.drawPoint(pMin, 4.0, c2);
         }
 
         if (this.maxLength < maxFloat) {
           // Vec2 pMax = pA + this.maxLength * axis;
-          const pMax: Vec2 = Vec2.AddVMulSV(pA, this.maxLength, axis, DistanceJoint.Draw_s_pMax);
-          draw.DrawPoint(pMax, 4.0, c3);
+          const pMax: Vec2 = Vec2.AddVMulSV(pA, this.maxLength, axis, DistanceJoint.draw_s_pMax);
+          draw.drawPoint(pMax, 4.0, c3);
         }
       }
     }

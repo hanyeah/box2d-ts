@@ -31,19 +31,19 @@ namespace b2 {
   }
 
   export enum ShapeType {
-    e_unknown = -1,
-    e_circleShape = 0,
-    e_edgeShape = 1,
-    e_polygonShape = 2,
-    e_chainShape = 3,
-    e_shapeTypeCount = 4,
+    Unknown = -1,
+    CircleShape = 0,
+    EdgeShape = 1,
+    PolygonShape = 2,
+    ChainShape = 3,
+    ShapeTypeCount = 4,
   }
 
 /// A shape is used for collision detection. You can create a shape however you like.
 /// Shapes used for simulation in World are created automatically when a Fixture
 /// is created. Shapes may encapsulate a one or more child shapes.
   export abstract class Shape {
-    public readonly type: ShapeType = ShapeType.e_unknown;
+    public readonly type: ShapeType = ShapeType.Unknown;
 
     /// Radius of a shape. For polygonal shapes this must be polygonRadius. There is no support for
     /// making rounded polygons.
@@ -55,9 +55,9 @@ namespace b2 {
     }
 
     /// Clone the concrete shape.
-    public abstract Clone(): Shape;
+    public abstract clone(): Shape;
 
-    public Copy(other: Shape): Shape {
+    public copy(other: Shape): Shape {
       // DEBUG: Assert(this.type === other.type);
       this.radius = other.radius;
       return this;
@@ -65,17 +65,17 @@ namespace b2 {
 
     /// Get the type of this shape. You can use this to down cast to the concrete shape.
     /// @return the shape type.
-    public GetType(): ShapeType {
+    public getType(): ShapeType {
       return this.type;
     }
 
     /// Get the number of child primitives.
-    public abstract GetChildCount(): number;
+    public abstract getChildCount(): number;
 
     /// Test a point for containment in this shape. This only works for convex shapes.
     /// @param xf the shape world transform.
     /// @param p a point in world coordinates.
-    public abstract TestPoint(xf: Transform, p: XY): boolean;
+    public abstract testPoint(xf: Transform, p: XY): boolean;
 
     // #if ENABLE_PARTICLE
     /// Compute the distance from the current shape to the specified point. This only works for convex shapes.
@@ -83,7 +83,7 @@ namespace b2 {
     /// @param p a point in world coordinates.
     /// @param distance returns the distance from the current shape.
     /// @param normal returns the direction in which the distance increases.
-    public abstract ComputeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
+    public abstract computeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
     // #endif
 
     /// Cast a ray against a child shape.
@@ -91,25 +91,25 @@ namespace b2 {
     /// @param input the ray-cast input parameters.
     /// @param transform the transform to be applied to the shape.
     /// @param childIndex the child shape index
-    public abstract RayCast(output: RayCastOutput, input: RayCastInput, transform: Transform, childIndex: number): boolean;
+    public abstract rayCast(output: RayCastOutput, input: RayCastInput, transform: Transform, childIndex: number): boolean;
 
     /// Given a transform, compute the associated axis aligned bounding box for a child shape.
     /// @param aabb returns the axis aligned box.
     /// @param xf the world transform of the shape.
     /// @param childIndex the child shape
-    public abstract ComputeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
+    public abstract computeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
 
     /// Compute the mass properties of this shape using its dimensions and density.
     /// The inertia tensor is computed about the local origin.
     /// @param massData returns the mass data for this shape.
     /// @param density the density in kilograms per meter squared.
-    public abstract ComputeMass(massData: MassData, density: number): void;
+    public abstract computeMass(massData: MassData, density: number): void;
 
-    public abstract SetupDistanceProxy(proxy: DistanceProxy, index: number): void;
+    public abstract setupDistanceProxy(proxy: DistanceProxy, index: number): void;
 
-    public abstract ComputeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
+    public abstract computeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
 
-    public abstract Dump(log: (format: string, ...args: any[]) => void): void;
+    public abstract dump(log: (format: string, ...args: any[]) => void): void;
   }
 }
 

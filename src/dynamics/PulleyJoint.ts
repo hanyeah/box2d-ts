@@ -53,17 +53,17 @@ namespace b2 {
     public ratio: number = 1;
 
     constructor() {
-      super(JointType.e_pulleyJoint);
+      super(JointType.PulleyJoint);
       this.collideConnected = true;
     }
 
-    public Initialize(bA: Body, bB: Body, groundA: Vec2, groundB: Vec2, anchorA: Vec2, anchorB: Vec2, r: number): void {
+    public initialize(bA: Body, bB: Body, groundA: Vec2, groundB: Vec2, anchorA: Vec2, anchorB: Vec2, r: number): void {
       this.bodyA = bA;
       this.bodyB = bB;
-      this.groundAnchorA.Copy(groundA);
-      this.groundAnchorB.Copy(groundB);
-      this.bodyA.GetLocalPoint(anchorA, this.localAnchorA);
-      this.bodyB.GetLocalPoint(anchorB, this.localAnchorB);
+      this.groundAnchorA.copy(groundA);
+      this.groundAnchorB.copy(groundB);
+      this.bodyA.getLocalPoint(anchorA, this.localAnchorA);
+      this.bodyB.getLocalPoint(anchorB, this.localAnchorB);
       this.lengthA = Vec2.DistanceVV(anchorA, groundA);
       this.lengthB = Vec2.DistanceVV(anchorB, groundB);
       this.ratio = r;
@@ -110,29 +110,29 @@ namespace b2 {
     constructor(def: IPulleyJointDef) {
       super(def);
 
-      this.groundAnchorA.Copy(Maybe(def.groundAnchorA, new Vec2(-1, 1)));
-      this.groundAnchorB.Copy(Maybe(def.groundAnchorB, new Vec2(1, 0)));
-      this.localAnchorA.Copy(Maybe(def.localAnchorA, new Vec2(-1, 0)));
-      this.localAnchorB.Copy(Maybe(def.localAnchorB, new Vec2(1, 0)));
+      this.groundAnchorA.copy(maybe(def.groundAnchorA, new Vec2(-1, 1)));
+      this.groundAnchorB.copy(maybe(def.groundAnchorB, new Vec2(1, 0)));
+      this.localAnchorA.copy(maybe(def.localAnchorA, new Vec2(-1, 0)));
+      this.localAnchorB.copy(maybe(def.localAnchorB, new Vec2(1, 0)));
 
-      this.lengthA = Maybe(def.lengthA, 0);
-      this.lengthB = Maybe(def.lengthB, 0);
+      this.lengthA = maybe(def.lengthA, 0);
+      this.lengthB = maybe(def.lengthB, 0);
 
       // DEBUG: Assert(Maybe(def.ratio, 1) !== 0);
-      this.ratio = Maybe(def.ratio, 1);
+      this.ratio = maybe(def.ratio, 1);
 
-      this.constant = Maybe(def.lengthA, 0) + this.ratio * Maybe(def.lengthB, 0);
+      this.constant = maybe(def.lengthA, 0) + this.ratio * maybe(def.lengthB, 0);
 
       this.impulse = 0;
     }
 
-    private static InitVelocityConstraints_s_PA = new Vec2();
-    private static InitVelocityConstraints_s_PB = new Vec2();
-    public InitVelocityConstraints(data: SolverData): void {
+    private static initVelocityConstraints_s_PA = new Vec2();
+    private static initVelocityConstraints_s_PB = new Vec2();
+    public initVelocityConstraints(data: SolverData): void {
       this.indexA = this.bodyA.islandIndex;
       this.indexB = this.bodyB.islandIndex;
-      this.localCenterA.Copy(this.bodyA.sweep.localCenter);
-      this.localCenterB.Copy(this.bodyB.sweep.localCenter);
+      this.localCenterA.copy(this.bodyA.sweep.localCenter);
+      this.localCenterB.copy(this.bodyB.sweep.localCenter);
       this.invMassA = this.bodyA.invMass;
       this.invMassB = this.bodyB.invMass;
       this.invIA = this.bodyA.invI;
@@ -149,34 +149,34 @@ namespace b2 {
       let wB: number = data.velocities[this.indexB].w;
 
       // Rot qA(aA), qB(aB);
-      const qA: Rot = this.qA.SetAngle(aA), qB: Rot = this.qB.SetAngle(aB);
+      const qA: Rot = this.qA.setAngle(aA), qB: Rot = this.qB.setAngle(aB);
 
       // rA = Mul(qA, localAnchorA - localCenterA);
       Vec2.SubVV(this.localAnchorA, this.localCenterA, this.lalcA);
-      Rot.MulRV(qA, this.lalcA, this.rA);
+      Rot.mulRV(qA, this.lalcA, this.rA);
       // rB = Mul(qB, localAnchorB - localCenterB);
       Vec2.SubVV(this.localAnchorB, this.localCenterB, this.lalcB);
-      Rot.MulRV(qB, this.lalcB, this.rB);
+      Rot.mulRV(qB, this.lalcB, this.rB);
 
       // Get the pulley axes.
       // uA = cA + rA - groundAnchorA;
-      this.uA.Copy(cA).SelfAdd(this.rA).SelfSub(this.groundAnchorA);
+      this.uA.copy(cA).selfAdd(this.rA).selfSub(this.groundAnchorA);
       // uB = cB + rB - groundAnchorB;
-      this.uB.Copy(cB).SelfAdd(this.rB).SelfSub(this.groundAnchorB);
+      this.uB.copy(cB).selfAdd(this.rB).selfSub(this.groundAnchorB);
 
-      const lengthA: number = this.uA.Length();
-      const lengthB: number = this.uB.Length();
+      const lengthA: number = this.uA.length();
+      const lengthB: number = this.uB.length();
 
       if (lengthA > 10 * linearSlop) {
-        this.uA.SelfMul(1 / lengthA);
+        this.uA.selfMul(1 / lengthA);
       } else {
-        this.uA.SetZero();
+        this.uA.setZero();
       }
 
       if (lengthB > 10 * linearSlop) {
-        this.uB.SelfMul(1 / lengthB);
+        this.uB.selfMul(1 / lengthB);
       } else {
-        this.uB.SetZero();
+        this.uB.setZero();
       }
 
       // Compute effective mass.
@@ -198,15 +198,15 @@ namespace b2 {
 
         // Warm starting.
         // Vec2 PA = -(impulse) * uA;
-        const PA: Vec2 = Vec2.MulSV(-(this.impulse), this.uA, PulleyJoint.InitVelocityConstraints_s_PA);
+        const PA: Vec2 = Vec2.MulSV(-(this.impulse), this.uA, PulleyJoint.initVelocityConstraints_s_PA);
         // Vec2 PB = (-ratio * impulse) * uB;
-        const PB: Vec2 = Vec2.MulSV((-this.ratio * this.impulse), this.uB, PulleyJoint.InitVelocityConstraints_s_PB);
+        const PB: Vec2 = Vec2.MulSV((-this.ratio * this.impulse), this.uB, PulleyJoint.initVelocityConstraints_s_PB);
 
         // vA += invMassA * PA;
-        vA.SelfMulAdd(this.invMassA, PA);
+        vA.selfMulAdd(this.invMassA, PA);
         wA += this.invIA * Vec2.CrossVV(this.rA, PA);
         // vB += invMassB * PB;
-        vB.SelfMulAdd(this.invMassB, PB);
+        vB.selfMulAdd(this.invMassB, PB);
         wB += this.invIB * Vec2.CrossVV(this.rB, PB);
       } else {
         this.impulse = 0;
@@ -218,34 +218,34 @@ namespace b2 {
       data.velocities[this.indexB].w = wB;
     }
 
-    private static SolveVelocityConstraints_s_vpA = new Vec2();
-    private static SolveVelocityConstraints_s_vpB = new Vec2();
-    private static SolveVelocityConstraints_s_PA = new Vec2();
-    private static SolveVelocityConstraints_s_PB = new Vec2();
-    public SolveVelocityConstraints(data: SolverData): void {
+    private static solveVelocityConstraints_s_vpA = new Vec2();
+    private static solveVelocityConstraints_s_vpB = new Vec2();
+    private static solveVelocityConstraints_s_PA = new Vec2();
+    private static solveVelocityConstraints_s_PB = new Vec2();
+    public solveVelocityConstraints(data: SolverData): void {
       const vA: Vec2 = data.velocities[this.indexA].v;
       let wA: number = data.velocities[this.indexA].w;
       const vB: Vec2 = data.velocities[this.indexB].v;
       let wB: number = data.velocities[this.indexB].w;
 
       // Vec2 vpA = vA + Cross(wA, rA);
-      const vpA: Vec2 = Vec2.AddVCrossSV(vA, wA, this.rA, PulleyJoint.SolveVelocityConstraints_s_vpA);
+      const vpA: Vec2 = Vec2.AddVCrossSV(vA, wA, this.rA, PulleyJoint.solveVelocityConstraints_s_vpA);
       // Vec2 vpB = vB + Cross(wB, rB);
-      const vpB: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, PulleyJoint.SolveVelocityConstraints_s_vpB);
+      const vpB: Vec2 = Vec2.AddVCrossSV(vB, wB, this.rB, PulleyJoint.solveVelocityConstraints_s_vpB);
 
       const Cdot: number = -Vec2.DotVV(this.uA, vpA) - this.ratio * Vec2.DotVV(this.uB, vpB);
       const impulse: number = -this.mass * Cdot;
       this.impulse += impulse;
 
       // Vec2 PA = -impulse * uA;
-      const PA: Vec2 = Vec2.MulSV(-impulse, this.uA, PulleyJoint.SolveVelocityConstraints_s_PA);
+      const PA: Vec2 = Vec2.MulSV(-impulse, this.uA, PulleyJoint.solveVelocityConstraints_s_PA);
       // Vec2 PB = -ratio * impulse * uB;
-      const PB: Vec2 = Vec2.MulSV(-this.ratio * impulse, this.uB, PulleyJoint.SolveVelocityConstraints_s_PB);
+      const PB: Vec2 = Vec2.MulSV(-this.ratio * impulse, this.uB, PulleyJoint.solveVelocityConstraints_s_PB);
       // vA += invMassA * PA;
-      vA.SelfMulAdd(this.invMassA, PA);
+      vA.selfMulAdd(this.invMassA, PA);
       wA += this.invIA * Vec2.CrossVV(this.rA, PA);
       // vB += invMassB * PB;
-      vB.SelfMulAdd(this.invMassB, PB);
+      vB.selfMulAdd(this.invMassB, PB);
       wB += this.invIB * Vec2.CrossVV(this.rB, PB);
 
       // data.velocities[this.indexA].v = vA;
@@ -254,43 +254,43 @@ namespace b2 {
       data.velocities[this.indexB].w = wB;
     }
 
-    private static SolvePositionConstraints_s_PA = new Vec2();
-    private static SolvePositionConstraints_s_PB = new Vec2();
-    public SolvePositionConstraints(data: SolverData): boolean {
+    private static solvePositionConstraints_s_PA = new Vec2();
+    private static solvePositionConstraints_s_PB = new Vec2();
+    public solvePositionConstraints(data: SolverData): boolean {
       const cA: Vec2 = data.positions[this.indexA].c;
       let aA: number = data.positions[this.indexA].a;
       const cB: Vec2 = data.positions[this.indexB].c;
       let aB: number = data.positions[this.indexB].a;
 
       // Rot qA(aA), qB(aB);
-      const qA: Rot = this.qA.SetAngle(aA), qB: Rot = this.qB.SetAngle(aB);
+      const qA: Rot = this.qA.setAngle(aA), qB: Rot = this.qB.setAngle(aB);
 
       // Vec2 rA = Mul(qA, localAnchorA - localCenterA);
       Vec2.SubVV(this.localAnchorA, this.localCenterA, this.lalcA);
-      const rA: Vec2 = Rot.MulRV(qA, this.lalcA, this.rA);
+      const rA: Vec2 = Rot.mulRV(qA, this.lalcA, this.rA);
       // Vec2 rB = Mul(qB, localAnchorB - localCenterB);
       Vec2.SubVV(this.localAnchorB, this.localCenterB, this.lalcB);
-      const rB: Vec2 = Rot.MulRV(qB, this.lalcB, this.rB);
+      const rB: Vec2 = Rot.mulRV(qB, this.lalcB, this.rB);
 
       // Get the pulley axes.
       // Vec2 uA = cA + rA - groundAnchorA;
-      const uA = this.uA.Copy(cA).SelfAdd(rA).SelfSub(this.groundAnchorA);
+      const uA = this.uA.copy(cA).selfAdd(rA).selfSub(this.groundAnchorA);
       // Vec2 uB = cB + rB - groundAnchorB;
-      const uB = this.uB.Copy(cB).SelfAdd(rB).SelfSub(this.groundAnchorB);
+      const uB = this.uB.copy(cB).selfAdd(rB).selfSub(this.groundAnchorB);
 
-      const lengthA: number = uA.Length();
-      const lengthB: number = uB.Length();
+      const lengthA: number = uA.length();
+      const lengthB: number = uB.length();
 
       if (lengthA > 10 * linearSlop) {
-        uA.SelfMul(1 / lengthA);
+        uA.selfMul(1 / lengthA);
       } else {
-        uA.SetZero();
+        uA.setZero();
       }
 
       if (lengthB > 10 * linearSlop) {
-        uB.SelfMul(1 / lengthB);
+        uB.selfMul(1 / lengthB);
       } else {
-        uB.SetZero();
+        uB.setZero();
       }
 
       // Compute effective mass.
@@ -312,15 +312,15 @@ namespace b2 {
       const impulse: number = -mass * C;
 
       // Vec2 PA = -impulse * uA;
-      const PA: Vec2 = Vec2.MulSV(-impulse, uA, PulleyJoint.SolvePositionConstraints_s_PA);
+      const PA: Vec2 = Vec2.MulSV(-impulse, uA, PulleyJoint.solvePositionConstraints_s_PA);
       // Vec2 PB = -ratio * impulse * uB;
-      const PB: Vec2 = Vec2.MulSV(-this.ratio * impulse, uB, PulleyJoint.SolvePositionConstraints_s_PB);
+      const PB: Vec2 = Vec2.MulSV(-this.ratio * impulse, uB, PulleyJoint.solvePositionConstraints_s_PB);
 
       // cA += invMassA * PA;
-      cA.SelfMulAdd(this.invMassA, PA);
+      cA.selfMulAdd(this.invMassA, PA);
       aA += this.invIA * Vec2.CrossVV(rA, PA);
       // cB += invMassB * PB;
-      cB.SelfMulAdd(this.invMassB, PB);
+      cB.selfMulAdd(this.invMassB, PB);
       aB += this.invIB * Vec2.CrossVV(rB, PB);
 
       // data.positions[this.indexA].c = cA;
@@ -331,15 +331,15 @@ namespace b2 {
       return linearError < linearSlop;
     }
 
-    public GetAnchorA<T extends XY>(out: T): T {
-      return this.bodyA.GetWorldPoint(this.localAnchorA, out);
+    public getAnchorA<T extends XY>(out: T): T {
+      return this.bodyA.getWorldPoint(this.localAnchorA, out);
     }
 
-    public GetAnchorB<T extends XY>(out: T): T {
-      return this.bodyB.GetWorldPoint(this.localAnchorB, out);
+    public getAnchorB<T extends XY>(out: T): T {
+      return this.bodyB.getWorldPoint(this.localAnchorB, out);
     }
 
-    public GetReactionForce<T extends XY>(inv_dt: number, out: T): T {
+    public getReactionForce<T extends XY>(inv_dt: number, out: T): T {
       // Vec2 P = impulse * uB;
       // return inv_dt * P;
       out.x = inv_dt * this.impulse * this.uB.x;
@@ -347,53 +347,41 @@ namespace b2 {
       return out;
     }
 
-    public GetReactionTorque(inv_dt: number): number {
+    public getReactionTorque(inv_dt: number): number {
       return 0;
     }
 
-    public GetGroundAnchorA() {
+    public getGroundAnchorA() {
       return this.groundAnchorA;
     }
 
-    public GetGroundAnchorB() {
+    public getGroundAnchorB() {
       return this.groundAnchorB;
     }
 
-    public GetLengthA() {
-      return this.lengthA;
-    }
-
-    public GetLengthB() {
-      return this.lengthB;
-    }
-
-    public GetRatio() {
-      return this.ratio;
-    }
-
-    private static GetCurrentLengthA_s_p = new Vec2();
-    public GetCurrentLengthA() {
+    private static getCurrentLengthA_s_p = new Vec2();
+    public getCurrentLengthA() {
       // Vec2 p = bodyA->GetWorldPoint(localAnchorA);
       // Vec2 s = groundAnchorA;
       // Vec2 d = p - s;
       // return d.Length();
-      const p = this.bodyA.GetWorldPoint(this.localAnchorA, PulleyJoint.GetCurrentLengthA_s_p);
+      const p = this.bodyA.getWorldPoint(this.localAnchorA, PulleyJoint.getCurrentLengthA_s_p);
       const s = this.groundAnchorA;
       return Vec2.DistanceVV(p, s);
     }
 
-    private static GetCurrentLengthB_s_p = new Vec2();
-    public GetCurrentLengthB() {
+    private static getCurrentLengthB_s_p = new Vec2();
+    public getCurrentLengthB() {
       // Vec2 p = bodyB->GetWorldPoint(localAnchorB);
       // Vec2 s = groundAnchorB;
       // Vec2 d = p - s;
       // return d.Length();
-      const p = this.bodyB.GetWorldPoint(this.localAnchorB, PulleyJoint.GetCurrentLengthB_s_p);
+      const p = this.bodyB.getWorldPoint(this.localAnchorB, PulleyJoint.getCurrentLengthB_s_p);
       const s = this.groundAnchorB;
       return Vec2.DistanceVV(p, s);
     }
 
-    public Dump(log: (format: string, ...args: any[]) => void) {
+    public dump(log: (format: string, ...args: any[]) => void) {
       const indexA = this.bodyA.islandIndex;
       const indexB = this.bodyB.islandIndex;
 
@@ -411,9 +399,9 @@ namespace b2 {
       log("  joints[%d] = this.world.CreateJoint(jd);\n", this.index);
     }
 
-    public ShiftOrigin(newOrigin: Vec2) {
-      this.groundAnchorA.SelfSub(newOrigin);
-      this.groundAnchorB.SelfSub(newOrigin);
+    public shiftOrigin(newOrigin: Vec2) {
+      this.groundAnchorA.selfSub(newOrigin);
+      this.groundAnchorB.selfSub(newOrigin);
     }
   }
 

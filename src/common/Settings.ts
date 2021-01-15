@@ -28,20 +28,9 @@ namespace b2 {
 /// this too much because BlockAllocator has a maximum object size.
 // export const maxPolygonVertices: number = 8;
 
-// Memory Allocation
-
-/// Implement this function to use your own memory allocator.
-  export function Alloc(size: number): any {
-    return null;
-  }
-
-/// If you implement Alloc, you should also implement this function.
-  export function Free(mem: any): void {
-  }
-
 /// Logging function.
-  export function Log(message: string, ...args: any[]): void {
-    // console.log(message, ...args);
+  export function log(message: string, ...args: any[]): void {
+    console.log(message, ...args);
   }
 
 }

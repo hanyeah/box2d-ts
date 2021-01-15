@@ -1,9 +1,9 @@
 declare namespace b2 {
-    function Assert(condition: boolean, ...args: any[]): void;
-    function Maybe<T>(value: T | undefined, def: T): T;
+    function assert(condition: boolean, ...args: any[]): void;
+    function maybe<T>(value: T, def: T): T;
     const maxFloat: number;
     const epsilon: number;
-    const epsilon_sq: number;
+    const epsilonSq: number;
     const pi: number;
     const lengthUnitsPerMeter: number;
     const maxPolygonVertices: number;
@@ -49,34 +49,34 @@ declare namespace b2 {
     function ParseInt(v: string): number;
     function ParseUInt(v: string): number;
     function MakeArray<T>(length: number, init: (i: number) => T): T[];
-    function MakeNullArray<T>(length: number): Array<T | null>;
+    function MakeNullArray<T>(length: number): Array<T>;
     function MakeNumberArray(length: number, init?: number): number[];
 }
 declare namespace b2 {
     const pi_over_180: number;
     const _180_over_pi: number;
     const two_pi: number;
-    const Abs: (x: number) => number;
-    function Min(a: number, b: number): number;
-    function Max(a: number, b: number): number;
-    function Clamp(a: number, lo: number, hi: number): number;
-    function Swap<T>(a: T[], b: T[]): void;
-    const IsValid: typeof isFinite;
-    function Sq(n: number): number;
-    function InvSqrt(n: number): number;
-    const Sqrt: (x: number) => number;
+    function clamp(a: number, lo: number, hi: number): number;
+    function swap<T>(a: T[], b: T[]): void;
+    const isValid: typeof isFinite;
+    function sqrt(n: number): number;
+    function invSqrt(n: number): number;
+    function degToRad(degrees: number): number;
+    function radToDeg(radians: number): number;
     const Pow: (x: number, y: number) => number;
-    function DegToRad(degrees: number): number;
-    function RadToDeg(radians: number): number;
+    const Sqrt: (x: number) => number;
+    const Abs: (x: number) => number;
     const Cos: (x: number) => number;
     const Sin: (x: number) => number;
     const Acos: (x: number) => number;
     const Asin: (x: number) => number;
     const Atan2: (y: number, x: number) => number;
-    function NextPowerOfTwo(x: number): number;
-    function IsPowerOfTwo(x: number): boolean;
-    function Random(): number;
-    function RandomRange(lo: number, hi: number): number;
+    const Random: () => number;
+    const Min: (...values: number[]) => number;
+    const Max: (...values: number[]) => number;
+    function nextPowerOfTwo(x: number): number;
+    function isPowerOfTwo(x: number): boolean;
+    function randomRange(lo: number, hi: number): number;
     interface XY {
         x: number;
         y: number;
@@ -92,33 +92,33 @@ declare namespace b2 {
         static readonly s_t2: Vec2;
         static readonly s_t3: Vec2;
         constructor(x?: number, y?: number);
-        Clone(): Vec2;
-        SetZero(): this;
-        Set(x: number, y: number): this;
-        Copy(other: XY): this;
-        SelfAdd(v: XY): this;
-        SelfAddXY(x: number, y: number): this;
-        SelfSub(v: XY): this;
-        SelfSubXY(x: number, y: number): this;
-        SelfMul(s: number): this;
-        SelfMulAdd(s: number, v: XY): this;
-        SelfMulSub(s: number, v: XY): this;
-        Dot(v: XY): number;
-        Cross(v: XY): number;
-        Length(): number;
-        LengthSquared(): number;
-        Normalize(): number;
-        SelfNormalize(): this;
-        SelfRotate(radians: number): this;
-        SelfRotateCosSin(c: number, s: number): this;
-        IsValid(): boolean;
-        SelfCrossVS(s: number): this;
-        SelfCrossSV(s: number): this;
-        SelfMinV(v: XY): this;
-        SelfMaxV(v: XY): this;
-        SelfAbs(): this;
-        SelfNeg(): this;
-        SelfSkew(): this;
+        clone(): Vec2;
+        setZero(): this;
+        set(x: number, y: number): this;
+        copy(other: XY): this;
+        selfAdd(v: XY): this;
+        selfAddXY(x: number, y: number): this;
+        selfSub(v: XY): this;
+        selfSubXY(x: number, y: number): this;
+        selfMul(s: number): this;
+        selfMulAdd(s: number, v: XY): this;
+        selfMulSub(s: number, v: XY): this;
+        dot(v: XY): number;
+        cross(v: XY): number;
+        length(): number;
+        lengthSquared(): number;
+        normalize(): number;
+        selfNormalize(): this;
+        selfRotate(radians: number): this;
+        selfRotateCosSin(c: number, s: number): this;
+        isValid(): boolean;
+        selfCrossVS(s: number): this;
+        selfCrossSV(s: number): this;
+        selfMinV(v: XY): this;
+        selfMaxV(v: XY): this;
+        selfAbs(): this;
+        selfNeg(): this;
+        selfSkew(): this;
         static MakeArray(length: number): Vec2[];
         static AbsV<T extends XY>(v: XY, out: T): T;
         static MinV<T extends XY>(a: XY, b: XY, out: T): T;
@@ -153,33 +153,33 @@ declare namespace b2 {
         constructor();
         constructor(data: Float32Array);
         constructor(x: number, y: number);
-        Clone(): TypedVec2;
-        SetZero(): this;
-        Set(x: number, y: number): this;
-        Copy(other: XY): this;
-        SelfAdd(v: XY): this;
-        SelfAddXY(x: number, y: number): this;
-        SelfSub(v: XY): this;
-        SelfSubXY(x: number, y: number): this;
-        SelfMul(s: number): this;
-        SelfMulAdd(s: number, v: XY): this;
-        SelfMulSub(s: number, v: XY): this;
-        Dot(v: XY): number;
-        Cross(v: XY): number;
-        Length(): number;
-        LengthSquared(): number;
-        Normalize(): number;
-        SelfNormalize(): this;
-        SelfRotate(radians: number): this;
-        SelfRotateCosSin(c: number, s: number): this;
-        IsValid(): boolean;
-        SelfCrossVS(s: number): this;
-        SelfCrossSV(s: number): this;
-        SelfMinV(v: XY): this;
-        SelfMaxV(v: XY): this;
-        SelfAbs(): this;
-        SelfNeg(): this;
-        SelfSkew(): this;
+        clone(): TypedVec2;
+        setZero(): this;
+        set(x: number, y: number): this;
+        copy(other: XY): this;
+        selfAdd(v: XY): this;
+        selfAddXY(x: number, y: number): this;
+        selfSub(v: XY): this;
+        selfSubXY(x: number, y: number): this;
+        selfMul(s: number): this;
+        selfMulAdd(s: number, v: XY): this;
+        selfMulSub(s: number, v: XY): this;
+        dot(v: XY): number;
+        cross(v: XY): number;
+        length(): number;
+        lengthSquared(): number;
+        normalize(): number;
+        selfNormalize(): this;
+        selfRotate(radians: number): this;
+        selfRotateCosSin(c: number, s: number): this;
+        isValid(): boolean;
+        selfCrossVS(s: number): this;
+        selfCrossSV(s: number): this;
+        selfMinV(v: XY): this;
+        selfMaxV(v: XY): this;
+        selfAbs(): this;
+        selfNeg(): this;
+        selfSkew(): this;
     }
     interface XYZ extends XY {
         z: number;
@@ -194,46 +194,46 @@ declare namespace b2 {
         constructor();
         constructor(data: Float32Array);
         constructor(x: number, y: number, z: number);
-        Clone(): Vec3;
-        SetZero(): this;
-        SetXYZ(x: number, y: number, z: number): this;
-        Copy(other: XYZ): this;
-        SelfNeg(): this;
-        SelfAdd(v: XYZ): this;
-        SelfAddXYZ(x: number, y: number, z: number): this;
-        SelfSub(v: XYZ): this;
-        SelfSubXYZ(x: number, y: number, z: number): this;
-        SelfMul(s: number): this;
-        static DotV3V3(a: XYZ, b: XYZ): number;
-        static CrossV3V3<T extends XYZ>(a: XYZ, b: XYZ, out: T): T;
+        clone(): Vec3;
+        setZero(): this;
+        setXYZ(x: number, y: number, z: number): this;
+        copy(other: XYZ): this;
+        selfNeg(): this;
+        selfAdd(v: XYZ): this;
+        selfAddXYZ(x: number, y: number, z: number): this;
+        selfSub(v: XYZ): this;
+        selfSubXYZ(x: number, y: number, z: number): this;
+        selfMul(s: number): this;
+        static dotV3V3(a: XYZ, b: XYZ): number;
+        static crossV3V3<T extends XYZ>(a: XYZ, b: XYZ, out: T): T;
     }
     class Mat22 {
         static readonly IDENTITY: Mat22;
         readonly ex: Vec2;
         readonly ey: Vec2;
-        Clone(): Mat22;
-        static FromVV(c1: XY, c2: XY): Mat22;
-        static FromSSSS(r1c1: number, r1c2: number, r2c1: number, r2c2: number): Mat22;
-        static FromAngle(radians: number): Mat22;
-        SetSSSS(r1c1: number, r1c2: number, r2c1: number, r2c2: number): this;
-        SetVV(c1: XY, c2: XY): this;
-        SetAngle(radians: number): this;
-        Copy(other: Mat22): this;
-        SetIdentity(): this;
-        SetZero(): this;
-        GetAngle(): number;
-        GetInverse(out: Mat22): Mat22;
-        Solve<T extends XY>(b_x: number, b_y: number, out: T): T;
-        SelfAbs(): this;
-        SelfInv(): this;
-        SelfAddM(M: Mat22): this;
-        SelfSubM(M: Mat22): this;
-        static AbsM(M: Mat22, out: Mat22): Mat22;
-        static MulMV<T extends XY>(M: Mat22, v: XY, out: T): T;
-        static MulTMV<T extends XY>(M: Mat22, v: XY, out: T): T;
-        static AddMM(A: Mat22, B: Mat22, out: Mat22): Mat22;
-        static MulMM(A: Mat22, B: Mat22, out: Mat22): Mat22;
-        static MulTMM(A: Mat22, B: Mat22, out: Mat22): Mat22;
+        clone(): Mat22;
+        static fromVV(c1: XY, c2: XY): Mat22;
+        static fromSSSS(r1c1: number, r1c2: number, r2c1: number, r2c2: number): Mat22;
+        static fromAngle(radians: number): Mat22;
+        setSSSS(r1c1: number, r1c2: number, r2c1: number, r2c2: number): this;
+        setVV(c1: XY, c2: XY): this;
+        setAngle(radians: number): this;
+        copy(other: Mat22): this;
+        setIdentity(): this;
+        setZero(): this;
+        getAngle(): number;
+        getInverse(out: Mat22): Mat22;
+        solve<T extends XY>(b_x: number, b_y: number, out: T): T;
+        selfAbs(): this;
+        selfInv(): this;
+        selfAddM(M: Mat22): this;
+        selfSubM(M: Mat22): this;
+        static absM(M: Mat22, out: Mat22): Mat22;
+        static mulMV<T extends XY>(M: Mat22, v: XY, out: T): T;
+        static mulTMV<T extends XY>(M: Mat22, v: XY, out: T): T;
+        static addMM(A: Mat22, B: Mat22, out: Mat22): Mat22;
+        static mulMM(A: Mat22, B: Mat22, out: Mat22): Mat22;
+        static mulTMM(A: Mat22, B: Mat22, out: Mat22): Mat22;
     }
     class Mat33 {
         static readonly IDENTITY: Mat33;
@@ -241,59 +241,59 @@ declare namespace b2 {
         readonly ex: Vec3;
         readonly ey: Vec3;
         readonly ez: Vec3;
-        Clone(): Mat33;
-        SetVVV(c1: XYZ, c2: XYZ, c3: XYZ): this;
-        Copy(other: Mat33): this;
-        SetIdentity(): this;
-        SetZero(): this;
-        SelfAddM(M: Mat33): this;
-        Solve33<T extends XYZ>(b_x: number, b_y: number, b_z: number, out: T): T;
-        Solve22<T extends XY>(b_x: number, b_y: number, out: T): T;
-        GetInverse22(M: Mat33): void;
-        GetSymInverse33(M: Mat33): void;
-        static MulM33V3<T extends XYZ>(A: Mat33, v: XYZ, out: T): T;
-        static MulM33XYZ<T extends XYZ>(A: Mat33, x: number, y: number, z: number, out: T): T;
-        static MulM33V2<T extends XY>(A: Mat33, v: XY, out: T): T;
-        static MulM33XY<T extends XY>(A: Mat33, x: number, y: number, out: T): T;
+        clone(): Mat33;
+        setVVV(c1: XYZ, c2: XYZ, c3: XYZ): this;
+        copy(other: Mat33): this;
+        setIdentity(): this;
+        setZero(): this;
+        selfAddM(M: Mat33): this;
+        solve33<T extends XYZ>(b_x: number, b_y: number, b_z: number, out: T): T;
+        solve22<T extends XY>(b_x: number, b_y: number, out: T): T;
+        getInverse22(M: Mat33): void;
+        getSymInverse33(M: Mat33): void;
+        static mulM33V3<T extends XYZ>(A: Mat33, v: XYZ, out: T): T;
+        static mulM33XYZ<T extends XYZ>(A: Mat33, x: number, y: number, z: number, out: T): T;
+        static mulM33V2<T extends XY>(A: Mat33, v: XY, out: T): T;
+        static mulM33XY<T extends XY>(A: Mat33, x: number, y: number, out: T): T;
     }
     class Rot {
         static readonly IDENTITY: Rot;
         s: number;
         c: number;
         constructor(angle?: number);
-        Clone(): Rot;
-        Copy(other: Rot): this;
-        SetAngle(angle: number): this;
-        SetIdentity(): this;
-        GetAngle(): number;
-        GetXAxis<T extends XY>(out: T): T;
-        GetYAxis<T extends XY>(out: T): T;
-        static MulRR(q: Rot, r: Rot, out: Rot): Rot;
-        static MulTRR(q: Rot, r: Rot, out: Rot): Rot;
-        static MulRV<T extends XY>(q: Rot, v: XY, out: T): T;
-        static MulTRV<T extends XY>(q: Rot, v: XY, out: T): T;
+        clone(): Rot;
+        copy(other: Rot): this;
+        setAngle(angle: number): this;
+        setIdentity(): this;
+        getAngle(): number;
+        getXAxis<T extends XY>(out: T): T;
+        getYAxis<T extends XY>(out: T): T;
+        static mulRR(q: Rot, r: Rot, out: Rot): Rot;
+        static mulTRR(q: Rot, r: Rot, out: Rot): Rot;
+        static mulRV<T extends XY>(q: Rot, v: XY, out: T): T;
+        static mulTRV<T extends XY>(q: Rot, v: XY, out: T): T;
     }
     class Transform {
         static readonly IDENTITY: Transform;
         readonly p: Vec2;
         readonly q: Rot;
-        Clone(): Transform;
-        Copy(other: Transform): this;
-        SetIdentity(): this;
-        SetPositionRotation(position: XY, q: Rot): this;
-        SetPositionAngle(pos: XY, a: number): this;
-        SetPosition(position: XY): this;
-        SetPositionXY(x: number, y: number): this;
-        SetRotation(rotation: Rot): this;
-        SetRotationAngle(radians: number): this;
-        GetPosition(): Vec2;
-        GetRotation(): Rot;
-        GetRotationAngle(): number;
-        GetAngle(): number;
-        static MulXV<T extends XY>(T: Transform, v: XY, out: T): T;
-        static MulTXV<T extends XY>(T: Transform, v: XY, out: T): T;
-        static MulXX(A: Transform, B: Transform, out: Transform): Transform;
-        static MulTXX(A: Transform, B: Transform, out: Transform): Transform;
+        clone(): Transform;
+        copy(other: Transform): this;
+        setIdentity(): this;
+        setPositionRotation(position: XY, q: Rot): this;
+        setPositionAngle(pos: XY, a: number): this;
+        setPosition(position: XY): this;
+        setPositionXY(x: number, y: number): this;
+        setRotation(rotation: Rot): this;
+        setRotationAngle(radians: number): this;
+        getPosition(): Vec2;
+        getRotation(): Rot;
+        getRotationAngle(): number;
+        getAngle(): number;
+        static mulXV<T extends XY>(T: Transform, v: XY, out: T): T;
+        static mulTXV<T extends XY>(T: Transform, v: XY, out: T): T;
+        static mulXX(A: Transform, B: Transform, out: Transform): Transform;
+        static mulTXX(A: Transform, B: Transform, out: Transform): Transform;
     }
     class Sweep {
         readonly localCenter: Vec2;
@@ -302,11 +302,11 @@ declare namespace b2 {
         a0: number;
         a: number;
         alpha0: number;
-        Clone(): Sweep;
-        Copy(other: Sweep): this;
-        GetTransform(xf: Transform, beta: number): Transform;
-        Advance(alpha: number): void;
-        Normalize(): void;
+        clone(): Sweep;
+        copy(other: Sweep): this;
+        getTransform(xf: Transform, beta: number): Transform;
+        advance(alpha: number): void;
+        normalize(): void;
     }
 }
 declare namespace b2 {
@@ -315,21 +315,21 @@ declare namespace b2 {
         vertices: Vec2[];
         count: number;
         radius: number;
-        Copy(other: DistanceProxy): this;
-        Reset(): DistanceProxy;
-        SetShape(shape: Shape, index: number): void;
-        SetVerticesRadius(vertices: Vec2[], count: number, radius: number): void;
-        GetSupport(d: Vec2): number;
-        GetSupportVertex(d: Vec2): Vec2;
-        GetVertexCount(): number;
-        GetVertex(index: number): Vec2;
+        copy(other: DistanceProxy): this;
+        reset(): DistanceProxy;
+        setShape(shape: Shape, index: number): void;
+        setVerticesRadius(vertices: Vec2[], count: number, radius: number): void;
+        getSupport(d: Vec2): number;
+        getSupportVertex(d: Vec2): Vec2;
+        getVertexCount(): number;
+        getVertex(index: number): Vec2;
     }
     class SimplexCache {
         metric: number;
         count: number;
         readonly indexA: [number, number, number];
         readonly indexB: [number, number, number];
-        Reset(): SimplexCache;
+        reset(): SimplexCache;
     }
     class DistanceInput {
         readonly proxyA: DistanceProxy;
@@ -337,14 +337,14 @@ declare namespace b2 {
         readonly transformA: Transform;
         readonly transformB: Transform;
         useRadii: boolean;
-        Reset(): DistanceInput;
+        reset(): DistanceInput;
     }
     class DistanceOutput {
         readonly pointA: Vec2;
         readonly pointB: Vec2;
         distance: number;
         iterations: number;
-        Reset(): DistanceOutput;
+        reset(): DistanceOutput;
     }
     class ShapeCastInput {
         readonly proxyA: DistanceProxy;
@@ -362,7 +362,7 @@ declare namespace b2 {
     let gjkCalls: number;
     let gjkIters: number;
     let gjkMaxIters: number;
-    function gjk_reset(): void;
+    function gjkReset(): void;
     class SimplexVertex {
         readonly wA: Vec2;
         readonly wB: Vec2;
@@ -370,7 +370,7 @@ declare namespace b2 {
         a: number;
         indexA: number;
         indexB: number;
-        Copy(other: SimplexVertex): SimplexVertex;
+        copy(other: SimplexVertex): SimplexVertex;
     }
     class Simplex {
         readonly v1: SimplexVertex;
@@ -379,45 +379,39 @@ declare namespace b2 {
         readonly vertices: SimplexVertex[];
         count: number;
         constructor();
-        ReadCache(cache: SimplexCache, proxyA: DistanceProxy, transformA: Transform, proxyB: DistanceProxy, transformB: Transform): void;
-        WriteCache(cache: SimplexCache): void;
-        GetSearchDirection(out: Vec2): Vec2;
-        GetClosestPoint(out: Vec2): Vec2;
-        GetWitnessPoints(pA: Vec2, pB: Vec2): void;
-        GetMetric(): number;
-        Solve2(): void;
-        Solve3(): void;
+        readCache(cache: SimplexCache, proxyA: DistanceProxy, transformA: Transform, proxyB: DistanceProxy, transformB: Transform): void;
+        writeCache(cache: SimplexCache): void;
+        getSearchDirection(out: Vec2): Vec2;
+        getClosestPoint(out: Vec2): Vec2;
+        getWitnessPoints(pA: Vec2, pB: Vec2): void;
+        getMetric(): number;
+        solve2(): void;
+        solve3(): void;
         private static s_e12;
         private static s_e13;
         private static s_e23;
     }
-    function Distance(output: DistanceOutput, cache: SimplexCache, input: DistanceInput): void;
-    function ShapeCast(output: ShapeCastOutput, input: ShapeCastInput): boolean;
+    function distance(output: DistanceOutput, cache: SimplexCache, input: DistanceInput): void;
+    function shapeCast(output: ShapeCastOutput, input: ShapeCastInput): boolean;
 }
 declare namespace b2 {
     class Timer {
         start: number;
-        Reset(): Timer;
-        GetMilliseconds(): number;
+        reset(): Timer;
+        getMilliseconds(): number;
     }
     class Counter {
         count: number;
-        min_count: number;
-        max_count: number;
-        GetCount(): number;
-        GetMinCount(): number;
-        GetMaxCount(): number;
-        ResetCount(): number;
-        ResetMinCount(): void;
-        ResetMaxCount(): void;
-        Increment(): void;
-        Decrement(): void;
+        minCount: number;
+        maxCount: number;
+        increment(): void;
+        decrement(): void;
     }
 }
 declare namespace b2 {
     enum ContactFeatureType {
-        e_vertex = 0,
-        e_face = 1
+        Vertex = 0,
+        Face = 1
     }
     class ContactFeature {
         private _key;
@@ -434,8 +428,8 @@ declare namespace b2 {
     }
     class ContactID {
         readonly cf: ContactFeature;
-        Copy(o: ContactID): ContactID;
-        Clone(): ContactID;
+        copy(o: ContactID): ContactID;
+        clone(): ContactID;
         key: number;
     }
     class ManifoldPoint {
@@ -443,15 +437,15 @@ declare namespace b2 {
         normalImpulse: number;
         tangentImpulse: number;
         readonly id: ContactID;
-        static MakeArray(length: number): ManifoldPoint[];
-        Reset(): void;
-        Copy(o: ManifoldPoint): ManifoldPoint;
+        static makeArray(length: number): ManifoldPoint[];
+        reset(): void;
+        copy(o: ManifoldPoint): ManifoldPoint;
     }
     enum ManifoldType {
-        e_unknown = -1,
-        e_circles = 0,
-        e_faceA = 1,
-        e_faceB = 2
+        Unknown = -1,
+        Circles = 0,
+        FaceA = 1,
+        FaceB = 2
     }
     class Manifold {
         readonly points: ManifoldPoint[];
@@ -459,9 +453,9 @@ declare namespace b2 {
         readonly localPoint: Vec2;
         type: ManifoldType;
         pointCount: number;
-        Reset(): void;
-        Copy(o: Manifold): Manifold;
-        Clone(): Manifold;
+        reset(): void;
+        copy(o: Manifold): Manifold;
+        clone(): Manifold;
     }
     class WorldManifold {
         readonly normal: Vec2;
@@ -473,53 +467,53 @@ declare namespace b2 {
         private static Initialize_s_cB;
         private static Initialize_s_planePoint;
         private static Initialize_s_clipPoint;
-        Initialize(manifold: Manifold, xfA: Transform, radiusA: number, xfB: Transform, radiusB: number): void;
+        initialize(manifold: Manifold, xfA: Transform, radiusA: number, xfB: Transform, radiusB: number): void;
     }
     enum PointState {
-        nullState = 0,
-        addState = 1,
-        persistState = 2,
-        removeState = 3
+        NullState = 0,
+        AddState = 1,
+        PersistState = 2,
+        RemoveState = 3
     }
-    function GetPointStates(state1: PointState[], state2: PointState[], manifold1: Manifold, manifold2: Manifold): void;
+    function getPointStates(state1: PointState[], state2: PointState[], manifold1: Manifold, manifold2: Manifold): void;
     class ClipVertex {
         readonly v: Vec2;
         readonly id: ContactID;
-        static MakeArray(length: number): ClipVertex[];
-        Copy(other: ClipVertex): ClipVertex;
+        static makeArray(length: number): ClipVertex[];
+        copy(other: ClipVertex): ClipVertex;
     }
     class RayCastInput {
         readonly p1: Vec2;
         readonly p2: Vec2;
         maxFraction: number;
-        Copy(o: RayCastInput): RayCastInput;
+        copy(o: RayCastInput): RayCastInput;
     }
     class RayCastOutput {
         readonly normal: Vec2;
         fraction: number;
-        Copy(o: RayCastOutput): RayCastOutput;
+        copy(o: RayCastOutput): RayCastOutput;
     }
     class AABB {
         readonly lowerBound: Vec2;
         readonly upperBound: Vec2;
         private readonly cache_center;
         private readonly cache_extent;
-        Copy(o: AABB): AABB;
-        IsValid(): boolean;
-        GetCenter(): Vec2;
-        GetExtents(): Vec2;
-        GetPerimeter(): number;
-        Combine1(aabb: AABB): AABB;
-        Combine2(aabb1: AABB, aab: AABB): AABB;
-        static Combine(aabb1: AABB, aab: AABB, out: AABB): AABB;
-        Contains(aabb: AABB): boolean;
-        RayCast(output: RayCastOutput, input: RayCastInput): boolean;
-        TestContain(point: XY): boolean;
-        TestOverlap(other: AABB): boolean;
+        copy(o: AABB): AABB;
+        isValid(): boolean;
+        getCenter(): Vec2;
+        getExtents(): Vec2;
+        getPerimeter(): number;
+        combine1(aabb: AABB): AABB;
+        combine2(aabb1: AABB, aab: AABB): AABB;
+        static combine(aabb1: AABB, aab: AABB, out: AABB): AABB;
+        contains(aabb: AABB): boolean;
+        rayCast(output: RayCastOutput, input: RayCastInput): boolean;
+        testContain(point: XY): boolean;
+        testOverlap(other: AABB): boolean;
     }
-    function TestOverlapAABB(a: AABB, b: AABB): boolean;
-    function ClipSegmentToLine(vOut: [ClipVertex, ClipVertex], vIn: [ClipVertex, ClipVertex], normal: Vec2, offset: number, vertexIndexA: number): number;
-    function TestOverlapShape(shapeA: Shape, indexA: number, shapeB: Shape, indexB: number, xfA: Transform, xfB: Transform): boolean;
+    function testOverlapAABB(a: AABB, b: AABB): boolean;
+    function clipSegmentToLine(vOut: [ClipVertex, ClipVertex], vIn: [ClipVertex, ClipVertex], normal: Vec2, offset: number, vertexIndexA: number): number;
+    function testOverlapShape(shapeA: Shape, indexA: number, shapeB: Shape, indexB: number, xfA: Transform, xfB: Transform): boolean;
 }
 declare namespace b2 {
     class MassData {
@@ -528,29 +522,29 @@ declare namespace b2 {
         I: number;
     }
     enum ShapeType {
-        e_unknown = -1,
-        e_circleShape = 0,
-        e_edgeShape = 1,
-        e_polygonShape = 2,
-        e_chainShape = 3,
-        e_shapeTypeCount = 4
+        Unknown = -1,
+        CircleShape = 0,
+        EdgeShape = 1,
+        PolygonShape = 2,
+        ChainShape = 3,
+        ShapeTypeCount = 4
     }
     abstract class Shape {
         readonly type: ShapeType;
         radius: number;
         constructor(type: ShapeType, radius: number);
-        abstract Clone(): Shape;
-        Copy(other: Shape): Shape;
-        GetType(): ShapeType;
-        abstract GetChildCount(): number;
-        abstract TestPoint(xf: Transform, p: XY): boolean;
-        abstract ComputeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
-        abstract RayCast(output: RayCastOutput, input: RayCastInput, transform: Transform, childIndex: number): boolean;
-        abstract ComputeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
-        abstract ComputeMass(massData: MassData, density: number): void;
-        abstract SetupDistanceProxy(proxy: DistanceProxy, index: number): void;
-        abstract ComputeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
-        abstract Dump(log: (format: string, ...args: any[]) => void): void;
+        abstract clone(): Shape;
+        copy(other: Shape): Shape;
+        getType(): ShapeType;
+        abstract getChildCount(): number;
+        abstract testPoint(xf: Transform, p: XY): boolean;
+        abstract computeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
+        abstract rayCast(output: RayCastOutput, input: RayCastInput, transform: Transform, childIndex: number): boolean;
+        abstract computeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
+        abstract computeMass(massData: MassData, density: number): void;
+        abstract setupDistanceProxy(proxy: DistanceProxy, index: number): void;
+        abstract computeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
+        abstract dump(log: (format: string, ...args: any[]) => void): void;
     }
 }
 declare namespace b2 {
@@ -561,7 +555,7 @@ declare namespace b2 {
     let toiMaxIters: number;
     let toiRootIters: number;
     let toiMaxRootIters: number;
-    function toi_reset(): void;
+    function toiReset(): void;
     class TOIInput {
         readonly proxyA: DistanceProxy;
         readonly proxyB: DistanceProxy;
@@ -570,21 +564,21 @@ declare namespace b2 {
         tMax: number;
     }
     enum TOIOutputState {
-        e_unknown = 0,
-        e_failed = 1,
-        e_overlapped = 2,
-        e_touching = 3,
-        e_separated = 4
+        Unknown = 0,
+        Failed = 1,
+        Overlapped = 2,
+        Touching = 3,
+        Separated = 4
     }
     class TOIOutput {
         state: TOIOutputState;
         t: number;
     }
     enum SeparationFunctionType {
-        e_unknown = -1,
-        e_points = 0,
-        e_faceA = 1,
-        e_faceB = 2
+        Unknown = -1,
+        Points = 0,
+        FaceA = 1,
+        FaceB = 2
     }
     class SeparationFunction {
         proxyA: DistanceProxy;
@@ -594,11 +588,11 @@ declare namespace b2 {
         type: SeparationFunctionType;
         readonly localPoint: Vec2;
         readonly axis: Vec2;
-        Initialize(cache: SimplexCache, proxyA: DistanceProxy, sweepA: Sweep, proxyB: DistanceProxy, sweepB: Sweep, t1: number): number;
-        FindMinSeparation(indexA: [number], indexB: [number], t: number): number;
-        Evaluate(indexA: number, indexB: number, t: number): number;
+        initialize(cache: SimplexCache, proxyA: DistanceProxy, sweepA: Sweep, proxyB: DistanceProxy, sweepB: Sweep, t1: number): number;
+        findMinSeparation(indexA: [number], indexB: [number], t: number): number;
+        evaluate(indexA: number, indexB: number, t: number): number;
     }
-    function TimeOfImpact(output: TOIOutput, input: TOIInput): void;
+    function timeOfImpact(output: TOIOutput, input: TOIInput): void;
 }
 declare namespace b2 {
     interface RGB {
@@ -619,25 +613,25 @@ declare namespace b2 {
         static readonly GREEN: Color;
         static readonly BLUE: Color;
         constructor(r?: number, g?: number, b?: number, a?: number);
-        Clone(): Color;
-        Copy(other: RGBA): this;
-        IsEqual(color: RGBA): boolean;
-        IsZero(): boolean;
-        Set(r: number, g: number, b: number, a?: number): void;
-        SetByteRGB(r: number, g: number, b: number): this;
-        SetByteRGBA(r: number, g: number, b: number, a: number): this;
-        SetRGB(rr: number, gg: number, bb: number): this;
-        SetRGBA(rr: number, gg: number, bb: number, aa: number): this;
-        SelfAdd(color: RGBA): this;
-        Add<T extends RGBA>(color: RGBA, out: T): T;
-        SelfSub(color: RGBA): this;
-        Sub<T extends RGBA>(color: RGBA, out: T): T;
-        SelfMul(s: number): this;
-        Mul<T extends RGBA>(s: number, out: T): T;
-        Mix(mixColor: RGBA, strength: number): void;
-        static MixColors(colorA: RGBA, colorB: RGBA, strength: number): void;
-        MakeStyleString(alpha?: number): string;
-        static MakeStyleString(r: number, g: number, b: number, a?: number): string;
+        clone(): Color;
+        copy(other: RGBA): this;
+        isEqual(color: RGBA): boolean;
+        isZero(): boolean;
+        set(r: number, g: number, b: number, a?: number): void;
+        setByteRGB(r: number, g: number, b: number): this;
+        setByteRGBA(r: number, g: number, b: number, a: number): this;
+        setRGB(rr: number, gg: number, bb: number): this;
+        setRGBA(rr: number, gg: number, bb: number, aa: number): this;
+        selfAdd(color: RGBA): this;
+        add<T extends RGBA>(color: RGBA, out: T): T;
+        selfSub(color: RGBA): this;
+        sub<T extends RGBA>(color: RGBA, out: T): T;
+        selfMul(s: number): this;
+        mul<T extends RGBA>(s: number, out: T): T;
+        mix(mixColor: RGBA, strength: number): void;
+        static mixColors(colorA: RGBA, colorB: RGBA, strength: number): void;
+        makeStyleString(alpha?: number): string;
+        static makeStyleString(r: number, g: number, b: number, a?: number): string;
     }
     class TypedColor implements Color {
         readonly data: Float32Array;
@@ -649,51 +643,51 @@ declare namespace b2 {
         constructor(data: Float32Array);
         constructor(rr: number, gg: number, bb: number);
         constructor(rr: number, gg: number, bb: number, aa: number);
-        Clone(): TypedColor;
-        Copy(other: RGBA): this;
-        IsEqual(color: RGBA): boolean;
-        IsZero(): boolean;
-        Set(r: number, g: number, b: number, a?: number): void;
-        SetByteRGB(r: number, g: number, b: number): this;
-        SetByteRGBA(r: number, g: number, b: number, a: number): this;
-        SetRGB(rr: number, gg: number, bb: number): this;
-        SetRGBA(rr: number, gg: number, bb: number, aa: number): this;
-        SelfAdd(color: RGBA): this;
-        Add<T extends RGBA>(color: RGBA, out: T): T;
-        SelfSub(color: RGBA): this;
-        Sub<T extends RGBA>(color: RGBA, out: T): T;
-        SelfMul(s: number): this;
-        Mul<T extends RGBA>(s: number, out: T): T;
-        Mix(mixColor: RGBA, strength: number): void;
-        MakeStyleString(alpha?: number): string;
+        clone(): TypedColor;
+        copy(other: RGBA): this;
+        isEqual(color: RGBA): boolean;
+        isZero(): boolean;
+        set(r: number, g: number, b: number, a?: number): void;
+        setByteRGB(r: number, g: number, b: number): this;
+        setByteRGBA(r: number, g: number, b: number, a: number): this;
+        setRGB(rr: number, gg: number, bb: number): this;
+        setRGBA(rr: number, gg: number, bb: number, aa: number): this;
+        selfAdd(color: RGBA): this;
+        add<T extends RGBA>(color: RGBA, out: T): T;
+        selfSub(color: RGBA): this;
+        sub<T extends RGBA>(color: RGBA, out: T): T;
+        selfMul(s: number): this;
+        mul<T extends RGBA>(s: number, out: T): T;
+        mix(mixColor: RGBA, strength: number): void;
+        makeStyleString(alpha?: number): string;
     }
     enum DrawFlags {
-        e_none = 0,
-        e_shapeBit = 1,
-        e_jointBit = 2,
-        e_aabbBit = 4,
-        e_pairBit = 8,
-        e_centerOfMassBit = 16,
-        e_particleBit = 32,
-        e_controllerBit = 64,
-        e_all = 63
+        None = 0,
+        ShapeBit = 1,
+        JointBit = 2,
+        AABBBit = 4,
+        PairBit = 8,
+        CenterOfMassBit = 16,
+        ParticleBit = 32,
+        ControllerBit = 64,
+        All = 63
     }
     class Draw {
         drawFlags: DrawFlags;
-        SetFlags(flags: DrawFlags): void;
-        GetFlags(): DrawFlags;
-        AppendFlags(flags: DrawFlags): void;
-        ClearFlags(flags: DrawFlags): void;
-        PushTransform(xf: Transform): void;
-        PopTransform(xf: Transform): void;
-        DrawPolygon(vertices: XY[], vertexCount: number, color: RGBA): void;
-        DrawSolidPolygon(vertices: XY[], vertexCount: number, color: RGBA): void;
-        DrawCircle(center: XY, radius: number, color: RGBA): void;
-        DrawSolidCircle(center: XY, radius: number, axis: XY, color: RGBA): void;
-        DrawParticles(centers: XY[], radius: number, colors: RGBA[] | null, count: number): void;
-        DrawSegment(p1: XY, p2: XY, color: RGBA): void;
-        DrawTransform(xf: Transform): void;
-        DrawPoint(p: XY, size: number, color: RGBA): void;
+        setFlags(flags: DrawFlags): void;
+        getFlags(): DrawFlags;
+        appendFlags(flags: DrawFlags): void;
+        clearFlags(flags: DrawFlags): void;
+        pushTransform(xf: Transform): void;
+        popTransform(xf: Transform): void;
+        drawPolygon(vertices: XY[], vertexCount: number, color: RGBA): void;
+        drawSolidPolygon(vertices: XY[], vertexCount: number, color: RGBA): void;
+        drawCircle(center: XY, radius: number, color: RGBA): void;
+        drawSolidCircle(center: XY, radius: number, axis: XY, color: RGBA): void;
+        drawParticles(centers: XY[], radius: number, colors: RGBA[], count: number): void;
+        drawSegment(p1: XY, p2: XY, color: RGBA): void;
+        drawTransform(xf: Transform): void;
+        drawPoint(p: XY, size: number, color: RGBA): void;
     }
 }
 declare namespace b2 {
@@ -706,7 +700,7 @@ declare namespace b2 {
         solvePosition: number;
         broadphase: number;
         solveTOI: number;
-        Reset(): this;
+        reset(): this;
     }
     class TimeStep {
         dt: number;
@@ -716,17 +710,17 @@ declare namespace b2 {
         positionIterations: number;
         particleIterations: number;
         warmStarting: boolean;
-        Copy(step: TimeStep): TimeStep;
+        copy(step: TimeStep): TimeStep;
     }
     class Position {
         readonly c: Vec2;
         a: number;
-        static MakeArray(length: number): Position[];
+        static makeArray(length: number): Position[];
     }
     class Velocity {
         readonly v: Vec2;
         w: number;
-        static MakeArray(length: number): Velocity[];
+        static makeArray(length: number): Velocity[];
     }
     class SolverData {
         readonly step: TimeStep;
@@ -736,37 +730,37 @@ declare namespace b2 {
 }
 declare namespace b2 {
     class EdgeShape extends Shape {
+        readonly vertex0: Vec2;
         readonly vertex1: Vec2;
         readonly vertex2: Vec2;
-        readonly vertex0: Vec2;
         readonly vertex3: Vec2;
         oneSided: boolean;
         constructor();
-        SetOneSided(v0: XY, v1: XY, v2: XY, v3: XY): EdgeShape;
-        SetTwoSided(v1: XY, v2: XY): EdgeShape;
-        Clone(): EdgeShape;
-        Copy(other: EdgeShape): EdgeShape;
-        GetChildCount(): number;
-        TestPoint(xf: Transform, p: XY): boolean;
+        setOneSided(v0: XY, v1: XY, v2: XY, v3: XY): EdgeShape;
+        setTwoSided(v1: XY, v2: XY): EdgeShape;
+        clone(): EdgeShape;
+        copy(other: EdgeShape): EdgeShape;
+        getChildCount(): number;
+        testPoint(xf: Transform, p: XY): boolean;
         private static ComputeDistance_s_v1;
         private static ComputeDistance_s_v2;
         private static ComputeDistance_s_d;
         private static ComputeDistance_s_s;
-        ComputeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
-        private static RayCast_s_p1;
-        private static RayCast_s_p2;
-        private static RayCast_s_d;
-        private static RayCast_s_e;
-        private static RayCast_s_q;
-        private static RayCast_s_r;
-        RayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean;
-        private static ComputeAABB_s_v1;
-        private static ComputeAABB_s_v2;
-        ComputeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
-        ComputeMass(massData: MassData, density: number): void;
-        SetupDistanceProxy(proxy: DistanceProxy, index: number): void;
-        ComputeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
+        computeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
+        private static rayCast_s_p1;
+        private static rayCast_s_p2;
+        private static rayCast_s_d;
+        private static rayCast_s_e;
+        private static rayCast_s_q;
+        private static rayCast_s_r;
+        rayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean;
+        private static computeAABB_s_v1;
+        private static computeAABB_s_v2;
+        computeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
+        computeMass(massData: MassData, density: number): void;
+        setupDistanceProxy(proxy: DistanceProxy, index: number): void;
+        computeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
     }
 }
 declare namespace b2 {
@@ -777,10 +771,10 @@ declare namespace b2 {
     class ControllerEdge {
         readonly controller: Controller;
         readonly body: Body;
-        prevBody: ControllerEdge | null;
-        nextBody: ControllerEdge | null;
-        prevController: ControllerEdge | null;
-        nextController: ControllerEdge | null;
+        prevBody: ControllerEdge;
+        nextBody: ControllerEdge;
+        prevController: ControllerEdge;
+        nextController: ControllerEdge;
         constructor(controller: Controller, body: Body);
     }
     /**
@@ -788,59 +782,44 @@ declare namespace b2 {
      * encapsulating common per-step functionality.
      */
     abstract class Controller {
-        bodyList: ControllerEdge | null;
+        bodyList: ControllerEdge;
         bodyCount: number;
-        prev: Controller | null;
-        next: Controller | null;
+        prev: Controller;
+        next: Controller;
         /**
          * Controllers override this to implement per-step functionality.
          */
-        abstract Step(step: TimeStep): void;
+        abstract step(step: TimeStep): void;
         /**
          * Controllers override this to provide debug drawing.
          */
-        abstract Draw(debugDraw: Draw): void;
-        /**
-         * Get the next controller in the world's body list.
-         */
-        GetNext(): Controller | null;
-        /**
-         * Get the previous controller in the world's body list.
-         */
-        GetPrev(): Controller | null;
-        /**
-         * Get the parent world of this body.
-         */
-        /**
-         * Get the attached body list
-         */
-        GetBodyList(): ControllerEdge | null;
+        draw(debugDraw: Draw): void;
         /**
          * Adds a body to the controller list.
          */
-        AddBody(body: Body): void;
+        addBody(body: Body): void;
         /**
          * Removes a body from the controller list.
          */
-        RemoveBody(body: Body): void;
+        removeBody(body: Body): void;
         /**
          * Removes all bodies from the controller list.
          */
-        Clear(): void;
+        clear(): void;
     }
 }
 declare namespace b2 {
-    function MixFriction(friction1: number, friction2: number): number;
-    function MixRestitution(restitution1: number, restitution2: number): number;
-    function MixRestitutionThreshold(threshold1: number, threshold2: number): number;
+    function mixFriction(friction1: number, friction2: number): number;
+    function mixRestitution(restitution1: number, restitution2: number): number;
+    function mixRestitutionThreshold(threshold1: number, threshold2: number): number;
     class ContactEdge {
         private _other;
         other: Body;
         readonly contact: Contact;
-        prev: ContactEdge | null;
-        next: ContactEdge | null;
+        prev: ContactEdge;
+        next: ContactEdge;
         constructor(contact: Contact);
-        Reset(): void;
+        reset(): void;
     }
     abstract class Contact<A extends Shape = Shape, B extends Shape = Shape> {
         islandFlag: boolean;
@@ -849,8 +828,8 @@ declare namespace b2 {
         filterFlag: boolean;
         bulletHitFlag: boolean;
         toiFlag: boolean;
-        prev: Contact | null;
-        next: Contact | null;
+        prev: Contact;
+        next: Contact;
         readonly nodeA: ContactEdge;
         readonly nodeB: ContactEdge;
         fixtureA: Fixture;
@@ -865,42 +844,40 @@ declare namespace b2 {
         restitutionThreshold: number;
         tangentSpeed: number;
         oldManifold: Manifold;
-        GetManifold(): Manifold;
-        GetWorldManifold(worldManifold: WorldManifold): void;
-        IsTouching(): boolean;
-        SetEnabled(flag: boolean): void;
-        IsEnabled(): boolean;
-        GetNext(): Contact | null;
-        GetFixtureA(): Fixture;
-        GetChildIndexA(): number;
-        GetShapeA(): A;
-        GetFixtureB(): Fixture;
-        GetChildIndexB(): number;
-        GetShapeB(): B;
-        abstract Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
-        FlagForFiltering(): void;
-        SetFriction(friction: number): void;
-        GetFriction(): number;
-        ResetFriction(): void;
-        SetRestitution(restitution: number): void;
-        GetRestitution(): number;
-        ResetRestitution(): void;
-        SetRestitutionThreshold(threshold: number): void;
-        GetRestitutionThreshold(): number;
-        ResetRestitutionThreshold(): void;
-        SetTangentSpeed(speed: number): void;
-        GetTangentSpeed(): number;
-        Reset(fixtureA: Fixture, indexA: number, fixtureB: Fixture, indexB: number): void;
-        Update(listener: ContactListener): void;
-        private static ComputeTOI_s_input;
-        private static ComputeTOI_s_output;
-        ComputeTOI(sweepA: Sweep, sweepB: Sweep): number;
+        getManifold(): Manifold;
+        getWorldManifold(worldManifold: WorldManifold): void;
+        isTouching(): boolean;
+        setEnabled(flag: boolean): void;
+        isEnabled(): boolean;
+        getNext(): Contact;
+        getFixtureA(): Fixture;
+        getChildIndexA(): number;
+        getShapeA(): A;
+        getFixtureB(): Fixture;
+        getChildIndexB(): number;
+        getShapeB(): B;
+        abstract evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
+        glagForFiltering(): void;
+        setFriction(friction: number): void;
+        getFriction(): number;
+        resetFriction(): void;
+        setRestitution(restitution: number): void;
+        getRestitution(): number;
+        resetRestitution(): void;
+        setRestitutionThreshold(threshold: number): void;
+        getRestitutionThreshold(): number;
+        resetRestitutionThreshold(): void;
+        setTangentSpeed(speed: number): void;
+        getTangentSpeed(): number;
+        reset(fixtureA: Fixture, indexA: number, fixtureB: Fixture, indexB: number): void;
+        update(listener: ContactListener): void;
+        private static computeTOI_s_input;
+        private static computeTOI_s_output;
+        computeTOI(sweepA: Sweep, sweepB: Sweep): number;
     }
 }
 declare namespace b2 {
-    let g_blockSolve: boolean;
-    function get_g_blockSolve(): boolean;
-    function set_g_blockSolve(value: boolean): void;
+    let gBlockSolve: boolean;
     class VelocityConstraintPoint {
         readonly rA: Vec2;
         readonly rB: Vec2;
@@ -909,7 +886,7 @@ declare namespace b2 {
         normalMass: number;
         tangentMass: number;
         velocityBias: number;
-        static MakeArray(length: number): VelocityConstraintPoint[];
+        static makeArray(length: number): VelocityConstraintPoint[];
     }
     class ContactVelocityConstraint {
         readonly points: VelocityConstraintPoint[];
@@ -929,7 +906,7 @@ declare namespace b2 {
         tangentSpeed: number;
         pointCount: number;
         contactIndex: number;
-        static MakeArray(length: number): ContactVelocityConstraint[];
+        static makeArray(length: number): ContactVelocityConstraint[];
     }
     class ContactPositionConstraint {
         readonly localPoints: Vec2[];
@@ -947,7 +924,7 @@ declare namespace b2 {
         radiusA: number;
         radiusB: number;
         pointCount: number;
-        static MakeArray(length: number): ContactPositionConstraint[];
+        static makeArray(length: number): ContactPositionConstraint[];
     }
     class ContactSolverDef {
         readonly step: TimeStep;
@@ -964,7 +941,7 @@ declare namespace b2 {
         private static Initialize_s_pointB;
         private static Initialize_s_planePoint;
         private static Initialize_s_clipPoint;
-        Initialize(pc: ContactPositionConstraint, xfA: Transform, xfB: Transform, index: number): void;
+        initialize(pc: ContactPositionConstraint, xfA: Transform, xfB: Transform, index: number): void;
     }
     class ContactSolver {
         readonly step: TimeStep;
@@ -974,40 +951,40 @@ declare namespace b2 {
         readonly velocityConstraints: ContactVelocityConstraint[];
         contacts: Contact[];
         count: number;
-        Initialize(def: ContactSolverDef): ContactSolver;
-        private static InitializeVelocityConstraints_s_xfA;
-        private static InitializeVelocityConstraints_s_xfB;
-        private static InitializeVelocityConstraints_s_worldManifold;
-        InitializeVelocityConstraints(): void;
-        private static WarmStart_s_P;
-        WarmStart(): void;
-        private static SolveVelocityConstraints_s_dv;
-        private static SolveVelocityConstraints_s_dv1;
-        private static SolveVelocityConstraints_s_dv2;
-        private static SolveVelocityConstraints_s_P;
-        private static SolveVelocityConstraints_s_a;
-        private static SolveVelocityConstraints_s_b;
-        private static SolveVelocityConstraints_s_x;
-        private static SolveVelocityConstraints_s_d;
-        private static SolveVelocityConstraints_s_P1;
-        private static SolveVelocityConstraints_s_P2;
-        private static SolveVelocityConstraints_s_P1P2;
-        SolveVelocityConstraints(): void;
-        StoreImpulses(): void;
-        private static SolvePositionConstraints_s_xfA;
-        private static SolvePositionConstraints_s_xfB;
-        private static SolvePositionConstraints_s_psm;
-        private static SolvePositionConstraints_s_rA;
-        private static SolvePositionConstraints_s_rB;
-        private static SolvePositionConstraints_s_P;
-        SolvePositionConstraints(): boolean;
-        private static SolveTOIPositionConstraints_s_xfA;
-        private static SolveTOIPositionConstraints_s_xfB;
-        private static SolveTOIPositionConstraints_s_psm;
-        private static SolveTOIPositionConstraints_s_rA;
-        private static SolveTOIPositionConstraints_s_rB;
-        private static SolveTOIPositionConstraints_s_P;
-        SolveTOIPositionConstraints(toiIndexA: number, toiIndexB: number): boolean;
+        initialize(def: ContactSolverDef): ContactSolver;
+        private static initializeVelocityConstraints_s_xfA;
+        private static initializeVelocityConstraints_s_xfB;
+        private static initializeVelocityConstraints_s_worldManifold;
+        initializeVelocityConstraints(): void;
+        private static warmStart_s_P;
+        warmStart(): void;
+        private static solveVelocityConstraints_s_dv;
+        private static solveVelocityConstraints_s_dv1;
+        private static solveVelocityConstraints_s_dv2;
+        private static solveVelocityConstraints_s_P;
+        private static solveVelocityConstraints_s_a;
+        private static solveVelocityConstraints_s_b;
+        private static solveVelocityConstraints_s_x;
+        private static solveVelocityConstraints_s_d;
+        private static solveVelocityConstraints_s_P1;
+        private static solveVelocityConstraints_s_P2;
+        private static solveVelocityConstraints_s_P1P2;
+        solveVelocityConstraints(): void;
+        storeImpulses(): void;
+        private static solvePositionConstraints_s_xfA;
+        private static solvePositionConstraints_s_xfB;
+        private static solvePositionConstraints_s_psm;
+        private static solvePositionConstraints_s_rA;
+        private static solvePositionConstraints_s_rB;
+        private static solvePositionConstraints_s_P;
+        solvePositionConstraints(): boolean;
+        private static solveTOIPositionConstraints_s_xfA;
+        private static solveTOIPositionConstraints_s_xfB;
+        private static solveTOIPositionConstraints_s_psm;
+        private static solveTOIPositionConstraints_s_rA;
+        private static solveTOIPositionConstraints_s_rB;
+        private static solveTOIPositionConstraints_s_P;
+        solveTOIPositionConstraints(toiIndexA: number, toiIndexB: number): boolean;
     }
 }
 declare namespace b2 {
@@ -1021,8 +998,8 @@ declare namespace b2 {
         categoryBits: number;
         maskBits: number;
         groupIndex: number;
-        Clone(): Filter;
-        Copy(other: IFilter): this;
+        clone(): Filter;
+        copy(other: IFilter): this;
     }
     interface IFixtureDef {
         shape: Shape;
@@ -1050,16 +1027,16 @@ declare namespace b2 {
         readonly childIndex: number;
         treeNode: TreeNode<FixtureProxy>;
         constructor(fixture: Fixture, childIndex: number);
-        Reset(): void;
-        Touch(): void;
-        private static Synchronize_s_aabb1;
-        private static Synchronize_s_aab;
-        private static Synchronize_s_displacement;
-        Synchronize(transform1: Transform, transform2: Transform): void;
+        reset(): void;
+        touch(): void;
+        private static synchronize_s_aabb1;
+        private static synchronize_s_aab;
+        private static synchronize_s_displacement;
+        synchronize(transform1: Transform, transform2: Transform): void;
     }
     class Fixture {
         density: number;
-        next: Fixture | null;
+        next: Fixture;
         readonly body: Body;
         readonly shape: Shape;
         friction: number;
@@ -1071,69 +1048,65 @@ declare namespace b2 {
         isSensor: boolean;
         userData: any;
         constructor(body: Body, def: IFixtureDef);
-        Reset(): void;
-        GetType(): ShapeType;
-        GetShape(): Shape;
-        SetSensor(sensor: boolean): void;
-        IsSensor(): boolean;
-        SetFilterData(filter: Filter): void;
-        GetFilterData(): Filter;
-        Refilter(): void;
-        GetBody(): Body;
-        GetNext(): Fixture | null;
-        GetUserData(): any;
-        SetUserData(data: any): void;
-        TestPoint(p: XY): boolean;
-        ComputeDistance(p: Vec2, normal: Vec2, childIndex: number): number;
-        RayCast(output: RayCastOutput, input: RayCastInput, childIndex: number): boolean;
-        GetMassData(massData?: MassData): MassData;
-        SetDensity(density: number): void;
-        GetDensity(): number;
-        GetFriction(): number;
-        SetFriction(friction: number): void;
-        GetRestitution(): number;
-        SetRestitution(restitution: number): void;
-        GetRestitutionThreshold(): number;
-        SetRestitutionThreshold(threshold: number): void;
-        GetAABB(childIndex: number): AABB;
-        Dump(log: (format: string, ...args: any[]) => void, bodyIndex: number): void;
-        CreateProxies(): void;
-        DestroyProxies(): void;
-        TouchProxies(): void;
-        SynchronizeProxies(transform1: Transform, transform2: Transform): void;
+        reset(): void;
+        getType(): ShapeType;
+        getShape(): Shape;
+        setSensor(sensor: boolean): void;
+        setFilterData(filter: Filter): void;
+        getFilterData(): Filter;
+        refilter(): void;
+        getBody(): Body;
+        testPoint(p: XY): boolean;
+        computeDistance(p: Vec2, normal: Vec2, childIndex: number): number;
+        rayCast(output: RayCastOutput, input: RayCastInput, childIndex: number): boolean;
+        getMassData(massData?: MassData): MassData;
+        setDensity(density: number): void;
+        getDensity(): number;
+        getFriction(): number;
+        setFriction(friction: number): void;
+        getRestitution(): number;
+        setRestitution(restitution: number): void;
+        getRestitutionThreshold(): number;
+        setRestitutionThreshold(threshold: number): void;
+        getAABB(childIndex: number): AABB;
+        dump(log: (format: string, ...args: any[]) => void, bodyIndex: number): void;
+        createProxies(): void;
+        destroyProxies(): void;
+        touchProxies(): void;
+        synchronizeProxies(transform1: Transform, transform2: Transform): void;
     }
 }
 declare namespace b2 {
     enum JointType {
-        e_unknownJoint = 0,
-        e_revoluteJoint = 1,
-        e_prismaticJoint = 2,
-        e_distanceJoint = 3,
-        e_pulleyJoint = 4,
-        e_mouseJoint = 5,
-        e_gearJoint = 6,
-        e_wheelJoint = 7,
-        e_weldJoint = 8,
-        e_frictionJoint = 9,
-        e_ropeJoint = 10,
-        e_motorJoint = 11,
-        e_areaJoint = 12
+        UnknownJoint = 0,
+        RevoluteJoint = 1,
+        PrismaticJoint = 2,
+        DistanceJoint = 3,
+        PulleyJoint = 4,
+        MouseJoint = 5,
+        GearJoint = 6,
+        WheelJoint = 7,
+        WeldJoint = 8,
+        FrictionJoint = 9,
+        RopeJoint = 10,
+        MotorJoint = 11,
+        AreaJoint = 12
     }
     class Jacobian {
         readonly linear: Vec2;
         angularA: number;
         angularB: number;
-        SetZero(): Jacobian;
-        Set(x: XY, a1: number, a2: number): Jacobian;
+        setZero(): Jacobian;
+        set(x: XY, a1: number, a2: number): Jacobian;
     }
     class JointEdge {
         private _other;
         other: Body;
         readonly joint: Joint;
-        prev: JointEdge | null;
-        next: JointEdge | null;
+        prev: JointEdge;
+        next: JointEdge;
         constructor(joint: Joint);
-        Reset(): void;
+        reset(): void;
     }
     interface IJointDef {
         type: JointType;
@@ -1150,18 +1123,18 @@ declare namespace b2 {
         collideConnected: boolean;
         constructor(type: JointType);
     }
-    function LinearStiffness(def: {
+    function linearStiffness(def: {
         stiffness: number;
         damping: number;
     }, frequencyHertz: number, dampingRatio: number, bodyA: Body, bodyB: Body): void;
-    function AngularStiffness(def: {
+    function angularStiffness(def: {
         stiffness: number;
         damping: number;
     }, frequencyHertz: number, dampingRatio: number, bodyA: Body, bodyB: Body): void;
     abstract class Joint {
         readonly type: JointType;
-        prev: Joint | null;
-        next: Joint | null;
+        prev: Joint;
+        next: Joint;
         readonly edgeA: JointEdge;
         readonly edgeB: JointEdge;
         bodyA: Body;
@@ -1171,41 +1144,38 @@ declare namespace b2 {
         collideConnected: boolean;
         userData: any;
         constructor(def: IJointDef);
-        GetType(): JointType;
-        GetBodyA(): Body;
-        GetBodyB(): Body;
-        abstract GetAnchorA<T extends XY>(out: T): T;
-        abstract GetAnchorB<T extends XY>(out: T): T;
-        abstract GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        abstract GetReactionTorque(inv_dt: number): number;
-        GetNext(): Joint | null;
-        GetUserData(): any;
-        SetUserData(data: any): void;
-        IsEnabled(): boolean;
-        GetCollideConnected(): boolean;
-        Dump(log: (format: string, ...args: any[]) => void): void;
-        ShiftOrigin(newOrigin: XY): void;
-        private static Draw_s_p1;
-        private static Draw_s_p2;
-        private static Draw_s_color;
-        private static Draw_s_c;
-        Draw(draw: Draw): void;
-        abstract InitVelocityConstraints(data: SolverData): void;
-        abstract SolveVelocityConstraints(data: SolverData): void;
-        abstract SolvePositionConstraints(data: SolverData): boolean;
+        getType(): JointType;
+        getBodyA(): Body;
+        getBodyB(): Body;
+        abstract getAnchorA<T extends XY>(out: T): T;
+        abstract getAnchorB<T extends XY>(out: T): T;
+        abstract getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        abstract getReactionTorque(inv_dt: number): number;
+        isEnabled(): boolean;
+        getCollideConnected(): boolean;
+        dump(log: (format: string, ...args: any[]) => void): void;
+        shiftOrigin(newOrigin: XY): void;
+        private static draw_s_p1;
+        private static draw_s_p2;
+        private static draw_s_color;
+        private static draw_s_c;
+        draw(draw: Draw): void;
+        abstract initVelocityConstraints(data: SolverData): void;
+        abstract solveVelocityConstraints(data: SolverData): void;
+        abstract solvePositionConstraints(data: SolverData): boolean;
     }
 }
 declare namespace b2 {
     class DestructionListener {
-        SayGoodbyeJoint(joint: Joint): void;
-        SayGoodbyeFixture(fixture: Fixture): void;
-        SayGoodbyeParticleGroup(group: ParticleGroup): void;
-        SayGoodbyeParticle(system: ParticleSystem, index: number): void;
+        sayGoodbyeJoint(joint: Joint): void;
+        sayGoodbyeFixture(fixture: Fixture): void;
+        sayGoodbyeParticleGroup(group: ParticleGroup): void;
+        sayGoodbyeParticle(system: ParticleSystem, index: number): void;
     }
     class ContactFilter {
         ShouldCollide(fixtureA: Fixture, fixtureB: Fixture): boolean;
-        ShouldCollideFixtureParticle(fixture: Fixture, system: ParticleSystem, index: number): boolean;
-        ShouldCollideParticleParticle(system: ParticleSystem, indexA: number, indexB: number): boolean;
+        shouldCollideFixtureParticle(fixture: Fixture, system: ParticleSystem, index: number): boolean;
+        shouldCollideParticleParticle(system: ParticleSystem, indexA: number, indexB: number): boolean;
         static readonly defaultFilter: ContactFilter;
     }
     class ContactImpulse {
@@ -1214,26 +1184,26 @@ declare namespace b2 {
         count: number;
     }
     class ContactListener {
-        BeginContact(contact: Contact): void;
-        EndContact(contact: Contact): void;
-        BeginContactFixtureParticle(system: ParticleSystem, contact: ParticleBodyContact): void;
-        EndContactFixtureParticle(system: ParticleSystem, contact: ParticleBodyContact): void;
-        BeginContactParticleParticle(system: ParticleSystem, contact: ParticleContact): void;
-        EndContactParticleParticle(system: ParticleSystem, contact: ParticleContact): void;
-        PreSolve(contact: Contact, oldManifold: Manifold): void;
-        PostSolve(contact: Contact, impulse: ContactImpulse): void;
+        beginContact(contact: Contact): void;
+        endContact(contact: Contact): void;
+        beginContactFixtureParticle(system: ParticleSystem, contact: ParticleBodyContact): void;
+        endContactFixtureParticle(system: ParticleSystem, contact: ParticleBodyContact): void;
+        beginContactParticleParticle(system: ParticleSystem, contact: ParticleContact): void;
+        endContactParticleParticle(system: ParticleSystem, contact: ParticleContact): void;
+        preSolve(contact: Contact, oldManifold: Manifold): void;
+        postSolve(contact: Contact, impulse: ContactImpulse): void;
         static readonly defaultListener: ContactListener;
     }
     class QueryCallback {
-        ReportFixture(fixture: Fixture): boolean;
-        ReportParticle(system: ParticleSystem, index: number): boolean;
-        ShouldQueryParticleSystem(system: ParticleSystem): boolean;
+        reportFixture(fixture: Fixture): boolean;
+        reportParticle(system: ParticleSystem, index: number): boolean;
+        shouldQueryParticleSystem(system: ParticleSystem): boolean;
     }
     type QueryCallbackFunction = (fixture: Fixture) => boolean;
     class RayCastCallback {
-        ReportFixture(fixture: Fixture, point: Vec2, normal: Vec2, fraction: number): number;
-        ReportParticle(system: ParticleSystem, index: number, point: Vec2, normal: Vec2, fraction: number): number;
-        ShouldQueryParticleSystem(system: ParticleSystem): boolean;
+        reportFixture(fixture: Fixture, point: Vec2, normal: Vec2, fraction: number): number;
+        reportParticle(system: ParticleSystem, index: number, point: Vec2, normal: Vec2, fraction: number): number;
+        shouldQueryParticleSystem(system: ParticleSystem): boolean;
     }
     type RayCastCallbackFunction = (fixture: Fixture, point: Vec2, normal: Vec2, fraction: number) => number;
 }
@@ -1242,24 +1212,24 @@ declare namespace b2 {
      * The particle type. Can be combined with the | operator.
      */
     enum ParticleFlag {
-        waterParticle = 0,
-        zombieParticle = 2,
-        wallParticle = 4,
-        springParticle = 8,
-        elasticParticle = 16,
-        viscousParticle = 32,
-        powderParticle = 64,
-        tensileParticle = 128,
-        colorMixingParticle = 256,
-        destructionListenerParticle = 512,
-        barrierParticle = 1024,
-        staticPressureParticle = 2048,
-        reactiveParticle = 4096,
-        repulsiveParticle = 8192,
-        fixtureContactListenerParticle = 16384,
-        particleContactListenerParticle = 32768,
-        fixtureContactFilterParticle = 65536,
-        particleContactFilterParticle = 131072
+        WaterParticle = 0,
+        ZombieParticle = 2,
+        WallParticle = 4,
+        SpringParticle = 8,
+        ElasticParticle = 16,
+        ViscousParticle = 32,
+        PowderParticle = 64,
+        TensileParticle = 128,
+        ColorMixingParticle = 256,
+        DestructionListenerParticle = 512,
+        BarrierParticle = 1024,
+        StaticPressureParticle = 2048,
+        ReactiveParticle = 4096,
+        RepulsiveParticle = 8192,
+        FixtureContactListenerParticle = 16384,
+        ParticleContactListenerParticle = 32768,
+        FixtureContactFilterParticle = 65536,
+        ParticleContactFilterParticle = 131072
     }
     interface IParticleDef {
         flags?: ParticleFlag;
@@ -1268,7 +1238,7 @@ declare namespace b2 {
         color?: RGBA;
         lifetime?: number;
         userData?: any;
-        group?: ParticleGroup | null;
+        group?: ParticleGroup;
     }
     class ParticleDef implements IParticleDef {
         flags: ParticleFlag;
@@ -1277,13 +1247,13 @@ declare namespace b2 {
         readonly color: Color;
         lifetime: number;
         userData: any;
-        group: ParticleGroup | null;
+        group: ParticleGroup;
     }
     function CalculateParticleIterations(gravity: number, radius: number, timeStep: number): number;
     class ParticleHandle {
         index: number;
-        GetIndex(): number;
-        SetIndex(index: number): void;
+        getIndex(): number;
+        setIndex(index: number): void;
     }
 }
 declare namespace b2 {
@@ -1296,24 +1266,24 @@ declare namespace b2 {
         readonly tree: DynamicTree<T>;
         proxyCount: number;
         moveCount: number;
-        readonly moveBuffer: Array<TreeNode<T> | null>;
+        readonly moveBuffer: Array<TreeNode<T>>;
         pairCount: number;
         readonly pairBuffer: Array<Pair<T>>;
-        CreateProxy(aabb: AABB, userData: T): TreeNode<T>;
-        DestroyProxy(proxy: TreeNode<T>): void;
-        MoveProxy(proxy: TreeNode<T>, aabb: AABB, displacement: Vec2): void;
-        TouchProxy(proxy: TreeNode<T>): void;
-        GetProxyCount(): number;
-        UpdatePairs(callback: (a: T, b: T) => void): void;
-        Query(aabb: AABB, callback: (node: TreeNode<T>) => boolean): void;
-        QueryPoint(point: XY, callback: (node: TreeNode<T>) => boolean): void;
-        RayCast(input: RayCastInput, callback: (input: RayCastInput, node: TreeNode<T>) => number): void;
-        GetTreeHeight(): number;
-        GetTreeBalance(): number;
-        GetTreeQuality(): number;
-        ShiftOrigin(newOrigin: XY): void;
-        BufferMove(proxy: TreeNode<T>): void;
-        UnBufferMove(proxy: TreeNode<T>): void;
+        createProxy(aabb: AABB, userData: T): TreeNode<T>;
+        destroyProxy(proxy: TreeNode<T>): void;
+        moveProxy(proxy: TreeNode<T>, aabb: AABB, displacement: Vec2): void;
+        touchProxy(proxy: TreeNode<T>): void;
+        getProxyCount(): number;
+        updatePairs(callback: (a: T, b: T) => void): void;
+        query(aabb: AABB, callback: (node: TreeNode<T>) => boolean): void;
+        queryPoint(point: XY, callback: (node: TreeNode<T>) => boolean): void;
+        rayCast(input: RayCastInput, callback: (input: RayCastInput, node: TreeNode<T>) => number): void;
+        getTreeHeight(): number;
+        getTreeBalance(): number;
+        getTreeQuality(): number;
+        shiftOrigin(newOrigin: XY): void;
+        bufferMove(proxy: TreeNode<T>): void;
+        unBufferMove(proxy: TreeNode<T>): void;
     }
 }
 declare namespace b2 {
@@ -1323,69 +1293,69 @@ declare namespace b2 {
         readonly prevVertex: Vec2;
         readonly nextVertex: Vec2;
         constructor();
-        CreateLoop(vertices: XY[]): ChainShape;
-        CreateLoop(vertices: XY[], count: number): ChainShape;
-        CreateLoop(vertices: number[]): ChainShape;
-        private _CreateLoop;
-        CreateChain(vertices: XY[], prevVertex: XY, nextVertex: XY): ChainShape;
-        CreateChain(vertices: XY[], count: number, prevVertex: XY, nextVertex: XY): ChainShape;
-        CreateChain(vertices: number[], prevVertex: XY, nextVertex: XY): ChainShape;
-        private _CreateChain;
-        Clone(): ChainShape;
-        Copy(other: ChainShape): ChainShape;
-        GetChildCount(): number;
-        GetChildEdge(edge: EdgeShape, index: number): void;
-        TestPoint(xf: Transform, p: XY): boolean;
+        createLoop(vertices: XY[]): ChainShape;
+        createLoop(vertices: XY[], count: number): ChainShape;
+        createLoop(vertices: number[]): ChainShape;
+        private _createLoop;
+        createChain(vertices: XY[], prevVertex: XY, nextVertex: XY): ChainShape;
+        createChain(vertices: XY[], count: number, prevVertex: XY, nextVertex: XY): ChainShape;
+        createChain(vertices: number[], prevVertex: XY, nextVertex: XY): ChainShape;
+        private _createChain;
+        clone(): ChainShape;
+        copy(other: ChainShape): ChainShape;
+        getChildCount(): number;
+        getChildEdge(edge: EdgeShape, index: number): void;
+        testPoint(xf: Transform, p: XY): boolean;
         private static ComputeDistance_s_edgeShape;
-        ComputeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
-        private static RayCast_s_edgeShape;
-        RayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean;
-        private static ComputeAABB_s_v1;
-        private static ComputeAABB_s_v2;
-        private static ComputeAABB_s_lower;
-        private static ComputeAABB_s_upper;
-        ComputeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
-        ComputeMass(massData: MassData, density: number): void;
-        SetupDistanceProxy(proxy: DistanceProxy, index: number): void;
-        ComputeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
+        computeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
+        private static rayCast_s_edgeShape;
+        rayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean;
+        private static computeAABB_s_v1;
+        private static computeAABB_s_v2;
+        private static computeAABB_s_lower;
+        private static computeAABB_s_upper;
+        computeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
+        computeMass(massData: MassData, density: number): void;
+        setupDistanceProxy(proxy: DistanceProxy, index: number): void;
+        computeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
     }
 }
 declare namespace b2 {
     class CircleShape extends Shape {
         readonly p: Vec2;
         constructor(radius?: number);
-        Set(position: XY, radius?: number): this;
-        Clone(): CircleShape;
-        Copy(other: CircleShape): CircleShape;
-        GetChildCount(): number;
+        set(position: XY, radius?: number): this;
+        clone(): CircleShape;
+        copy(other: CircleShape): CircleShape;
+        getChildCount(): number;
         private static TestPoint_s_center;
         private static TestPoint_s_d;
-        TestPoint(transform: Transform, p: XY): boolean;
+        testPoint(transform: Transform, p: XY): boolean;
         private static ComputeDistance_s_center;
-        ComputeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
-        private static RayCast_s_position;
-        private static RayCast_s_s;
-        private static RayCast_s_r;
-        RayCast(output: RayCastOutput, input: RayCastInput, transform: Transform, childIndex: number): boolean;
-        private static ComputeAABB_s_p;
-        ComputeAABB(aabb: AABB, transform: Transform, childIndex: number): void;
-        ComputeMass(massData: MassData, density: number): void;
-        SetupDistanceProxy(proxy: DistanceProxy, index: number): void;
-        ComputeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
+        computeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
+        private static rayCast_s_position;
+        private static rayCast_s_s;
+        private static rayCast_s_r;
+        rayCast(output: RayCastOutput, input: RayCastInput, transform: Transform, childIndex: number): boolean;
+        private static computeAABB_s_p;
+        computeAABB(aabb: AABB, transform: Transform, childIndex: number): void;
+        computeMass(massData: MassData, density: number): void;
+        setupDistanceProxy(proxy: DistanceProxy, index: number): void;
+        computeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
     }
 }
 declare namespace b2 {
-    function CollideCircles(manifold: Manifold, circleA: CircleShape, xfA: Transform, circleB: CircleShape, xfB: Transform): void;
-    function CollidePolygonAndCircle(manifold: Manifold, polygonA: PolygonShape, xfA: Transform, circleB: CircleShape, xfB: Transform): void;
+    function collideCircles(manifold: Manifold, circleA: CircleShape, xfA: Transform, circleB: CircleShape, xfB: Transform): void;
+    function collidePolygonAndCircle(manifold: Manifold, polygonA: PolygonShape, xfA: Transform, circleB: CircleShape, xfB: Transform): void;
 }
 declare namespace b2 {
-    function CollideEdgeAndCircle(manifold: Manifold, edgeA: EdgeShape, xfA: Transform, circleB: CircleShape, xfB: Transform): void;
-    function CollideEdgeAndPolygon(manifold: Manifold, edgeA: EdgeShape, xfA: Transform, polygonB: PolygonShape, xfB: Transform): void;
+    function collideEdgeAndCircle(manifold: Manifold, edgeA: EdgeShape, xfA: Transform, circleB: CircleShape, xfB: Transform): void;
+    function collideEdgeAndPolygon(manifold: Manifold, edgeA: EdgeShape, xfA: Transform, polygonB: PolygonShape, xfB: Transform): void;
 }
 declare namespace b2 {
-    function CollidePolygons(manifold: Manifold, polyA: PolygonShape, xfA: Transform, polyB: PolygonShape, xfB: Transform): void;
+    function collidePolygons(manifold: Manifold, polyA: PolygonShape, xfA: Transform, polyB: PolygonShape, xfB: Transform): void;
 }
 declare namespace b2 {
     class TreeNode<T> {
@@ -1393,54 +1363,54 @@ declare namespace b2 {
         readonly aabb: AABB;
         private _userData;
         userData: T;
-        parent: TreeNode<T> | null;
-        child1: TreeNode<T> | null;
-        child2: TreeNode<T> | null;
+        parent: TreeNode<T>;
+        child1: TreeNode<T>;
+        child2: TreeNode<T>;
         height: number;
         moved: boolean;
         constructor(id?: number);
-        Reset(): void;
-        IsLeaf(): boolean;
+        reset(): void;
+        isLeaf(): boolean;
     }
     class DynamicTree<T> {
-        root: TreeNode<T> | null;
-        freeList: TreeNode<T> | null;
+        root: TreeNode<T>;
+        freeList: TreeNode<T>;
         insertionCount: number;
         readonly stack: GrowableStack<TreeNode<T>>;
-        static readonly s_r: Vec2;
-        static readonly s_v: Vec2;
-        static readonly s_abs_v: Vec2;
-        static readonly s_segmentAABB: AABB;
-        static readonly s_subInput: RayCastInput;
-        static readonly s_combinedAABB: AABB;
-        static readonly s_aabb: AABB;
-        Query(aabb: AABB, callback: (node: TreeNode<T>) => boolean): void;
-        QueryPoint(point: XY, callback: (node: TreeNode<T>) => boolean): void;
-        RayCast(input: RayCastInput, callback: (input: RayCastInput, node: TreeNode<T>) => number): void;
-        static s_node_id: number;
-        AllocateNode(): TreeNode<T>;
-        FreeNode(node: TreeNode<T>): void;
-        CreateProxy(aabb: AABB, userData: T): TreeNode<T>;
-        DestroyProxy(node: TreeNode<T>): void;
-        private static MoveProxy_s_fatAABB;
-        private static MoveProxy_s_hugeAABB;
-        MoveProxy(node: TreeNode<T>, aabb: AABB, displacement: Vec2): boolean;
-        InsertLeaf(leaf: TreeNode<T>): void;
-        RemoveLeaf(leaf: TreeNode<T>): void;
-        Balance(A: TreeNode<T>): TreeNode<T>;
-        GetHeight(): number;
-        private static GetAreaNode;
-        GetAreaRatio(): number;
-        static ComputeHeightNode<T>(node: TreeNode<T> | null): number;
-        ComputeHeight(): number;
-        ValidateStructure(node: TreeNode<T> | null): void;
-        ValidateMetrics(node: TreeNode<T> | null): void;
-        Validate(): void;
-        private static GetMaxBalanceNode;
-        GetMaxBalance(): number;
-        RebuildBottomUp(): void;
-        private static ShiftOriginNode;
-        ShiftOrigin(newOrigin: XY): void;
+        static readonly sR: Vec2;
+        static readonly sV: Vec2;
+        static readonly absV: Vec2;
+        static readonly segmentAABB: AABB;
+        static readonly subInput: RayCastInput;
+        static readonly combinedAABB: AABB;
+        static readonly sAabb: AABB;
+        query(aabb: AABB, callback: (node: TreeNode<T>) => boolean): void;
+        queryPoint(point: XY, callback: (node: TreeNode<T>) => boolean): void;
+        rayCast(input: RayCastInput, callback: (input: RayCastInput, node: TreeNode<T>) => number): void;
+        static sNodeId: number;
+        allocateNode(): TreeNode<T>;
+        freeNode(node: TreeNode<T>): void;
+        createProxy(aabb: AABB, userData: T): TreeNode<T>;
+        destroyProxy(node: TreeNode<T>): void;
+        private static moveProxy_s_fatAABB;
+        private static moveProxy_s_hugeAABB;
+        moveProxy(node: TreeNode<T>, aabb: AABB, displacement: Vec2): boolean;
+        insertLeaf(leaf: TreeNode<T>): void;
+        removeLeaf(leaf: TreeNode<T>): void;
+        balance(A: TreeNode<T>): TreeNode<T>;
+        getHeight(): number;
+        private static getAreaNode;
+        getAreaRatio(): number;
+        static computeHeightNode<T>(node: TreeNode<T>): number;
+        computeHeight(): number;
+        validateStructure(node: TreeNode<T>): void;
+        validateMetrics(node: TreeNode<T>): void;
+        validate(): void;
+        private static getMaxBalanceNode;
+        getMaxBalance(): number;
+        rebuildBottomUp(): void;
+        private static shiftOriginNode;
+        shiftOrigin(newOrigin: XY): void;
     }
 }
 declare namespace b2 {
@@ -1450,52 +1420,52 @@ declare namespace b2 {
         normals: Vec2[];
         count: number;
         constructor();
-        Clone(): PolygonShape;
-        Copy(other: PolygonShape): PolygonShape;
-        GetChildCount(): number;
+        clone(): PolygonShape;
+        copy(other: PolygonShape): PolygonShape;
+        getChildCount(): number;
         private static Set_s_r;
         private static Set_s_v;
-        Set(vertices: XY[]): PolygonShape;
-        Set(vertices: XY[], count: number): PolygonShape;
-        Set(vertices: number[]): PolygonShape;
-        _Set(vertices: (index: number) => XY, count: number): PolygonShape;
-        SetAsBox(hx: number, hy: number, center?: XY, angle?: number): PolygonShape;
-        private static TestPoint_s_pLocal;
-        TestPoint(xf: Transform, p: XY): boolean;
-        private static ComputeDistance_s_pLocal;
-        private static ComputeDistance_s_normalForMaxDistance;
-        private static ComputeDistance_s_minDistance;
-        private static ComputeDistance_s_distance;
-        ComputeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
-        private static RayCast_s_p1;
-        private static RayCast_s_p2;
-        private static RayCast_s_d;
-        RayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean;
-        private static ComputeAABB_s_v;
-        ComputeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
-        private static ComputeMass_s_center;
-        private static ComputeMass_s_s;
-        private static ComputeMass_s_e1;
-        private static ComputeMass_s_e2;
-        ComputeMass(massData: MassData, density: number): void;
-        private static Validate_s_e;
-        private static Validate_s_v;
-        Validate(): boolean;
-        SetupDistanceProxy(proxy: DistanceProxy, index: number): void;
+        set(vertices: XY[]): PolygonShape;
+        set(vertices: XY[], count: number): PolygonShape;
+        set(vertices: number[]): PolygonShape;
+        _set(vertices: (index: number) => XY, count: number): PolygonShape;
+        setAsBox(hx: number, hy: number, center?: XY, angle?: number): PolygonShape;
+        private static testPointSPLocal;
+        testPoint(xf: Transform, p: XY): boolean;
+        private static computeDistance_s_pLocal;
+        private static computeDistance_s_normalForMaxDistance;
+        private static computeDistance_s_minDistance;
+        private static computeDistance_s_distance;
+        computeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
+        private static rayCast_s_p1;
+        private static rayCast_s_p2;
+        private static rayCast_s_d;
+        rayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean;
+        private static computeAABB_s_v;
+        computeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
+        private static computeMass_s_center;
+        private static computeMass_s_s;
+        private static computeMass_s_e1;
+        private static computeMass_s_e2;
+        computeMass(massData: MassData, density: number): void;
+        private static validate_s_e;
+        private static validate_s_v;
+        validate(): boolean;
+        setupDistanceProxy(proxy: DistanceProxy, index: number): void;
         private static ComputeSubmergedArea_s_normalL;
         private static ComputeSubmergedArea_s_md;
         private static ComputeSubmergedArea_s_intoVec;
         private static ComputeSubmergedArea_s_outoVec;
         private static ComputeSubmergedArea_s_center;
-        ComputeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
-        private static ComputeCentroid_s_s;
-        private static ComputeCentroid_s_p1;
-        private static ComputeCentroid_s_p2;
-        private static ComputeCentroid_s_p3;
-        private static ComputeCentroid_s_e1;
-        private static ComputeCentroid_s_e2;
-        static ComputeCentroid(vs: Vec2[], count: number, out: Vec2): Vec2;
+        computeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
+        private static computeCentroid_s_s;
+        private static computeCentroid_s_p1;
+        private static computeCentroid_s_p2;
+        private static computeCentroid_s_p3;
+        private static computeCentroid_s_e1;
+        private static computeCentroid_s_e2;
+        static computeCentroid(vs: Vec2[], count: number, out: Vec2): Vec2;
     }
 }
 declare namespace b2 {
@@ -1504,19 +1474,17 @@ declare namespace b2 {
 }
 declare namespace b2 {
     class GrowableStack<T> {
-        stack: Array<T | null>;
+        stack: Array<T>;
         count: number;
         constructor(N: number);
-        Reset(): this;
-        Push(element: T): void;
-        Pop(): T | null;
-        GetCount(): number;
+        reset(): this;
+        push(element: T): void;
+        pop(): T;
+        getCount(): number;
     }
 }
 declare namespace b2 {
-    function Alloc(size: number): any;
-    function Free(mem: any): void;
-    function Log(message: string, ...args: any[]): void;
+    function log(message: string, ...args: any[]): void;
 }
 declare namespace b2 {
     class StackAllocator {
@@ -1565,8 +1533,8 @@ declare namespace b2 {
          * Gravity vector, if the world's gravity is not used
          */
         readonly gravity: Vec2;
-        Step(step: TimeStep): void;
-        Draw(debugDraw: Draw): void;
+        step(step: TimeStep): void;
+        draw(debugDraw: Draw): void;
     }
 }
 declare namespace b2 {
@@ -1578,9 +1546,9 @@ declare namespace b2 {
          * The acceleration to apply
          */
         readonly A: Vec2;
-        Step(step: TimeStep): void;
-        private static Step_s_dtA;
-        Draw(draw: Draw): void;
+        step(step: TimeStep): void;
+        private static step_s_dtA;
+        draw(draw: Draw): void;
     }
 }
 declare namespace b2 {
@@ -1592,8 +1560,8 @@ declare namespace b2 {
          * The force to apply
          */
         readonly F: Vec2;
-        Step(step: TimeStep): void;
-        Draw(draw: Draw): void;
+        step(step: TimeStep): void;
+        draw(draw: Draw): void;
     }
 }
 declare namespace b2 {
@@ -1612,9 +1580,9 @@ declare namespace b2 {
         /**
          * @see Controller::Step
          */
-        Step(step: TimeStep): void;
-        private static Step_s_f;
-        Draw(draw: Draw): void;
+        step(step: TimeStep): void;
+        private static step_s_f;
+        draw(draw: Draw): void;
     }
 }
 declare namespace b2 {
@@ -1629,13 +1597,13 @@ declare namespace b2 {
         /**
          * @see Controller::Step
          */
-        Step(step: TimeStep): void;
-        private static Step_s_damping;
-        Draw(draw: Draw): void;
+        step(step: TimeStep): void;
+        private static step_s_damping;
+        draw(draw: Draw): void;
         /**
          * Sets damping independantly along the x and y axes
          */
-        SetAxisAligned(xDamping: number, yDamping: number): void;
+        setAxisAligned(xDamping: number, yDamping: number): void;
     }
 }
 declare namespace b2 {
@@ -1649,7 +1617,7 @@ declare namespace b2 {
         stiffness: number;
         damping: number;
         constructor();
-        AddBody(body: Body): void;
+        addBody(body: Body): void;
     }
     class AreaJoint extends Joint {
         bodies: Body[];
@@ -1663,26 +1631,26 @@ declare namespace b2 {
         readonly deltas: Vec2[];
         readonly delta: Vec2;
         constructor(def: IAreaJointDef);
-        GetAnchorA<T extends XY>(out: T): T;
-        GetAnchorB<T extends XY>(out: T): T;
-        GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        GetReactionTorque(inv_dt: number): number;
-        SetStiffness(stiffness: number): void;
-        GetStiffness(): number;
-        SetDamping(damping: number): void;
-        GetDamping(): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
-        InitVelocityConstraints(data: SolverData): void;
-        SolveVelocityConstraints(data: SolverData): void;
-        SolvePositionConstraints(data: SolverData): boolean;
+        getAnchorA<T extends XY>(out: T): T;
+        getAnchorB<T extends XY>(out: T): T;
+        getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        getReactionTorque(inv_dt: number): number;
+        setStiffness(stiffness: number): void;
+        getStiffness(): number;
+        setDamping(damping: number): void;
+        getDamping(): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
+        initVelocityConstraints(data: SolverData): void;
+        solveVelocityConstraints(data: SolverData): void;
+        solvePositionConstraints(data: SolverData): boolean;
     }
 }
 declare namespace b2 {
     enum BodyType {
-        unknown = -1,
-        staticBody = 0,
-        kinematicBody = 1,
-        dynamicBody = 2
+        Unknown = -1,
+        StaticBody = 0,
+        KinematicBody = 1,
+        DynamicBody = 2
     }
     interface IBodyDef {
         type?: BodyType;
@@ -1734,12 +1702,12 @@ declare namespace b2 {
         readonly force: Vec2;
         torque: number;
         world: World;
-        prev: Body | null;
-        next: Body | null;
-        fixtureList: Fixture | null;
+        prev: Body;
+        next: Body;
+        fixtureList: Fixture;
         fixtureCount: number;
-        jointList: JointEdge | null;
-        contactList: ContactEdge | null;
+        jointList: JointEdge;
+        contactList: ContactEdge;
         mass: number;
         invMass: number;
         I: number;
@@ -1749,140 +1717,140 @@ declare namespace b2 {
         gravityScale: number;
         sleepTime: number;
         userData: any;
-        controllerList: ControllerEdge | null;
+        controllerList: ControllerEdge;
         controllerCount: number;
         constructor(bd: IBodyDef, world: World);
-        CreateFixture(def: IFixtureDef): Fixture;
-        CreateFixture(shape: Shape): Fixture;
-        CreateFixture(shape: Shape, density: number): Fixture;
-        CreateFixtureDef(def: IFixtureDef): Fixture;
-        private static CreateFixtureShapeDensity_s_def;
-        CreateFixtureShapeDensity(shape: Shape, density?: number): Fixture;
-        DestroyFixture(fixture: Fixture): void;
-        SetTransformVec(position: XY, angle: number): void;
-        SetTransformXY(x: number, y: number, angle: number): void;
-        SetTransform(xf: Transform): void;
-        GetTransform(): Transform;
-        GetPosition(): Vec2;
-        SetPosition(position: XY): void;
-        SetPositionXY(x: number, y: number): void;
-        GetAngle(): number;
-        SetAngle(angle: number): void;
-        GetWorldCenter(): Vec2;
-        GetLocalCenter(): Vec2;
-        SetLinearVelocity(v: XY): void;
-        GetLinearVelocity(): Vec2;
-        SetAngularVelocity(w: number): void;
-        GetAngularVelocity(): number;
-        GetDefinition(bd: BodyDef): BodyDef;
-        ApplyForce(force: XY, point: XY, wake?: boolean): void;
-        ApplyForceToCenter(force: XY, wake?: boolean): void;
-        ApplyTorque(torque: number, wake?: boolean): void;
-        ApplyLinearImpulse(impulse: XY, point: XY, wake?: boolean): void;
-        ApplyLinearImpulseToCenter(impulse: XY, wake?: boolean): void;
-        ApplyAngularImpulse(impulse: number, wake?: boolean): void;
-        GetMass(): number;
-        GetInertia(): number;
-        GetMassData(data: MassData): MassData;
-        private static SetMassData_s_oldCenter;
-        SetMassData(massData: MassData): void;
-        private static ResetMassData_s_localCenter;
-        private static ResetMassData_s_oldCenter;
-        private static ResetMassData_s_massData;
-        ResetMassData(): void;
-        GetWorldPoint<T extends XY>(localPoint: XY, out: T): T;
-        GetWorldVector<T extends XY>(localVector: XY, out: T): T;
-        GetLocalPoint<T extends XY>(worldPoint: XY, out: T): T;
-        GetLocalVector<T extends XY>(worldVector: XY, out: T): T;
-        GetLinearVelocityFromWorldPoint<T extends XY>(worldPoint: XY, out: T): T;
-        GetLinearVelocityFromLocalPoint<T extends XY>(localPoint: XY, out: T): T;
-        GetLinearDamping(): number;
-        SetLinearDamping(linearDamping: number): void;
-        GetAngularDamping(): number;
-        SetAngularDamping(angularDamping: number): void;
-        GetGravityScale(): number;
-        SetGravityScale(scale: number): void;
-        SetType(type: BodyType): void;
-        GetType(): BodyType;
-        SetBullet(flag: boolean): void;
-        IsBullet(): boolean;
-        SetSleepingAllowed(flag: boolean): void;
-        IsSleepingAllowed(): boolean;
-        SetAwake(flag: boolean): void;
-        IsAwake(): boolean;
-        SetEnabled(flag: boolean): void;
-        IsEnabled(): boolean;
-        SetFixedRotation(flag: boolean): void;
-        IsFixedRotation(): boolean;
-        GetFixtureList(): Fixture | null;
-        GetJointList(): JointEdge | null;
-        GetContactList(): ContactEdge | null;
-        GetNext(): Body | null;
-        GetUserData(): any;
-        SetUserData(data: any): void;
-        GetWorld(): World;
-        Dump(log: (format: string, ...args: any[]) => void): void;
-        private static SynchronizeFixtures_s_xf1;
-        SynchronizeFixtures(): void;
-        SynchronizeTransform(): void;
-        ShouldCollide(other: Body): boolean;
-        ShouldCollideConnected(other: Body): boolean;
-        Advance(alpha: number): void;
-        GetControllerList(): ControllerEdge | null;
-        GetControllerCount(): number;
+        createFixture(def: IFixtureDef): Fixture;
+        createFixture(shape: Shape): Fixture;
+        createFixture(shape: Shape, density: number): Fixture;
+        createFixtureDef(def: IFixtureDef): Fixture;
+        private static createFixtureShapeDensity_s_def;
+        createFixtureShapeDensity(shape: Shape, density?: number): Fixture;
+        destroyFixture(fixture: Fixture): void;
+        setTransformVec(position: XY, angle: number): void;
+        setTransformXY(x: number, y: number, angle: number): void;
+        setTransform(xf: Transform): void;
+        getTransform(): Transform;
+        getPosition(): Vec2;
+        setPosition(position: XY): void;
+        setPositionXY(x: number, y: number): void;
+        getAngle(): number;
+        setAngle(angle: number): void;
+        getWorldCenter(): Vec2;
+        getLocalCenter(): Vec2;
+        setLinearVelocity(v: XY): void;
+        getLinearVelocity(): Vec2;
+        setAngularVelocity(w: number): void;
+        getAngularVelocity(): number;
+        getDefinition(bd: BodyDef): BodyDef;
+        applyForce(force: XY, point: XY, wake?: boolean): void;
+        applyForceToCenter(force: XY, wake?: boolean): void;
+        applyTorque(torque: number, wake?: boolean): void;
+        applyLinearImpulse(impulse: XY, point: XY, wake?: boolean): void;
+        applyLinearImpulseToCenter(impulse: XY, wake?: boolean): void;
+        applyAngularImpulse(impulse: number, wake?: boolean): void;
+        getMass(): number;
+        getInertia(): number;
+        getMassData(data: MassData): MassData;
+        private static setMassData_s_oldCenter;
+        setMassData(massData: MassData): void;
+        private static resetMassData_s_localCenter;
+        private static resetMassData_s_oldCenter;
+        private static resetMassData_s_massData;
+        resetMassData(): void;
+        getWorldPoint<T extends XY>(localPoint: XY, out: T): T;
+        getWorldVector<T extends XY>(localVector: XY, out: T): T;
+        getLocalPoint<T extends XY>(worldPoint: XY, out: T): T;
+        getLocalVector<T extends XY>(worldVector: XY, out: T): T;
+        getLinearVelocityFromWorldPoint<T extends XY>(worldPoint: XY, out: T): T;
+        getLinearVelocityFromLocalPoint<T extends XY>(localPoint: XY, out: T): T;
+        getLinearDamping(): number;
+        setLinearDamping(linearDamping: number): void;
+        getAngularDamping(): number;
+        setAngularDamping(angularDamping: number): void;
+        getGravityScale(): number;
+        setGravityScale(scale: number): void;
+        setType(type: BodyType): void;
+        getType(): BodyType;
+        setBullet(flag: boolean): void;
+        isBullet(): boolean;
+        setSleepingAllowed(flag: boolean): void;
+        isSleepingAllowed(): boolean;
+        setAwake(flag: boolean): void;
+        isAwake(): boolean;
+        setEnabled(flag: boolean): void;
+        isEnabled(): boolean;
+        setFixedRotation(flag: boolean): void;
+        isFixedRotation(): boolean;
+        getFixtureList(): Fixture;
+        getJointList(): JointEdge;
+        getContactList(): ContactEdge;
+        getNext(): Body;
+        getUserData(): any;
+        setUserData(data: any): void;
+        getWorld(): World;
+        dump(log: (format: string, ...args: any[]) => void): void;
+        private static synchronizeFixtures_s_xf1;
+        synchronizeFixtures(): void;
+        synchronizeTransform(): void;
+        shouldCollide(other: Body): boolean;
+        shouldCollideConnected(other: Body): boolean;
+        advance(alpha: number): void;
+        getControllerList(): ControllerEdge;
+        getControllerCount(): number;
     }
 }
 declare namespace b2 {
     class ChainAndCircleContact extends Contact<ChainShape, CircleShape> {
-        static Create(): Contact;
-        static Destroy(contact: Contact): void;
-        private static Evaluate_s_edge;
-        Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
+        static create(): Contact;
+        static destroy(contact: Contact): void;
+        private static evaluate_s_edge;
+        evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
     }
 }
 declare namespace b2 {
     class ChainAndPolygonContact extends Contact<ChainShape, PolygonShape> {
-        static Create(): Contact;
-        static Destroy(contact: Contact): void;
-        private static Evaluate_s_edge;
-        Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
+        static create(): Contact;
+        static destroy(contact: Contact): void;
+        private static evaluate_s_edge;
+        evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
     }
 }
 declare namespace b2 {
     class CircleContact extends Contact<CircleShape, CircleShape> {
-        static Create(): Contact;
-        static Destroy(contact: Contact): void;
-        Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
+        static create(): Contact;
+        static destroy(contact: Contact): void;
+        evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
     }
 }
 declare namespace b2 {
     class ContactRegister {
         pool: Contact[];
-        createFcn: (() => Contact) | null;
-        destroyFcn: ((contact: Contact) => void) | null;
+        createFcn: (() => Contact);
+        destroyFcn: ((contact: Contact) => void);
         primary: boolean;
     }
     class ContactFactory {
         readonly registers: ContactRegister[][];
         constructor();
-        private AddType;
-        private InitializeRegisters;
-        Create(fixtureA: Fixture, indexA: number, fixtureB: Fixture, indexB: number): Contact | null;
-        Destroy(contact: Contact): void;
+        private addType;
+        private initializeRegisters;
+        create(fixtureA: Fixture, indexA: number, fixtureB: Fixture, indexB: number): Contact;
+        destroy(contact: Contact): void;
     }
 }
 declare namespace b2 {
     class ContactManager {
         readonly broadPhase: BroadPhase<FixtureProxy>;
-        contactList: Contact | null;
+        contactList: Contact;
         contactCount: number;
         contactFilter: ContactFilter;
         contactListener: ContactListener;
         readonly contactFactory: ContactFactory;
-        AddPair(proxyA: FixtureProxy, proxyB: FixtureProxy): void;
-        FindNewContacts(): void;
-        Destroy(c: Contact): void;
-        Collide(): void;
+        addPair(proxyA: FixtureProxy, proxyB: FixtureProxy): void;
+        findNewContacts(): void;
+        destroy(c: Contact): void;
+        collide(): void;
     }
 }
 declare namespace b2 {
@@ -1938,10 +1906,10 @@ declare namespace b2 {
         readonly lalcA: Vec2;
         readonly lalcB: Vec2;
         constructor(def: IDistanceJointDef);
-        GetAnchorA<T extends XY>(out: T): T;
-        GetAnchorB<T extends XY>(out: T): T;
-        GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        GetReactionTorque(inv_dt: number): number;
+        getAnchorA<T extends XY>(out: T): T;
+        getAnchorB<T extends XY>(out: T): T;
+        getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        getReactionTorque(inv_dt: number): number;
         GetLocalAnchorA(): Vec2;
         GetLocalAnchorB(): Vec2;
         SetLength(length: number): number;
@@ -1953,40 +1921,40 @@ declare namespace b2 {
         GetStiffness(): number;
         SetDamping(damping: number): void;
         GetDamping(): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
-        private static InitVelocityConstraints_s_P;
-        InitVelocityConstraints(data: SolverData): void;
-        private static SolveVelocityConstraints_s_vpA;
-        private static SolveVelocityConstraints_s_vpB;
-        private static SolveVelocityConstraints_s_P;
-        SolveVelocityConstraints(data: SolverData): void;
-        private static SolvePositionConstraints_s_P;
-        SolvePositionConstraints(data: SolverData): boolean;
-        private static Draw_s_pA;
-        private static Draw_s_pB;
-        private static Draw_s_axis;
-        private static Draw_s_c1;
-        private static Draw_s_c2;
-        private static Draw_s_c3;
-        private static Draw_s_c4;
-        private static Draw_s_pRest;
-        private static Draw_s_pMin;
-        private static Draw_s_pMax;
-        Draw(draw: Draw): void;
+        dump(log: (format: string, ...args: any[]) => void): void;
+        private static initVelocityConstraints_s_P;
+        initVelocityConstraints(data: SolverData): void;
+        private static solveVelocityConstraints_s_vpA;
+        private static solveVelocityConstraints_s_vpB;
+        private static solveVelocityConstraints_s_P;
+        solveVelocityConstraints(data: SolverData): void;
+        private static solvePositionConstraints_s_P;
+        solvePositionConstraints(data: SolverData): boolean;
+        private static draw_s_pA;
+        private static draw_s_pB;
+        private static draw_s_axis;
+        private static draw_s_c1;
+        private static draw_s_c2;
+        private static draw_s_c3;
+        private static draw_s_c4;
+        private static draw_s_pRest;
+        private static draw_s_pMin;
+        private static draw_s_pMax;
+        draw(draw: Draw): void;
     }
 }
 declare namespace b2 {
     class EdgeAndCircleContact extends Contact<EdgeShape, CircleShape> {
-        static Create(): Contact;
-        static Destroy(contact: Contact): void;
-        Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
+        static create(): Contact;
+        static destroy(contact: Contact): void;
+        evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
     }
 }
 declare namespace b2 {
     class EdgeAndPolygonContact extends Contact<EdgeShape, PolygonShape> {
-        static Create(): Contact;
-        static Destroy(contact: Contact): void;
-        Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
+        static create(): Contact;
+        static destroy(contact: Contact): void;
+        evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
     }
 }
 declare namespace b2 {
@@ -2002,7 +1970,7 @@ declare namespace b2 {
         maxForce: number;
         maxTorque: number;
         constructor();
-        Initialize(bA: Body, bB: Body, anchor: Vec2): void;
+        initialize(bA: Body, bB: Body, anchor: Vec2): void;
     }
     class FrictionJoint extends Joint {
         readonly localAnchorA: Vec2;
@@ -2029,23 +1997,17 @@ declare namespace b2 {
         readonly lalcB: Vec2;
         readonly K: Mat22;
         constructor(def: IFrictionJointDef);
-        InitVelocityConstraints(data: SolverData): void;
-        private static SolveVelocityConstraints_s_Cdot_v2;
-        private static SolveVelocityConstraints_s_impulseV;
-        private static SolveVelocityConstraints_s_oldImpulseV;
-        SolveVelocityConstraints(data: SolverData): void;
-        SolvePositionConstraints(data: SolverData): boolean;
-        GetAnchorA<T extends XY>(out: T): T;
-        GetAnchorB<T extends XY>(out: T): T;
-        GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        GetReactionTorque(inv_dt: number): number;
-        GetLocalAnchorA(): Vec2;
-        GetLocalAnchorB(): Vec2;
-        SetMaxForce(force: number): void;
-        GetMaxForce(): number;
-        SetMaxTorque(torque: number): void;
-        GetMaxTorque(): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
+        initVelocityConstraints(data: SolverData): void;
+        private static solveVelocityConstraints_s_Cdot_v2;
+        private static solveVelocityConstraints_s_impulseV;
+        private static solveVelocityConstraints_s_oldImpulseV;
+        solveVelocityConstraints(data: SolverData): void;
+        solvePositionConstraints(data: SolverData): boolean;
+        getAnchorA<T extends XY>(out: T): T;
+        getAnchorB<T extends XY>(out: T): T;
+        getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        getReactionTorque(inv_dt: number): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
     }
 }
 declare namespace b2 {
@@ -2110,28 +2072,24 @@ declare namespace b2 {
         readonly lalcC: Vec2;
         readonly lalcD: Vec2;
         constructor(def: IGearJointDef);
-        private static InitVelocityConstraints_s_u;
-        private static InitVelocityConstraints_s_rA;
-        private static InitVelocityConstraints_s_rB;
-        private static InitVelocityConstraints_s_rC;
-        private static InitVelocityConstraints_s_rD;
-        InitVelocityConstraints(data: SolverData): void;
-        SolveVelocityConstraints(data: SolverData): void;
-        private static SolvePositionConstraints_s_u;
-        private static SolvePositionConstraints_s_rA;
-        private static SolvePositionConstraints_s_rB;
-        private static SolvePositionConstraints_s_rC;
-        private static SolvePositionConstraints_s_rD;
-        SolvePositionConstraints(data: SolverData): boolean;
-        GetAnchorA<T extends XY>(out: T): T;
-        GetAnchorB<T extends XY>(out: T): T;
-        GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        GetReactionTorque(inv_dt: number): number;
-        GetJoint1(): RevoluteJoint | PrismaticJoint;
-        GetJoint2(): RevoluteJoint | PrismaticJoint;
-        GetRatio(): number;
-        SetRatio(ratio: number): void;
-        Dump(log: (format: string, ...args: any[]) => void): void;
+        private static initVelocityConstraints_s_u;
+        private static initVelocityConstraints_s_rA;
+        private static initVelocityConstraints_s_rB;
+        private static initVelocityConstraints_s_rC;
+        private static initVelocityConstraints_s_rD;
+        initVelocityConstraints(data: SolverData): void;
+        solveVelocityConstraints(data: SolverData): void;
+        private static solvePositionConstraints_s_u;
+        private static solvePositionConstraints_s_rA;
+        private static solvePositionConstraints_s_rB;
+        private static solvePositionConstraints_s_rC;
+        private static solvePositionConstraints_s_rD;
+        solvePositionConstraints(data: SolverData): boolean;
+        getAnchorA<T extends XY>(out: T): T;
+        getAnchorB<T extends XY>(out: T): T;
+        getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        getReactionTorque(inv_dt: number): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
     }
 }
 declare namespace b2 {
@@ -2148,20 +2106,20 @@ declare namespace b2 {
         bodyCapacity: number;
         contactCapacity: number;
         jointCapacity: number;
-        Initialize(bodyCapacity: number, contactCapacity: number, jointCapacity: number, listener: ContactListener): void;
-        Clear(): void;
-        AddBody(body: Body): void;
-        AddContact(contact: Contact): void;
-        AddJoint(joint: Joint): void;
+        initialize(bodyCapacity: number, contactCapacity: number, jointCapacity: number, listener: ContactListener): void;
+        clear(): void;
+        addBody(body: Body): void;
+        addContact(contact: Contact): void;
+        addJoint(joint: Joint): void;
         private static s_timer;
         private static s_solverData;
         private static s_contactSolverDef;
         private static s_contactSolver;
         private static s_translation;
-        Solve(profile: Profile, step: TimeStep, gravity: Vec2, allowSleep: boolean): void;
-        SolveTOI(subStep: TimeStep, toiIndexA: number, toiIndexB: number): void;
+        solve(profile: Profile, step: TimeStep, gravity: Vec2, allowSleep: boolean): void;
+        solveTOI(subStep: TimeStep, toiIndexA: number, toiIndexB: number): void;
         private static s_impulse;
-        Report(constraints: ContactVelocityConstraint[]): void;
+        report(constraints: ContactVelocityConstraint[]): void;
     }
 }
 declare namespace b2 {
@@ -2179,7 +2137,7 @@ declare namespace b2 {
         maxTorque: number;
         correctionFactor: number;
         constructor();
-        Initialize(bA: Body, bB: Body): void;
+        initialize(bA: Body, bB: Body): void;
     }
     class MotorJoint extends Joint {
         readonly linearOffset: Vec2;
@@ -2207,25 +2165,25 @@ declare namespace b2 {
         readonly qB: Rot;
         readonly K: Mat22;
         constructor(def: IMotorJointDef);
-        GetAnchorA<T extends XY>(out: T): T;
-        GetAnchorB<T extends XY>(out: T): T;
-        GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        GetReactionTorque(inv_dt: number): number;
-        SetLinearOffset(linearOffset: Vec2): void;
-        GetLinearOffset(): Vec2;
-        SetAngularOffset(angularOffset: number): void;
-        GetAngularOffset(): number;
-        SetMaxForce(force: number): void;
-        GetMaxForce(): number;
-        SetMaxTorque(torque: number): void;
-        GetMaxTorque(): number;
-        InitVelocityConstraints(data: SolverData): void;
-        private static SolveVelocityConstraints_s_Cdot_v2;
-        private static SolveVelocityConstraints_s_impulse_v2;
-        private static SolveVelocityConstraints_s_oldImpulse_v2;
-        SolveVelocityConstraints(data: SolverData): void;
-        SolvePositionConstraints(data: SolverData): boolean;
-        Dump(log: (format: string, ...args: any[]) => void): void;
+        getAnchorA<T extends XY>(out: T): T;
+        getAnchorB<T extends XY>(out: T): T;
+        getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        getReactionTorque(inv_dt: number): number;
+        setLinearOffset(linearOffset: Vec2): void;
+        getLinearOffset(): Vec2;
+        setAngularOffset(angularOffset: number): void;
+        getAngularOffset(): number;
+        setMaxForce(force: number): void;
+        getMaxForce(): number;
+        setMaxTorque(torque: number): void;
+        getMaxTorque(): number;
+        initVelocityConstraints(data: SolverData): void;
+        private static solveVelocityConstraints_s_Cdot_v2;
+        private static solveVelocityConstraints_s_impulse_v2;
+        private static solveVelocityConstraints_s_oldImpulse_v2;
+        solveVelocityConstraints(data: SolverData): void;
+        solvePositionConstraints(data: SolverData): boolean;
+        dump(log: (format: string, ...args: any[]) => void): void;
     }
 }
 declare namespace b2 {
@@ -2263,40 +2221,40 @@ declare namespace b2 {
         readonly lalcB: Vec2;
         readonly K: Mat22;
         constructor(def: IMouseJointDef);
-        SetTarget(target: Vec2): void;
-        GetTarget(): Vec2;
-        SetMaxForce(maxForce: number): void;
-        GetMaxForce(): number;
-        SetStiffness(stiffness: number): void;
-        GetStiffness(): number;
-        SetDamping(damping: number): void;
-        GetDamping(): number;
-        InitVelocityConstraints(data: SolverData): void;
-        private static SolveVelocityConstraints_s_Cdot;
-        private static SolveVelocityConstraints_s_impulse;
-        private static SolveVelocityConstraints_s_oldImpulse;
-        SolveVelocityConstraints(data: SolverData): void;
-        SolvePositionConstraints(data: SolverData): boolean;
-        GetAnchorA<T extends XY>(out: T): T;
-        GetAnchorB<T extends XY>(out: T): T;
-        GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        GetReactionTorque(inv_dt: number): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
-        ShiftOrigin(newOrigin: Vec2): void;
+        setTarget(target: Vec2): void;
+        getTarget(): Vec2;
+        setMaxForce(maxForce: number): void;
+        getMaxForce(): number;
+        setStiffness(stiffness: number): void;
+        getStiffness(): number;
+        setDamping(damping: number): void;
+        getDamping(): number;
+        initVelocityConstraints(data: SolverData): void;
+        private static solveVelocityConstraints_s_Cdot;
+        private static solveVelocityConstraints_s_impulse;
+        private static solveVelocityConstraints_s_oldImpulse;
+        solveVelocityConstraints(data: SolverData): void;
+        solvePositionConstraints(data: SolverData): boolean;
+        getAnchorA<T extends XY>(out: T): T;
+        getAnchorB<T extends XY>(out: T): T;
+        getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        getReactionTorque(inv_dt: number): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
+        shiftOrigin(newOrigin: Vec2): void;
     }
 }
 declare namespace b2 {
     class PolygonAndCircleContact extends Contact<PolygonShape, CircleShape> {
-        static Create(): Contact;
-        static Destroy(contact: Contact): void;
-        Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
+        static create(): Contact;
+        static destroy(contact: Contact): void;
+        evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
     }
 }
 declare namespace b2 {
     class PolygonContact extends Contact<PolygonShape, PolygonShape> {
-        static Create(): Contact;
-        static Destroy(contact: Contact): void;
-        Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
+        static create(): Contact;
+        static destroy(contact: Contact): void;
+        evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
     }
 }
 declare namespace b2 {
@@ -2324,7 +2282,7 @@ declare namespace b2 {
         maxMotorForce: number;
         motorSpeed: number;
         constructor();
-        Initialize(bA: Body, bB: Body, anchor: Vec2, axis: Vec2): void;
+        initialize(bA: Body, bB: Body, anchor: Vec2, axis: Vec2): void;
     }
     class PrismaticJoint extends Joint {
         readonly localAnchorA: Vec2;
@@ -2368,56 +2326,52 @@ declare namespace b2 {
         readonly rA: Vec2;
         readonly rB: Vec2;
         constructor(def: IPrismaticJointDef);
-        private static InitVelocityConstraints_s_d;
-        private static InitVelocityConstraints_s_P;
-        InitVelocityConstraints(data: SolverData): void;
-        private static SolveVelocityConstraints_s_P;
-        private static SolveVelocityConstraints_s_df;
-        SolveVelocityConstraints(data: SolverData): void;
-        private static SolvePositionConstraints_s_d;
-        private static SolvePositionConstraints_s_impulse;
-        private static SolvePositionConstraints_s_impulse1;
-        private static SolvePositionConstraints_s_P;
-        SolvePositionConstraints(data: SolverData): boolean;
-        GetAnchorA<T extends XY>(out: T): T;
-        GetAnchorB<T extends XY>(out: T): T;
-        GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        GetReactionTorque(inv_dt: number): number;
-        GetLocalAnchorA(): Vec2;
-        GetLocalAnchorB(): Vec2;
-        GetLocalAxisA(): Vec2;
-        GetReferenceAngle(): number;
-        private static GetJointTranslation_s_pA;
-        private static GetJointTranslation_s_pB;
-        private static GetJointTranslation_s_d;
-        private static GetJointTranslation_s_axis;
-        GetJointTranslation(): number;
-        GetJointSpeed(): number;
-        IsLimitEnabled(): boolean;
-        EnableLimit(flag: boolean): void;
-        GetLowerLimit(): number;
-        GetUpperLimit(): number;
-        SetLimits(lower: number, upper: number): void;
-        IsMotorEnabled(): boolean;
-        EnableMotor(flag: boolean): void;
-        SetMotorSpeed(speed: number): void;
-        GetMotorSpeed(): number;
-        SetMaxMotorForce(force: number): void;
-        GetMaxMotorForce(): number;
-        GetMotorForce(inv_dt: number): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
-        private static Draw_s_pA;
-        private static Draw_s_pB;
-        private static Draw_s_axis;
-        private static Draw_s_c1;
-        private static Draw_s_c2;
-        private static Draw_s_c3;
-        private static Draw_s_c4;
-        private static Draw_s_c5;
-        private static Draw_s_lower;
-        private static Draw_s_upper;
-        private static Draw_s_perp;
-        Draw(draw: Draw): void;
+        private static initVelocityConstraints_s_d;
+        private static initVelocityConstraints_s_P;
+        initVelocityConstraints(data: SolverData): void;
+        private static solveVelocityConstraints_s_P;
+        private static solveVelocityConstraints_s_df;
+        solveVelocityConstraints(data: SolverData): void;
+        private static solvePositionConstraints_s_d;
+        private static solvePositionConstraints_s_impulse;
+        private static solvePositionConstraints_s_impulse1;
+        private static solvePositionConstraints_s_P;
+        solvePositionConstraints(data: SolverData): boolean;
+        getAnchorA<T extends XY>(out: T): T;
+        getAnchorB<T extends XY>(out: T): T;
+        getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        getReactionTorque(inv_dt: number): number;
+        private static getJointTranslation_s_pA;
+        private static getJointTranslation_s_pB;
+        private static getJointTranslation_s_d;
+        private static getJointTranslation_s_axis;
+        getJointTranslation(): number;
+        getJointSpeed(): number;
+        isLimitEnabled(): boolean;
+        setEnableLimit(flag: boolean): void;
+        getLowerLimit(): number;
+        getUpperLimit(): number;
+        setLimits(lower: number, upper: number): void;
+        isMotorEnabled(): boolean;
+        setEnableMotor(flag: boolean): void;
+        setMotorSpeed(speed: number): void;
+        getMotorSpeed(): number;
+        setMaxMotorForce(force: number): void;
+        getMaxMotorForce(): number;
+        getMotorForce(inv_dt: number): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
+        private static draw_s_pA;
+        private static draw_s_pB;
+        private static draw_s_axis;
+        private static draw_s_c1;
+        private static draw_s_c2;
+        private static draw_s_c3;
+        private static draw_s_c4;
+        private static draw_s_c5;
+        private static draw_s_lower;
+        private static draw_s_upper;
+        private static draw_s_perp;
+        draw(draw: Draw): void;
     }
 }
 declare namespace b2 {
@@ -2440,7 +2394,7 @@ declare namespace b2 {
         lengthB: number;
         ratio: number;
         constructor();
-        Initialize(bA: Body, bB: Body, groundA: Vec2, groundB: Vec2, anchorA: Vec2, anchorB: Vec2, r: number): void;
+        initialize(bA: Body, bB: Body, groundA: Vec2, groundB: Vec2, anchorA: Vec2, anchorB: Vec2, r: number): void;
     }
     class PulleyJoint extends Joint {
         readonly groundAnchorA: Vec2;
@@ -2470,32 +2424,29 @@ declare namespace b2 {
         readonly lalcA: Vec2;
         readonly lalcB: Vec2;
         constructor(def: IPulleyJointDef);
-        private static InitVelocityConstraints_s_PA;
-        private static InitVelocityConstraints_s_PB;
-        InitVelocityConstraints(data: SolverData): void;
-        private static SolveVelocityConstraints_s_vpA;
-        private static SolveVelocityConstraints_s_vpB;
-        private static SolveVelocityConstraints_s_PA;
-        private static SolveVelocityConstraints_s_PB;
-        SolveVelocityConstraints(data: SolverData): void;
-        private static SolvePositionConstraints_s_PA;
-        private static SolvePositionConstraints_s_PB;
-        SolvePositionConstraints(data: SolverData): boolean;
-        GetAnchorA<T extends XY>(out: T): T;
-        GetAnchorB<T extends XY>(out: T): T;
-        GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        GetReactionTorque(inv_dt: number): number;
-        GetGroundAnchorA(): Vec2;
-        GetGroundAnchorB(): Vec2;
-        GetLengthA(): number;
-        GetLengthB(): number;
-        GetRatio(): number;
-        private static GetCurrentLengthA_s_p;
-        GetCurrentLengthA(): number;
-        private static GetCurrentLengthB_s_p;
-        GetCurrentLengthB(): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
-        ShiftOrigin(newOrigin: Vec2): void;
+        private static initVelocityConstraints_s_PA;
+        private static initVelocityConstraints_s_PB;
+        initVelocityConstraints(data: SolverData): void;
+        private static solveVelocityConstraints_s_vpA;
+        private static solveVelocityConstraints_s_vpB;
+        private static solveVelocityConstraints_s_PA;
+        private static solveVelocityConstraints_s_PB;
+        solveVelocityConstraints(data: SolverData): void;
+        private static solvePositionConstraints_s_PA;
+        private static solvePositionConstraints_s_PB;
+        solvePositionConstraints(data: SolverData): boolean;
+        getAnchorA<T extends XY>(out: T): T;
+        getAnchorB<T extends XY>(out: T): T;
+        getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        getReactionTorque(inv_dt: number): number;
+        getGroundAnchorA(): Vec2;
+        getGroundAnchorB(): Vec2;
+        private static getCurrentLengthA_s_p;
+        getCurrentLengthA(): number;
+        private static getCurrentLengthB_s_p;
+        getCurrentLengthB(): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
+        shiftOrigin(newOrigin: Vec2): void;
     }
 }
 declare namespace b2 {
@@ -2521,7 +2472,7 @@ declare namespace b2 {
         motorSpeed: number;
         maxMotorTorque: number;
         constructor();
-        Initialize(bA: Body, bB: Body, anchor: XY): void;
+        initialize(bA: Body, bB: Body, anchor: XY): void;
     }
     class RevoluteJoint extends Joint {
         readonly localAnchorA: Vec2;
@@ -2555,48 +2506,45 @@ declare namespace b2 {
         readonly lalcA: Vec2;
         readonly lalcB: Vec2;
         constructor(def: IRevoluteJointDef);
-        private static InitVelocityConstraints_s_P;
-        InitVelocityConstraints(data: SolverData): void;
-        private static SolveVelocityConstraints_s_Cdot_v2;
-        private static SolveVelocityConstraints_s_impulse_v2;
-        SolveVelocityConstraints(data: SolverData): void;
-        private static SolvePositionConstraints_s_C_v2;
-        private static SolvePositionConstraints_s_impulse;
-        SolvePositionConstraints(data: SolverData): boolean;
-        GetAnchorA<T extends XY>(out: T): T;
-        GetAnchorB<T extends XY>(out: T): T;
-        GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        GetReactionTorque(inv_dt: number): number;
-        GetLocalAnchorA(): Vec2;
-        GetLocalAnchorB(): Vec2;
-        GetReferenceAngle(): number;
-        GetJointAngle(): number;
-        GetJointSpeed(): number;
-        IsMotorEnabled(): boolean;
-        EnableMotor(flag: boolean): void;
-        GetMotorTorque(inv_dt: number): number;
-        GetMotorSpeed(): number;
-        SetMaxMotorTorque(torque: number): void;
-        GetMaxMotorTorque(): number;
-        IsLimitEnabled(): boolean;
-        EnableLimit(flag: boolean): void;
-        GetLowerLimit(): number;
-        GetUpperLimit(): number;
-        SetLimits(lower: number, upper: number): void;
-        SetMotorSpeed(speed: number): void;
-        Dump(log: (format: string, ...args: any[]) => void): void;
-        private static Draw_s_pA;
-        private static Draw_s_pB;
-        private static Draw_s_c1;
-        private static Draw_s_c2;
-        private static Draw_s_c3;
-        private static Draw_s_c4;
-        private static Draw_s_c5;
-        private static Draw_s_color_;
-        private static Draw_s_r;
-        private static Draw_s_rlo;
-        private static Draw_s_rhi;
-        Draw(draw: Draw): void;
+        private static initVelocityConstraints_s_P;
+        initVelocityConstraints(data: SolverData): void;
+        private static solveVelocityConstraints_s_Cdot_v2;
+        private static solveVelocityConstraints_s_impulse_v2;
+        solveVelocityConstraints(data: SolverData): void;
+        private static solvePositionConstraints_s_C_v2;
+        private static solvePositionConstraints_s_impulse;
+        solvePositionConstraints(data: SolverData): boolean;
+        getAnchorA<T extends XY>(out: T): T;
+        getAnchorB<T extends XY>(out: T): T;
+        getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        getReactionTorque(inv_dt: number): number;
+        getJointAngle(): number;
+        getJointSpeed(): number;
+        isMotorEnabled(): boolean;
+        setEnableMotor(flag: boolean): void;
+        getMotorTorque(inv_dt: number): number;
+        getMotorSpeed(): number;
+        setMaxMotorTorque(torque: number): void;
+        getMaxMotorTorque(): number;
+        isLimitEnabled(): boolean;
+        setEnableLimit(flag: boolean): void;
+        getLowerLimit(): number;
+        getUpperLimit(): number;
+        setLimits(lower: number, upper: number): void;
+        setMotorSpeed(speed: number): void;
+        dump(log: (format: string, ...args: any[]) => void): void;
+        private static draw_s_pA;
+        private static draw_s_pB;
+        private static draw_s_c1;
+        private static draw_s_c2;
+        private static draw_s_c3;
+        private static draw_s_c4;
+        private static draw_s_c5;
+        private static draw_s_color_;
+        private static draw_s_r;
+        private static draw_s_rlo;
+        private static draw_s_rhi;
+        draw(draw: Draw): void;
     }
 }
 declare namespace b2 {
@@ -2614,7 +2562,7 @@ declare namespace b2 {
         stiffness: number;
         damping: number;
         constructor();
-        Initialize(bA: Body, bB: Body, anchor: Vec2): void;
+        initialize(bA: Body, bB: Body, anchor: Vec2): void;
     }
     class WeldJoint extends Joint {
         stiffness: number;
@@ -2642,29 +2590,26 @@ declare namespace b2 {
         readonly lalcB: Vec2;
         readonly K: Mat33;
         constructor(def: IWeldJointDef);
-        private static InitVelocityConstraints_s_P;
-        InitVelocityConstraints(data: SolverData): void;
-        private static SolveVelocityConstraints_s_Cdot1;
-        private static SolveVelocityConstraints_s_impulse1;
-        private static SolveVelocityConstraints_s_impulse;
-        private static SolveVelocityConstraints_s_P;
-        SolveVelocityConstraints(data: SolverData): void;
-        private static SolvePositionConstraints_s_C1;
-        private static SolvePositionConstraints_s_P;
-        private static SolvePositionConstraints_s_impulse;
-        SolvePositionConstraints(data: SolverData): boolean;
-        GetAnchorA<T extends XY>(out: T): T;
-        GetAnchorB<T extends XY>(out: T): T;
-        GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        GetReactionTorque(inv_dt: number): number;
-        GetLocalAnchorA(): Vec2;
-        GetLocalAnchorB(): Vec2;
-        GetReferenceAngle(): number;
-        SetStiffness(stiffness: number): void;
-        GetStiffness(): number;
-        SetDamping(damping: number): void;
-        GetDamping(): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
+        private static initVelocityConstraints_s_P;
+        initVelocityConstraints(data: SolverData): void;
+        private static solveVelocityConstraints_s_Cdot1;
+        private static solveVelocityConstraints_s_impulse1;
+        private static solveVelocityConstraints_s_impulse;
+        private static solveVelocityConstraints_s_P;
+        solveVelocityConstraints(data: SolverData): void;
+        private static solvePositionConstraints_s_C1;
+        private static solvePositionConstraints_s_P;
+        private static solvePositionConstraints_s_impulse;
+        solvePositionConstraints(data: SolverData): boolean;
+        getAnchorA<T extends XY>(out: T): T;
+        getAnchorB<T extends XY>(out: T): T;
+        getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        getReactionTorque(inv_dt: number): number;
+        setStiffness(stiffness: number): void;
+        getStiffness(): number;
+        setDamping(damping: number): void;
+        getDamping(): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
     }
 }
 declare namespace b2 {
@@ -2694,7 +2639,7 @@ declare namespace b2 {
         stiffness: number;
         damping: number;
         constructor();
-        Initialize(bA: Body, bB: Body, anchor: Vec2, axis: Vec2): void;
+        initialize(bA: Body, bB: Body, anchor: Vec2, axis: Vec2): void;
     }
     class WheelJoint extends Joint {
         readonly localAnchorA: Vec2;
@@ -2742,194 +2687,188 @@ declare namespace b2 {
         readonly rA: Vec2;
         readonly rB: Vec2;
         constructor(def: IWheelJointDef);
-        GetMotorSpeed(): number;
-        GetMaxMotorTorque(): number;
-        SetSpringFrequencyHz(hz: number): void;
-        GetSpringFrequencyHz(): number;
-        SetSpringDampingRatio(ratio: number): void;
-        GetSpringDampingRatio(): number;
-        private static InitVelocityConstraints_s_d;
-        private static InitVelocityConstraints_s_P;
-        InitVelocityConstraints(data: SolverData): void;
-        private static SolveVelocityConstraints_s_P;
-        SolveVelocityConstraints(data: SolverData): void;
-        private static SolvePositionConstraints_s_d;
-        private static SolvePositionConstraints_s_P;
-        SolvePositionConstraints(data: SolverData): boolean;
-        GetDefinition(def: WheelJointDef): WheelJointDef;
-        GetAnchorA<T extends XY>(out: T): T;
-        GetAnchorB<T extends XY>(out: T): T;
-        GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
-        GetReactionTorque(inv_dt: number): number;
-        GetLocalAnchorA(): Vec2;
-        GetLocalAnchorB(): Vec2;
-        GetLocalAxisA(): Vec2;
-        GetJointTranslation(): number;
-        GetJointLinearSpeed(): number;
-        GetJointAngle(): number;
-        GetJointAngularSpeed(): number;
-        GetPrismaticJointTranslation(): number;
-        GetPrismaticJointSpeed(): number;
-        GetRevoluteJointAngle(): number;
-        GetRevoluteJointSpeed(): number;
-        IsMotorEnabled(): boolean;
-        EnableMotor(flag: boolean): void;
-        SetMotorSpeed(speed: number): void;
-        SetMaxMotorTorque(force: number): void;
-        GetMotorTorque(inv_dt: number): number;
-        IsLimitEnabled(): boolean;
-        EnableLimit(flag: boolean): void;
-        GetLowerLimit(): number;
-        GetUpperLimit(): number;
-        SetLimits(lower: number, upper: number): void;
-        Dump(log: (format: string, ...args: any[]) => void): void;
-        private static Draw_s_pA;
-        private static Draw_s_pB;
-        private static Draw_s_axis;
-        private static Draw_s_c1;
-        private static Draw_s_c2;
-        private static Draw_s_c3;
-        private static Draw_s_c4;
-        private static Draw_s_c5;
-        private static Draw_s_lower;
-        private static Draw_s_upper;
-        private static Draw_s_perp;
-        Draw(draw: Draw): void;
+        getMotorSpeed(): number;
+        getMaxMotorTorque(): number;
+        setSpringFrequencyHz(hz: number): void;
+        getSpringFrequencyHz(): number;
+        setSpringDampingRatio(ratio: number): void;
+        getSpringDampingRatio(): number;
+        private static initVelocityConstraints_s_d;
+        private static initVelocityConstraints_s_P;
+        initVelocityConstraints(data: SolverData): void;
+        private static solveVelocityConstraints_s_P;
+        solveVelocityConstraints(data: SolverData): void;
+        private static solvePositionConstraints_s_d;
+        private static solvePositionConstraints_s_P;
+        solvePositionConstraints(data: SolverData): boolean;
+        getDefinition(def: WheelJointDef): WheelJointDef;
+        getAnchorA<T extends XY>(out: T): T;
+        getAnchorB<T extends XY>(out: T): T;
+        getReactionForce<T extends XY>(inv_dt: number, out: T): T;
+        getReactionTorque(inv_dt: number): number;
+        getJointTranslation(): number;
+        getJointLinearSpeed(): number;
+        getJointAngle(): number;
+        getJointAngularSpeed(): number;
+        getPrismaticJointTranslation(): number;
+        getPrismaticJointSpeed(): number;
+        getRevoluteJointAngle(): number;
+        getRevoluteJointSpeed(): number;
+        isMotorEnabled(): boolean;
+        setEnableMotor(flag: boolean): void;
+        setMotorSpeed(speed: number): void;
+        setMaxMotorTorque(force: number): void;
+        getMotorTorque(inv_dt: number): number;
+        isLimitEnabled(): boolean;
+        setEnableLimit(flag: boolean): void;
+        getLowerLimit(): number;
+        getUpperLimit(): number;
+        setLimits(lower: number, upper: number): void;
+        dump(log: (format: string, ...args: any[]) => void): void;
+        private static draw_s_pA;
+        private static draw_s_pB;
+        private static draw_s_axis;
+        private static draw_s_c1;
+        private static draw_s_c2;
+        private static draw_s_c3;
+        private static draw_s_c4;
+        private static draw_s_c5;
+        private static draw_s_lower;
+        private static draw_s_upper;
+        private static draw_s_perp;
+        draw(draw: Draw): void;
     }
 }
 declare namespace b2 {
     class World {
         readonly contactManager: ContactManager;
-        bodyList: Body | null;
-        jointList: Joint | null;
-        particleSystemList: ParticleSystem | null;
+        bodyList: Body;
+        jointList: Joint;
+        particleSystemList: ParticleSystem;
         bodyCount: number;
         jointCount: number;
         readonly gravity: Vec2;
         allowSleep: boolean;
-        destructionListener: DestructionListener | null;
-        debugDraw: Draw;
+        destructionListener: DestructionListener;
+        debugDrawInstance: Draw;
         inv_dt0: number;
         newContacts: boolean;
         locked: boolean;
-        clearForces: boolean;
+        clearForcesFlag: boolean;
         warmStarting: boolean;
         continuousPhysics: boolean;
         subStepping: boolean;
         stepComplete: boolean;
         readonly profile: Profile;
         readonly island: Island;
-        readonly s_stack: Array<Body | null>;
-        controllerList: Controller | null;
+        readonly s_stack: Array<Body>;
+        controllerList: Controller;
         controllerCount: number;
         constructor(gravity: XY);
-        SetDestructionListener(listener: DestructionListener | null): void;
-        SetContactFilter(filter: ContactFilter): void;
-        SetContactListener(listener: ContactListener): void;
-        SetDebugDraw(debugDraw: Draw): void;
-        CreateBody(def?: IBodyDef): Body;
-        DestroyBody(b: Body): void;
-        private static _Joint_Create;
-        private static _Joint_Destroy;
-        CreateJoint(def: IAreaJointDef): AreaJoint;
-        CreateJoint(def: IDistanceJointDef): DistanceJoint;
-        CreateJoint(def: IFrictionJointDef): FrictionJoint;
-        CreateJoint(def: IGearJointDef): GearJoint;
-        CreateJoint(def: IMotorJointDef): MotorJoint;
-        CreateJoint(def: IMouseJointDef): MouseJoint;
-        CreateJoint(def: IPrismaticJointDef): PrismaticJoint;
-        CreateJoint(def: IPulleyJointDef): PulleyJoint;
-        CreateJoint(def: IRevoluteJointDef): RevoluteJoint;
-        CreateJoint(def: IWeldJointDef): WeldJoint;
-        CreateJoint(def: IWheelJointDef): WheelJoint;
-        DestroyJoint(j: Joint): void;
-        CreateParticleSystem(def: ParticleSystemDef): ParticleSystem;
-        DestroyParticleSystem(p: ParticleSystem): void;
-        CalculateReasonableParticleIterations(timeStep: number): number;
-        private static Step_s_step;
-        private static Step_s_stepTimer;
-        private static Step_s_timer;
-        Step(dt: number, velocityIterations: number, positionIterations: number, particleIterations?: number): void;
-        ClearForces(): void;
-        DrawParticleSystem(system: ParticleSystem): void;
-        private static DebugDraw_s_color;
-        private static DebugDraw_s_vs;
-        private static DebugDraw_s_xf;
-        DebugDraw(): void;
-        QueryAABB(callback: QueryCallback, aabb: AABB): void;
-        QueryAABB(aabb: AABB, fn: QueryCallbackFunction): void;
-        private _QueryAABB;
-        QueryAllAABB(aabb: AABB, out?: Fixture[]): Fixture[];
-        QueryPointAABB(callback: QueryCallback, point: XY): void;
-        QueryPointAABB(point: XY, fn: QueryCallbackFunction): void;
-        private _QueryPointAABB;
-        QueryAllPointAABB(point: XY, out?: Fixture[]): Fixture[];
-        QueryFixtureShape(callback: QueryCallback, shape: Shape, index: number, transform: Transform): void;
-        QueryFixtureShape(shape: Shape, index: number, transform: Transform, fn: QueryCallbackFunction): void;
-        private static QueryFixtureShape_s_aabb;
-        private _QueryFixtureShape;
-        QueryAllFixtureShape(shape: Shape, index: number, transform: Transform, out?: Fixture[]): Fixture[];
-        QueryFixturePoint(callback: QueryCallback, point: XY): void;
-        QueryFixturePoint(point: XY, fn: QueryCallbackFunction): void;
-        private _QueryFixturePoint;
-        QueryAllFixturePoint(point: XY, out?: Fixture[]): Fixture[];
-        RayCast(callback: RayCastCallback, point1: XY, point2: XY): void;
-        RayCast(point1: XY, point2: XY, fn: RayCastCallbackFunction): void;
-        private static RayCast_s_input;
-        private static RayCast_s_output;
-        private static RayCast_s_point;
-        private _RayCast;
-        RayCastOne(point1: XY, point2: XY): Fixture | null;
-        RayCastAll(point1: XY, point2: XY, out?: Fixture[]): Fixture[];
-        GetBodyList(): Body | null;
-        GetJointList(): Joint | null;
-        GetParticleSystemList(): ParticleSystem | null;
-        GetContactList(): Contact | null;
-        SetAllowSleeping(flag: boolean): void;
-        GetAllowSleeping(): boolean;
-        SetWarmStarting(flag: boolean): void;
-        GetWarmStarting(): boolean;
-        SetContinuousPhysics(flag: boolean): void;
-        GetContinuousPhysics(): boolean;
-        SetSubStepping(flag: boolean): void;
-        GetSubStepping(): boolean;
-        GetProxyCount(): number;
-        GetBodyCount(): number;
-        GetJointCount(): number;
-        GetContactCount(): number;
-        GetTreeHeight(): number;
-        GetTreeBalance(): number;
-        GetTreeQuality(): number;
-        SetGravity(gravity: XY, wake?: boolean): void;
-        GetGravity(): Vec2;
-        IsLocked(): boolean;
-        SetAutoClearForces(flag: boolean): void;
-        GetAutoClearForces(): boolean;
-        ShiftOrigin(newOrigin: XY): void;
-        GetContactManager(): ContactManager;
-        GetProfile(): Profile;
-        Dump(log: (format: string, ...args: any[]) => void): void;
-        DrawShape(fixture: Fixture, color: Color): void;
-        Solve(step: TimeStep): void;
-        private static SolveTOI_s_subStep;
-        private static SolveTOI_s_backup;
-        private static SolveTOI_s_backup1;
-        private static SolveTOI_s_backup2;
-        private static SolveTOI_s_toi_input;
-        private static SolveTOI_s_toi_output;
-        SolveTOI(step: TimeStep): void;
-        AddController(controller: Controller): Controller;
-        RemoveController(controller: Controller): Controller;
+        setDestructionListener(listener: DestructionListener): void;
+        setContactFilter(filter: ContactFilter): void;
+        setContactListener(listener: ContactListener): void;
+        setDebugDraw(debugDraw: Draw): void;
+        createBody(def?: IBodyDef): Body;
+        destroyBody(b: Body): void;
+        private static _createJoint;
+        private static _destroyJoint;
+        createJoint(def: IAreaJointDef): AreaJoint;
+        createJoint(def: IDistanceJointDef): DistanceJoint;
+        createJoint(def: IFrictionJointDef): FrictionJoint;
+        createJoint(def: IGearJointDef): GearJoint;
+        createJoint(def: IMotorJointDef): MotorJoint;
+        createJoint(def: IMouseJointDef): MouseJoint;
+        createJoint(def: IPrismaticJointDef): PrismaticJoint;
+        createJoint(def: IPulleyJointDef): PulleyJoint;
+        createJoint(def: IRevoluteJointDef): RevoluteJoint;
+        createJoint(def: IWeldJointDef): WeldJoint;
+        createJoint(def: IWheelJointDef): WheelJoint;
+        destroyJoint(j: Joint): void;
+        createParticleSystem(def: ParticleSystemDef): ParticleSystem;
+        destroyParticleSystem(p: ParticleSystem): void;
+        calculateReasonableParticleIterations(timeStep: number): number;
+        private static step_s_step;
+        private static step_s_stepTimer;
+        private static step_s_timer;
+        step(dt: number, velocityIterations: number, positionIterations: number, particleIterations?: number): void;
+        clearForces(): void;
+        drawParticleSystem(system: ParticleSystem): void;
+        private static debugdraw_s_color;
+        private static debugdraw_s_vs;
+        private static debugdraw_s_xf;
+        debugDraw(): void;
+        queryAABB(callback: QueryCallback, aabb: AABB): void;
+        queryAABB(aabb: AABB, fn: QueryCallbackFunction): void;
+        private _queryAABB;
+        queryAllAABB(aabb: AABB, out?: Fixture[]): Fixture[];
+        queryPointAABB(callback: QueryCallback, point: XY): void;
+        queryPointAABB(point: XY, fn: QueryCallbackFunction): void;
+        private _queryPointAABB;
+        queryAllPointAABB(point: XY, out?: Fixture[]): Fixture[];
+        queryFixtureShape(callback: QueryCallback, shape: Shape, index: number, transform: Transform): void;
+        queryFixtureShape(shape: Shape, index: number, transform: Transform, fn: QueryCallbackFunction): void;
+        private static queryFixtureShape_s_aabb;
+        private _queryFixtureShape;
+        queryAllFixtureShape(shape: Shape, index: number, transform: Transform, out?: Fixture[]): Fixture[];
+        queryFixturePoint(callback: QueryCallback, point: XY): void;
+        queryFixturePoint(point: XY, fn: QueryCallbackFunction): void;
+        private _queryFixturePoint;
+        queryAllFixturePoint(point: XY, out?: Fixture[]): Fixture[];
+        rayCast(callback: RayCastCallback, point1: XY, point2: XY): void;
+        rayCast(point1: XY, point2: XY, fn: RayCastCallbackFunction): void;
+        private static rayCast_s_input;
+        private static rayCast_s_output;
+        private static rayCast_s_point;
+        private _rayCast;
+        rayCastOne(point1: XY, point2: XY): Fixture;
+        rayCastAll(point1: XY, point2: XY, out?: Fixture[]): Fixture[];
+        getParticleSystemList(): ParticleSystem;
+        getContactList(): Contact;
+        setAllowSleeping(flag: boolean): void;
+        getAllowSleeping(): boolean;
+        setWarmStarting(flag: boolean): void;
+        getWarmStarting(): boolean;
+        setContinuousPhysics(flag: boolean): void;
+        getContinuousPhysics(): boolean;
+        setSubStepping(flag: boolean): void;
+        getSubStepping(): boolean;
+        getProxyCount(): number;
+        getBodyCount(): number;
+        getJointCount(): number;
+        getContactCount(): number;
+        getTreeHeight(): number;
+        getTreeBalance(): number;
+        getTreeQuality(): number;
+        setGravity(gravity: XY, wake?: boolean): void;
+        isLocked(): boolean;
+        setAutoClearForces(flag: boolean): void;
+        getAutoClearForces(): boolean;
+        shiftOrigin(newOrigin: XY): void;
+        getContactManager(): ContactManager;
+        getProfile(): Profile;
+        dump(log: (format: string, ...args: any[]) => void): void;
+        drawShape(fixture: Fixture, color: Color): void;
+        solve(step: TimeStep): void;
+        private static solveTOI_s_subStep;
+        private static solveTOI_s_backup;
+        private static solveTOI_s_backup1;
+        private static solveTOI_s_backup2;
+        private static solveTOI_s_toi_input;
+        private static solveTOI_s_toi_output;
+        solveTOI(step: TimeStep): void;
+        addController(controller: Controller): Controller;
+        removeController(controller: Controller): Controller;
     }
 }
 declare namespace b2 {
     enum ParticleGroupFlag {
-        solidParticleGroup = 1,
-        rigidParticleGroup = 2,
-        particleGroupCanBeEmpty = 4,
-        particleGroupWillBeDestroyed = 8,
-        particleGroupNeedsUpdateDepth = 16,
-        particleGroupInternalMask = 24
+        SolidParticleGroup = 1,
+        RigidParticleGroup = 2,
+        ParticleGroupCanBeEmpty = 4,
+        ParticleGroupWillBeDestroyed = 8,
+        ParticleGroupNeedsUpdateDepth = 16,
+        ParticleGroupInternalMask = 24
     }
     interface IParticleGroupDef {
         flags?: ParticleFlag;
@@ -2948,7 +2887,7 @@ declare namespace b2 {
         positionData?: XY[];
         lifetime?: number;
         userData?: any;
-        group?: ParticleGroup | null;
+        group?: ParticleGroup;
     }
     class ParticleGroupDef implements IParticleGroupDef {
         flags: ParticleFlag;
@@ -2967,7 +2906,7 @@ declare namespace b2 {
         positionData?: Vec2[];
         lifetime: number;
         userData: any;
-        group: ParticleGroup | null;
+        group: ParticleGroup;
     }
     class ParticleGroup {
         readonly system: ParticleSystem;
@@ -2975,8 +2914,8 @@ declare namespace b2 {
         lastIndex: number;
         groupFlags: ParticleGroupFlag;
         strength: number;
-        prev: ParticleGroup | null;
-        next: ParticleGroup | null;
+        prev: ParticleGroup;
+        next: ParticleGroup;
         timestamp: number;
         mass: number;
         inertia: number;
@@ -2986,30 +2925,30 @@ declare namespace b2 {
         readonly transform: Transform;
         userData: any;
         constructor(system: ParticleSystem);
-        GetNext(): ParticleGroup | null;
-        GetParticleSystem(): ParticleSystem;
-        GetParticleCount(): number;
-        GetBufferIndex(): number;
-        ContainsParticle(index: number): boolean;
-        GetAllParticleFlags(): ParticleFlag;
-        GetGroupFlags(): ParticleGroupFlag;
-        SetGroupFlags(flags: number): void;
-        GetMass(): number;
-        GetInertia(): number;
-        GetCenter(): Vec2;
-        GetLinearVelocity(): Vec2;
-        GetAngularVelocity(): number;
-        GetTransform(): Transform;
-        GetPosition(): Vec2;
-        GetAngle(): number;
-        GetLinearVelocityFromWorldPoint<T extends XY>(worldPoint: XY, out: T): T;
+        getNext(): ParticleGroup;
+        getParticleSystem(): ParticleSystem;
+        getParticleCount(): number;
+        getBufferIndex(): number;
+        containsParticle(index: number): boolean;
+        getAllParticleFlags(): ParticleFlag;
+        getGroupFlags(): ParticleGroupFlag;
+        setGroupFlags(flags: number): void;
+        getMass(): number;
+        getInertia(): number;
+        getCenter(): Vec2;
+        getLinearVelocity(): Vec2;
+        getAngularVelocity(): number;
+        getTransform(): Transform;
+        getPosition(): Vec2;
+        getAngle(): number;
+        getLinearVelocityFromWorldPoint<T extends XY>(worldPoint: XY, out: T): T;
         static readonly GetLinearVelocityFromWorldPoint_s_t0: Vec2;
-        GetUserData(): void;
-        SetUserData(data: any): void;
-        ApplyForce(force: XY): void;
-        ApplyLinearImpulse(impulse: XY): void;
-        DestroyParticles(callDestructionListener: boolean): void;
-        UpdateStatistics(): void;
+        getUserData(): void;
+        setUserData(data: any): void;
+        applyForce(force: XY): void;
+        applyLinearImpulse(impulse: XY): void;
+        destroyParticles(callDestructionListener: boolean): void;
+        updateStatistics(): void;
     }
 }
 declare namespace b2 {
@@ -3019,26 +2958,26 @@ declare namespace b2 {
         capacity: number;
         allocator: () => T;
         constructor(allocator: () => T);
-        Append(): number;
-        Reserve(newCapacity: number): void;
-        Grow(): void;
-        Free(): void;
-        Shorten(newEnd: number): void;
-        Data(): T[];
-        GetCount(): number;
-        SetCount(newCount: number): void;
-        GetCapacity(): number;
-        RemoveIf(pred: (t: T) => boolean): void;
-        Unique(pred: (a: T, b: T) => boolean): void;
+        append(): number;
+        reserve(newCapacity: number): void;
+        grow(): void;
+        free(): void;
+        shorten(newEnd: number): void;
+        getData(): T[];
+        getCount(): number;
+        setCount(newCount: number): void;
+        getCapacity(): number;
+        removeIf(pred: (t: T) => boolean): void;
+        unique(pred: (a: T, b: T) => boolean): void;
     }
     type ParticleIndex = number;
     class FixtureParticleQueryCallback extends QueryCallback {
         system: ParticleSystem;
         constructor(system: ParticleSystem);
-        ShouldQueryParticleSystem(system: ParticleSystem): boolean;
-        ReportFixture(fixture: Fixture): boolean;
-        ReportParticle(system: ParticleSystem, index: number): boolean;
-        ReportFixtureAndParticle(fixture: Fixture, childIndex: number, index: number): void;
+        shouldQueryParticleSystem(system: ParticleSystem): boolean;
+        reportFixture(fixture: Fixture): boolean;
+        reportParticle(system: ParticleSystem, index: number): boolean;
+        reportFixtureAndParticle(fixture: Fixture, childIndex: number, index: number): void;
     }
     class ParticleContact {
         indexA: number;
@@ -3046,18 +2985,18 @@ declare namespace b2 {
         weight: number;
         normal: Vec2;
         flags: ParticleFlag;
-        SetIndices(a: number, b: number): void;
-        SetWeight(w: number): void;
-        SetNormal(n: Vec2): void;
-        SetFlags(f: ParticleFlag): void;
-        GetIndexA(): number;
-        GetIndexB(): number;
-        GetWeight(): number;
-        GetNormal(): Vec2;
-        GetFlags(): ParticleFlag;
-        IsEqual(rhs: ParticleContact): boolean;
-        IsNotEqual(rhs: ParticleContact): boolean;
-        ApproximatelyEqual(rhs: ParticleContact): boolean;
+        setIndices(a: number, b: number): void;
+        setWeight(w: number): void;
+        setNormal(n: Vec2): void;
+        setFlags(f: ParticleFlag): void;
+        getIndexA(): number;
+        getIndexB(): number;
+        getWeight(): number;
+        getNormal(): Vec2;
+        getFlags(): ParticleFlag;
+        isEqual(rhs: ParticleContact): boolean;
+        isNotEqual(rhs: ParticleContact): boolean;
+        approximatelyEqual(rhs: ParticleContact): boolean;
     }
     class ParticleBodyContact {
         index: number;
@@ -3210,7 +3149,7 @@ declare namespace b2 {
          */
         lifetimeGranularity: number;
         Copy(def: ParticleSystemDef): ParticleSystemDef;
-        Clone(): ParticleSystemDef;
+        clone(): ParticleSystemDef;
     }
     class ParticleSystem {
         paused: boolean;
@@ -3233,7 +3172,7 @@ declare namespace b2 {
         /**
          * Maps particle indicies to handles.
          */
-        handleIndexBuffer: ParticleSysteUserOverridableBuffer<ParticleHandle | null>;
+        handleIndexBuffer: ParticleSysteUserOverridableBuffer<ParticleHandle>;
         flagsBuffer: ParticleSysteUserOverridableBuffer<ParticleFlag>;
         positionBuffer: ParticleSysteUserOverridableBuffer<Vec2>;
         velocityBuffer: ParticleSysteUserOverridableBuffer<Vec2>;
@@ -3270,7 +3209,7 @@ declare namespace b2 {
          */
         depthBuffer: number[];
         colorBuffer: ParticleSysteUserOverridableBuffer<Color>;
-        groupBuffer: Array<ParticleGroup | null>;
+        groupBuffer: Array<ParticleGroup>;
         userDataBuffer: ParticleSysteUserOverridableBuffer<any>;
         /**
          * Stuck particle detection parameters and record keeping
@@ -3308,11 +3247,11 @@ declare namespace b2 {
          */
         expirationTimeBufferRequiresSorting: boolean;
         groupCount: number;
-        groupList: ParticleGroup | null;
+        groupList: ParticleGroup;
         def: ParticleSystemDef;
         world: World;
-        prev: ParticleSystem | null;
-        next: ParticleSystem | null;
+        prev: ParticleSystem;
+        next: ParticleSystem;
         static readonly xTruncBits: number;
         static readonly yTruncBits: number;
         static readonly tagBits: number;
@@ -3326,7 +3265,7 @@ declare namespace b2 {
         static computeTag(x: number, y: number): number;
         static computeRelativeTag(tag: number, x: number, y: number): number;
         constructor(def: ParticleSystemDef, world: World);
-        Drop(): void;
+        drop(): void;
         /**
          * Create a particle whose properties have been defined.
          *
@@ -3339,13 +3278,13 @@ declare namespace b2 {
          *
          * warning: This function is locked during callbacks.
          */
-        CreateParticle(def: IParticleDef): number;
+        createParticle(def: IParticleDef): number;
         /**
          * Retrieve a handle to the particle at the specified index.
          *
          * Please see #ParticleHandle for why you might want a handle.
          */
-        GetParticleHandleFromIndex(index: number): ParticleHandle;
+        getParticleHandleFromIndex(index: number): ParticleHandle;
         /**
          * Destroy a particle.
          *
@@ -3357,7 +3296,7 @@ declare namespace b2 {
          *      destruction listener just before the particle is
          *      destroyed.
          */
-        DestroyParticle(index: number, callDestructionListener?: boolean): void;
+        destroyParticle(index: number, callDestructionListener?: boolean): void;
         /**
          * Destroy the Nth oldest particle in the system.
          *
@@ -3370,7 +3309,7 @@ declare namespace b2 {
          *      destruction listener just before the particle is
          *      destroyed.
          */
-        DestroyOldestParticle(index: number, callDestructionListener?: boolean): void;
+        destroyOldestParticle(index: number, callDestructionListener?: boolean): void;
         /**
          * Destroy particles inside a shape.
          *
@@ -3388,7 +3327,7 @@ declare namespace b2 {
          *      world DestructionListener for each particle
          *      destroyed.
          */
-        DestroyParticlesInShape(shape: Shape, xf: Transform, callDestructionListener?: boolean): number;
+        destroyParticlesInShape(shape: Shape, xf: Transform, callDestructionListener?: boolean): number;
         static readonly DestroyParticlesInShape_s_aabb: AABB;
         /**
          * Create a particle group whose properties have been defined.
@@ -3397,8 +3336,8 @@ declare namespace b2 {
          *
          * warning: This function is locked during callbacks.
          */
-        CreateParticleGroup(groupDef: IParticleGroupDef): ParticleGroup;
-        static readonly CreateParticleGroup_s_transform: Transform;
+        createParticleGroup(groupDef: IParticleGroupDef): ParticleGroup;
+        static readonly createParticleGroup_s_transform: Transform;
         /**
          * Join two particle groups.
          *
@@ -3407,7 +3346,7 @@ declare namespace b2 {
          * @param groupA the first group. Expands to encompass the second group.
          * @param groupB the second group. It is destroyed.
          */
-        JoinParticleGroups(groupA: ParticleGroup, groupB: ParticleGroup): void;
+        joinParticleGroups(groupA: ParticleGroup, groupB: ParticleGroup): void;
         /**
          * Split particle group into multiple disconnected groups.
          *
@@ -3415,7 +3354,7 @@ declare namespace b2 {
          *
          * @param group the group to be split.
          */
-        SplitParticleGroup(group: ParticleGroup): void;
+        splitParticleGroup(group: ParticleGroup): void;
         /**
          * Get the world particle group list. With the returned group,
          * use ParticleGroup::GetNext to get the next group in the
@@ -3425,19 +3364,19 @@ declare namespace b2 {
          *
          * @return the head of the world particle group list.
          */
-        GetParticleGroupList(): ParticleGroup | null;
+        getParticleGroupList(): ParticleGroup;
         /**
          * Get the number of particle groups.
          */
-        GetParticleGroupCount(): number;
+        getParticleGroupCount(): number;
         /**
          * Get the number of particles.
          */
-        GetParticleCount(): number;
+        getParticleCount(): number;
         /**
          * Get the maximum number of particles.
          */
-        GetMaxParticleCount(): number;
+        getMaxParticleCount(): number;
         /**
          * Set the maximum number of particles.
          *
@@ -3450,15 +3389,15 @@ declare namespace b2 {
          * SetDestructionByAge() is used to enable the destruction of
          * the oldest particles in the system.
          */
-        SetMaxParticleCount(count: number): void;
+        setMaxParticleCount(count: number): void;
         /**
          * Get all existing particle flags.
          */
-        GetAllParticleFlags(): ParticleFlag;
+        getAllParticleFlags(): ParticleFlag;
         /**
          * Get all existing particle group flags.
          */
-        GetAllGroupFlags(): ParticleGroupFlag;
+        getAllGroupFlags(): ParticleGroupFlag;
         /**
          * Pause or unpause the particle system. When paused,
          * World::Step() skips over this particle system. All
@@ -3466,14 +3405,14 @@ declare namespace b2 {
          *
          * @param paused paused is true to pause, false to un-pause.
          */
-        SetPaused(paused: boolean): void;
+        setPaused(paused: boolean): void;
         /**
          * Initially, true, then, the last value passed into
          * SetPaused().
          *
          * @return true if the particle system is being updated in World::Step().
          */
-        GetPaused(): boolean;
+        getPaused(): boolean;
         /**
          * Change the particle density.
          *
@@ -3482,31 +3421,31 @@ declare namespace b2 {
          * that the density does not affect how the particles interact
          * with each other.
          */
-        SetDensity(density: number): void;
+        setDensity(density: number): void;
         /**
          * Get the particle density.
          */
-        GetDensity(): number;
+        getDensity(): number;
         /**
          * Change the particle gravity scale. Adjusts the effect of the
          * global gravity vector on particles.
          */
-        SetGravityScale(gravityScale: number): void;
+        setGravityScale(gravityScale: number): void;
         /**
          * Get the particle gravity scale.
          */
-        GetGravityScale(): number;
+        getGravityScale(): number;
         /**
          * Damping is used to reduce the velocity of particles. The
          * damping parameter can be larger than 1.0f but the damping
          * effect becomes sensitive to the time step when the damping
          * parameter is large.
          */
-        SetDamping(damping: number): void;
+        setDamping(damping: number): void;
         /**
          * Get damping for particles
          */
-        GetDamping(): number;
+        getDamping(): number;
         /**
          * Change the number of iterations when calculating the static
          * pressure of particles. By default, 8 iterations. You can
@@ -3519,12 +3458,12 @@ declare namespace b2 {
          * For a description of static pressure, see
          * http://en.wikipedia.org/wiki/Static_pressure#Static_pressure_in_fluid_dynamics
          */
-        SetStaticPressureIterations(iterations: number): void;
+        setStaticPressureIterations(iterations: number): void;
         /**
          * Get the number of iterations for static pressure of
          * particles.
          */
-        GetStaticPressureIterations(): number;
+        getStaticPressureIterations(): number;
         /**
          * Change the particle radius.
          *
@@ -3532,11 +3471,11 @@ declare namespace b2 {
          * If you change the radius during execution, existing particles
          * may explode, shrink, or behave unexpectedly.
          */
-        SetRadius(radius: number): void;
+        setRadius(radius: number): void;
         /**
          * Get the particle radius.
          */
-        GetRadius(): number;
+        getRadius(): number;
         /**
          * Get the position of each particle
          *
@@ -3544,7 +3483,7 @@ declare namespace b2 {
          *
          * @return the pointer to the head of the particle positions array.
          */
-        GetPositionBuffer(): Vec2[];
+        getPositionBuffer(): Vec2[];
         /**
          * Get the velocity of each particle
          *
@@ -3552,7 +3491,7 @@ declare namespace b2 {
          *
          * @return the pointer to the head of the particle velocities array.
          */
-        GetVelocityBuffer(): Vec2[];
+        getVelocityBuffer(): Vec2[];
         /**
          * Get the color of each particle
          *
@@ -3560,7 +3499,7 @@ declare namespace b2 {
          *
          * @return the pointer to the head of the particle colors array.
          */
-        GetColorBuffer(): Color[];
+        getColorBuffer(): Color[];
         /**
          * Get the particle-group of each particle.
          *
@@ -3568,7 +3507,7 @@ declare namespace b2 {
          *
          * @return the pointer to the head of the particle group array.
          */
-        GetGroupBuffer(): Array<ParticleGroup | null>;
+        getGroupBuffer(): Array<ParticleGroup>;
         /**
          * Get the weight of each particle
          *
@@ -3576,7 +3515,7 @@ declare namespace b2 {
          *
          * @return the pointer to the head of the particle positions array.
          */
-        GetWeightBuffer(): number[];
+        getWeightBuffer(): number[];
         /**
          * Get the user-specified data of each particle.
          *
@@ -3584,7 +3523,7 @@ declare namespace b2 {
          *
          * @return the pointer to the head of the particle user-data array.
          */
-        GetUserDataBuffer<T>(): T[];
+        getUserDataBuffer<T>(): T[];
         /**
          * Get the flags for each particle. See the ParticleFlag enum.
          *
@@ -3592,15 +3531,15 @@ declare namespace b2 {
          *
          * @return the pointer to the head of the particle-flags array.
          */
-        GetFlagsBuffer(): ParticleFlag[];
+        getFlagsBuffer(): ParticleFlag[];
         /**
          * Set flags for a particle. See the ParticleFlag enum.
          */
-        SetParticleFlags(index: number, newFlags: ParticleFlag): void;
+        setParticleFlags(index: number, newFlags: ParticleFlag): void;
         /**
          * Get flags for a particle. See the ParticleFlag enum.
          */
-        GetParticleFlags(index: number): ParticleFlag;
+        getParticleFlags(index: number): ParticleFlag;
         /**
          * Set an external buffer for particle data.
          *
@@ -3617,26 +3556,26 @@ declare namespace b2 {
          * @param buffer a pointer to a block of memory.
          * @param capacity the number of values in the block.
          */
-        SetFlagsBuffer(buffer: ParticleFlag[]): void;
-        SetPositionBuffer(buffer: Vec2[] | Float32Array): void;
-        SetVelocityBuffer(buffer: TypedVec2[] | Float32Array): void;
-        SetColorBuffer(buffer: Color[] | Float32Array): void;
-        SetUserDataBuffer<T>(buffer: T[]): void;
+        setFlagsBuffer(buffer: ParticleFlag[]): void;
+        setPositionBuffer(buffer: Vec2[] | Float32Array): void;
+        setVelocityBuffer(buffer: TypedVec2[] | Float32Array): void;
+        setColorBuffer(buffer: Color[] | Float32Array): void;
+        setUserDataBuffer<T>(buffer: T[]): void;
         /**
          * Get contacts between particles
          * Contact data can be used for many reasons, for example to
          * trigger rendering or audio effects.
          */
-        GetContacts(): ParticleContact[];
-        GetContactCount(): number;
+        getContacts(): ParticleContact[];
+        getContactCount(): number;
         /**
          * Get contacts between particles and bodies
          *
          * Contact data can be used for many reasons, for example to
          * trigger rendering or audio effects.
          */
-        GetBodyContacts(): ParticleBodyContact[];
-        GetBodyContactCount(): number;
+        getBodyContacts(): ParticleBodyContact[];
+        getBodyContactCount(): number;
         /**
          * Get array of particle pairs. The particles in a pair:
          *   (1) are contacting,
@@ -3653,8 +3592,8 @@ declare namespace b2 {
          * that are interacting. The array is sorted by ParticlePair's
          * indexA, and then indexB. There are no duplicate entries.
          */
-        GetPairs(): ParticlePair[];
-        GetPairCount(): number;
+        getPairs(): ParticlePair[];
+        getPairCount(): number;
         /**
          * Get array of particle triads. The particles in a triad:
          *   (1) are in the same particle group,
@@ -3672,31 +3611,31 @@ declare namespace b2 {
          * interacting. The array is sorted by ParticleTriad's indexA,
          * then indexB, then indexC. There are no duplicate entries.
          */
-        GetTriads(): ParticleTriad[];
-        GetTriadCount(): number;
+        getTriads(): ParticleTriad[];
+        getTriadCount(): number;
         /**
          * Set an optional threshold for the maximum number of
          * consecutive particle iterations that a particle may contact
          * multiple bodies before it is considered a candidate for being
          * "stuck". Setting to zero or less disables.
          */
-        SetStuckThreshold(steps: number): void;
+        setStuckThreshold(steps: number): void;
         /**
          * Get potentially stuck particles from the last step; the user
          * must decide if they are stuck or not, and if so, delete or
          * move them
          */
-        GetStuckCandidates(): number[];
+        getStuckCandidates(): number[];
         /**
          * Get the number of stuck particle candidates from the last
          * step.
          */
-        GetStuckCandidateCount(): number;
+        getStuckCandidateCount(): number;
         /**
          * Compute the kinetic energy that can be lost by damping force
          */
-        ComputeCollisionEnergy(): number;
-        static readonly ComputeCollisionEnergy_s_v: Vec2;
+        computeCollisionEnergy(): number;
+        static readonly computeCollisionEnergy_s_v: Vec2;
         /**
          * Set strict Particle/Body contact check.
          *
@@ -3707,25 +3646,25 @@ declare namespace b2 {
          * enable if it is necessary for your geometry. Enable if you
          * see strange particle behavior around Body intersections.
          */
-        SetStrictContactCheck(enabled: boolean): void;
+        setStrictContactCheck(enabled: boolean): void;
         /**
          * Get the status of the strict contact check.
          */
-        GetStrictContactCheck(): boolean;
+        getStrictContactCheck(): boolean;
         /**
          * Set the lifetime (in seconds) of a particle relative to the
          * current time.  A lifetime of less than or equal to 0.0f
          * results in the particle living forever until it's manually
          * destroyed by the application.
          */
-        SetParticleLifetime(index: number, lifetime: number): void;
+        setParticleLifetime(index: number, lifetime: number): void;
         /**
          * Get the lifetime (in seconds) of a particle relative to the
          * current time.  A value > 0.0f is returned if the particle is
          * scheduled to be destroyed in the future, values <= 0.0f
          * indicate the particle has an infinite lifetime.
          */
-        GetParticleLifetime(index: number): number;
+        getParticleLifetime(index: number): number;
         /**
          * Enable / disable destruction of particles in CreateParticle()
          * when no more particles can be created due to a prior call to
@@ -3737,26 +3676,26 @@ declare namespace b2 {
          * enabling this feature using this function enables particle
          * lifetime tracking.
          */
-        SetDestructionByAge(enable: boolean): void;
+        setDestructionByAge(enable: boolean): void;
         /**
          * Get whether the oldest particle will be destroyed in
          * CreateParticle() when the maximum number of particles are
          * present in the system.
          */
-        GetDestructionByAge(): boolean;
+        getDestructionByAge(): boolean;
         /**
          * Get the array of particle expiration times indexed by
          * particle index.
          *
          * GetParticleCount() items are in the returned array.
          */
-        GetExpirationTimeBuffer(): number[];
+        getExpirationTimeBuffer(): number[];
         /**
          * Convert a expiration time value in returned by
          * GetExpirationTimeBuffer() to a time in seconds relative to
          * the current simulation time.
          */
-        ExpirationTimeToLifetime(expirationTime: number): number;
+        expirationTimeToLifetime(expirationTime: number): number;
         /**
          * Get the array of particle indices ordered by reverse
          * lifetime. The oldest particle indexes are at the end of the
@@ -3768,7 +3707,7 @@ declare namespace b2 {
          *
          * GetParticleCount() items are in the returned array.
          */
-        GetIndexByExpirationTimeBuffer(): number[];
+        getIndexByExpirationTimeBuffer(): number[];
         /**
          * Apply an impulse to one particle. This immediately modifies
          * the velocity. Similar to Body::ApplyLinearImpulse.
@@ -3776,7 +3715,7 @@ declare namespace b2 {
          * @param index the particle that will be modified.
          * @param impulse impulse the world impulse vector, usually in N-seconds or kg-m/s.
          */
-        ParticleApplyLinearImpulse(index: number, impulse: XY): void;
+        particleApplyLinearImpulse(index: number, impulse: XY): void;
         /**
          * Apply an impulse to all particles between 'firstIndex' and
          * 'lastIndex'. This immediately modifies the velocity. Note
@@ -3790,15 +3729,15 @@ declare namespace b2 {
          * @param lastIndex the last particle to be modified.
          * @param impulse the world impulse vector, usually in N-seconds or kg-m/s.
          */
-        ApplyLinearImpulse(firstIndex: number, lastIndex: number, impulse: XY): void;
-        static IsSignificantForce(force: XY): boolean;
+        applyLinearImpulse(firstIndex: number, lastIndex: number, impulse: XY): void;
+        static isSignificantForce(force: XY): boolean;
         /**
          * Apply a force to the center of a particle.
          *
          * @param index the particle that will be modified.
          * @param force the world force vector, usually in Newtons (N).
          */
-        ParticleApplyForce(index: number, force: XY): void;
+        particleApplyForce(index: number, force: XY): void;
         /**
          * Distribute a force across several particles. The particles
          * must not be wall particles. Note that the force is
@@ -3810,12 +3749,12 @@ declare namespace b2 {
          * @param lastIndex the last particle to be modified.
          * @param force the world force vector, usually in Newtons (N).
          */
-        ApplyForce(firstIndex: number, lastIndex: number, force: XY): void;
+        applyForce(firstIndex: number, lastIndex: number, force: XY): void;
         /**
          * Get the next particle-system in the world's particle-system
          * list.
          */
-        GetNext(): ParticleSystem | null;
+        getNext(): ParticleSystem;
         /**
          * Query the particle system for all particles that potentially
          * overlap the provided AABB.
@@ -3824,7 +3763,7 @@ declare namespace b2 {
          * @param callback a user implemented callback class.
          * @param aabb the query box.
          */
-        QueryAABB(callback: QueryCallback, aabb: AABB): void;
+        queryAABB(callback: QueryCallback, aabb: AABB): void;
         /**
          * Query the particle system for all particles that potentially
          * overlap the provided shape's AABB. Calls QueryAABB
@@ -3836,9 +3775,9 @@ declare namespace b2 {
          * @param xf the transform of the AABB
          * @param childIndex
          */
-        QueryShapeAABB(callback: QueryCallback, shape: Shape, xf: Transform, childIndex?: number): void;
-        static readonly QueryShapeAABB_s_aabb: AABB;
-        QueryPointAABB(callback: QueryCallback, point: XY, slop?: number): void;
+        queryShapeAABB(callback: QueryCallback, shape: Shape, xf: Transform, childIndex?: number): void;
+        static readonly queryShapeAABB_s_aabb: AABB;
+        queryPointAABB(callback: QueryCallback, point: XY, slop?: number): void;
         static readonly QueryPointAABB_s_aabb: AABB;
         /**
          * Ray-cast the particle system for all particles in the path of
@@ -3851,18 +3790,18 @@ declare namespace b2 {
          * @param point1 the ray starting point
          * @param point2 the ray ending point
          */
-        RayCast(callback: RayCastCallback, point1: XY, point2: XY): void;
-        static readonly RayCast_s_aabb: AABB;
-        static readonly RayCast_s_p: Vec2;
-        static readonly RayCast_s_v: Vec2;
-        static readonly RayCast_s_n: Vec2;
-        static readonly RayCast_s_point: Vec2;
+        rayCast(callback: RayCastCallback, point1: XY, point2: XY): void;
+        static readonly rayCast_s_aabb: AABB;
+        static readonly rayCast_s_p: Vec2;
+        static readonly rayCast_s_v: Vec2;
+        static readonly rayCast_s_n: Vec2;
+        static readonly rayCast_s_point: Vec2;
         /**
          * Compute the axis-aligned bounding box for all particles
          * contained within this particle system.
          * @param aabb Returns the axis-aligned bounding box of the system.
          */
-        ComputeAABB(aabb: AABB): void;
+        computeAABB(aabb: AABB): void;
         /**
          * All particle types that require creating pairs
          */
@@ -3880,224 +3819,224 @@ declare namespace b2 {
          */
         static readonly k_extraDampingFlags: ParticleFlag;
         static readonly k_barrierWallFlags: number;
-        FreeBuffer<T>(b: T[] | null, capacity: number): void;
-        FreeUserOverridableBuffer<T>(b: ParticleSysteUserOverridableBuffer<T>): void;
+        freeBuffer<T>(b: T[], capacity: number): void;
+        freeUserOverridableBuffer<T>(b: ParticleSysteUserOverridableBuffer<T>): void;
         /**
          * Reallocate a buffer
          */
-        ReallocateBuffer3<T>(oldBuffer: T[] | null, oldCapacity: number, newCapacity: number): T[];
+        reallocateBuffer3<T>(oldBuffer: T[], oldCapacity: number, newCapacity: number): T[];
         /**
          * Reallocate a buffer
          */
-        ReallocateBuffer5<T>(buffer: T[] | null, userSuppliedCapacity: number, oldCapacity: number, newCapacity: number, deferred: boolean): T[];
+        reallocateBuffer5<T>(buffer: T[], userSuppliedCapacity: number, oldCapacity: number, newCapacity: number, deferred: boolean): T[];
         /**
          * Reallocate a buffer
          */
-        ReallocateBuffer4<T>(buffer: ParticleSysteUserOverridableBuffer<any>, oldCapacity: number, newCapacity: number, deferred: boolean): T[];
-        RequestBuffer<T>(buffer: T[] | null): T[];
+        reallocateBuffer4<T>(buffer: ParticleSysteUserOverridableBuffer<any>, oldCapacity: number, newCapacity: number, deferred: boolean): T[];
+        requestBuffer<T>(buffer: T[]): T[];
         /**
          * Reallocate the handle / index map and schedule the allocation
          * of a new pool for handle allocation.
          */
-        ReallocateHandleBuffers(newCapacity: number): void;
-        ReallocateInternalAllocatedBuffers(capacity: number): void;
-        CreateParticleForGroup(groupDef: IParticleGroupDef, xf: Transform, p: XY): void;
-        CreateParticlesStrokeShapeForGroup(shape: Shape, groupDef: IParticleGroupDef, xf: Transform): void;
-        static readonly CreateParticlesStrokeShapeForGroup_s_edge: EdgeShape;
-        static readonly CreateParticlesStrokeShapeForGroup_s_d: Vec2;
-        static readonly CreateParticlesStrokeShapeForGroup_s_p: Vec2;
-        CreateParticlesFillShapeForGroup(shape: Shape, groupDef: IParticleGroupDef, xf: Transform): void;
-        static readonly CreateParticlesFillShapeForGroup_s_aabb: AABB;
-        static readonly CreateParticlesFillShapeForGroup_s_p: Vec2;
-        CreateParticlesWithShapeForGroup(shape: Shape, groupDef: IParticleGroupDef, xf: Transform): void;
-        CreateParticlesWithShapesForGroup(shapes: Shape[], shapeCount: number, groupDef: IParticleGroupDef, xf: Transform): void;
-        CloneParticle(oldIndex: number, group: ParticleGroup): number;
-        DestroyParticlesInGroup(group: ParticleGroup, callDestructionListener?: boolean): void;
-        DestroyParticleGroup(group: ParticleGroup): void;
-        static ParticleCanBeConnected(flags: ParticleFlag, group: ParticleGroup | null): boolean;
-        UpdatePairsAndTriads(firstIndex: number, lastIndex: number, filter: ParticleSysteConnectionFilter): void;
-        private static UpdatePairsAndTriads_s_dab;
-        private static UpdatePairsAndTriads_s_dbc;
-        private static UpdatePairsAndTriads_s_dca;
-        UpdatePairsAndTriadsWithReactiveParticles(): void;
-        static ComparePairIndices(a: ParticlePair, b: ParticlePair): boolean;
-        static MatchPairIndices(a: ParticlePair, b: ParticlePair): boolean;
-        static CompareTriadIndices(a: ParticleTriad, b: ParticleTriad): boolean;
-        static MatchTriadIndices(a: ParticleTriad, b: ParticleTriad): boolean;
-        static InitializeParticleLists(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[]): void;
-        MergeParticleListsInContact(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[]): void;
-        static MergeParticleLists(listA: ParticleSysteParticleListNode, listB: ParticleSysteParticleListNode): void;
-        static FindLongestParticleList(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[]): ParticleSysteParticleListNode;
-        MergeZombieParticleListNodes(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[], survivingList: ParticleSysteParticleListNode): void;
-        static MergeParticleListAndNode(list: ParticleSysteParticleListNode, node: ParticleSysteParticleListNode): void;
-        CreateParticleGroupsFromParticleList(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[], survivingList: ParticleSysteParticleListNode): void;
-        UpdatePairsAndTriadsWithParticleList(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[]): void;
-        ComputeDepth(): void;
-        GetInsideBoundsEnumerator(aabb: AABB): ParticleSysteInsideBoundsEnumerator;
-        UpdateAllParticleFlags(): void;
-        UpdateAllGroupFlags(): void;
-        AddContact(a: number, b: number, contacts: GrowableBuffer<ParticleContact>): void;
-        static readonly AddContact_s_d: Vec2;
-        FindContacts_Reference(contacts: GrowableBuffer<ParticleContact>): void;
-        FindContacts(contacts: GrowableBuffer<ParticleContact>): void;
-        UpdateProxies_Reference(proxies: GrowableBuffer<ParticleSysteProxy>): void;
-        UpdateProxies(proxies: GrowableBuffer<ParticleSysteProxy>): void;
-        SortProxies(proxies: GrowableBuffer<ParticleSysteProxy>): void;
-        FilterContacts(contacts: GrowableBuffer<ParticleContact>): void;
-        NotifyContactListenerPreContact(particlePairs: ParticlePairSet): void;
-        NotifyContactListenerPostContact(particlePairs: ParticlePairSet): void;
-        static ParticleContactIsZombie(contact: ParticleContact): boolean;
-        UpdateContacts(exceptZombie: boolean): void;
-        NotifyBodyContactListenerPreContact(fixtureSet: ParticleSysteFixtureParticleSet): void;
-        NotifyBodyContactListenerPostContact(fixtureSet: ParticleSysteFixtureParticleSet): void;
-        UpdateBodyContacts(): void;
-        static readonly UpdateBodyContacts_s_aabb: AABB;
-        UpdateBodyContacts_callback: ParticleSysteUpdateBodyContactsCallback | null;
-        Solve(step: TimeStep): void;
-        static readonly Solve_s_subStep: TimeStep;
-        SolveCollision(step: TimeStep): void;
-        static readonly SolveCollision_s_aabb: AABB;
-        SolveCollision_callback: ParticleSysteSolveCollisionCallback | null;
-        LimitVelocity(step: TimeStep): void;
-        SolveGravity(step: TimeStep): void;
+        reallocateHandleBuffers(newCapacity: number): void;
+        reallocateInternalAllocatedBuffers(capacity: number): void;
+        createParticleForGroup(groupDef: IParticleGroupDef, xf: Transform, p: XY): void;
+        createParticlesStrokeShapeForGroup(shape: Shape, groupDef: IParticleGroupDef, xf: Transform): void;
+        static readonly createParticlesStrokeShapeForGroup_s_edge: EdgeShape;
+        static readonly createParticlesStrokeShapeForGroup_s_d: Vec2;
+        static readonly createParticlesStrokeShapeForGroup_s_p: Vec2;
+        createParticlesFillShapeForGroup(shape: Shape, groupDef: IParticleGroupDef, xf: Transform): void;
+        static readonly createParticlesFillShapeForGroup_s_aabb: AABB;
+        static readonly createParticlesFillShapeForGroup_s_p: Vec2;
+        createParticlesWithShapeForGroup(shape: Shape, groupDef: IParticleGroupDef, xf: Transform): void;
+        createParticlesWithShapesForGroup(shapes: Shape[], shapeCount: number, groupDef: IParticleGroupDef, xf: Transform): void;
+        cloneParticle(oldIndex: number, group: ParticleGroup): number;
+        destroyParticlesInGroup(group: ParticleGroup, callDestructionListener?: boolean): void;
+        destroyParticleGroup(group: ParticleGroup): void;
+        static particleCanBeConnected(flags: ParticleFlag, group: ParticleGroup): boolean;
+        updatePairsAndTriads(firstIndex: number, lastIndex: number, filter: ParticleSysteConnectionFilter): void;
+        private static updatePairsAndTriads_s_dab;
+        private static updatePairsAndTriads_s_dbc;
+        private static updatePairsAndTriads_s_dca;
+        updatePairsAndTriadsWithReactiveParticles(): void;
+        static comparePairIndices(a: ParticlePair, b: ParticlePair): boolean;
+        static matchPairIndices(a: ParticlePair, b: ParticlePair): boolean;
+        static compareTriadIndices(a: ParticleTriad, b: ParticleTriad): boolean;
+        static matchTriadIndices(a: ParticleTriad, b: ParticleTriad): boolean;
+        static initializeParticleLists(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[]): void;
+        mergeParticleListsInContact(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[]): void;
+        static mergeParticleLists(listA: ParticleSysteParticleListNode, listB: ParticleSysteParticleListNode): void;
+        static findLongestParticleList(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[]): ParticleSysteParticleListNode;
+        mergeZombieParticleListNodes(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[], survivingList: ParticleSysteParticleListNode): void;
+        static mergeParticleListAndNode(list: ParticleSysteParticleListNode, node: ParticleSysteParticleListNode): void;
+        createParticleGroupsFromParticleList(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[], survivingList: ParticleSysteParticleListNode): void;
+        updatePairsAndTriadsWithParticleList(group: ParticleGroup, nodeBuffer: ParticleSysteParticleListNode[]): void;
+        computeDepth(): void;
+        getInsideBoundsEnumerator(aabb: AABB): ParticleSysteInsideBoundsEnumerator;
+        updateAllParticleFlags(): void;
+        updateAllGroupFlags(): void;
+        addContact(a: number, b: number, contacts: GrowableBuffer<ParticleContact>): void;
+        static readonly addContact_s_d: Vec2;
+        findContacts_Reference(contacts: GrowableBuffer<ParticleContact>): void;
+        findContacts(contacts: GrowableBuffer<ParticleContact>): void;
+        updateProxies_Reference(proxies: GrowableBuffer<ParticleSysteProxy>): void;
+        updateProxies(proxies: GrowableBuffer<ParticleSysteProxy>): void;
+        sortProxies(proxies: GrowableBuffer<ParticleSysteProxy>): void;
+        filterContacts(contacts: GrowableBuffer<ParticleContact>): void;
+        notifyContactListenerPreContact(particlePairs: ParticlePairSet): void;
+        notifyContactListenerPostContact(particlePairs: ParticlePairSet): void;
+        static particleContactIsZombie(contact: ParticleContact): boolean;
+        updateContacts(exceptZombie: boolean): void;
+        notifyBodyContactListenerPreContact(fixtureSet: ParticleSysteFixtureParticleSet): void;
+        notifyBodyContactListenerPostContact(fixtureSet: ParticleSysteFixtureParticleSet): void;
+        updateBodyContacts(): void;
+        static readonly updateBodyContacts_s_aabb: AABB;
+        updateBodyContacts_callback: ParticleSysteUpdateBodyContactsCallback;
+        solve(step: TimeStep): void;
+        static readonly solve_s_subStep: TimeStep;
+        solveCollision(step: TimeStep): void;
+        static readonly solveCollision_s_aabb: AABB;
+        solveCollision_callback: ParticleSysteSolveCollisionCallback;
+        limitVelocity(step: TimeStep): void;
+        solveGravity(step: TimeStep): void;
         static readonly SolveGravity_s_gravity: Vec2;
-        SolveBarrier(step: TimeStep): void;
-        static readonly SolveBarrier_s_aabb: AABB;
-        static readonly SolveBarrier_s_va: Vec2;
-        static readonly SolveBarrier_s_vb: Vec2;
-        static readonly SolveBarrier_s_pba: Vec2;
-        static readonly SolveBarrier_s_vba: Vec2;
-        static readonly SolveBarrier_s_vc: Vec2;
-        static readonly SolveBarrier_s_pca: Vec2;
-        static readonly SolveBarrier_s_vca: Vec2;
-        static readonly SolveBarrier_s_qba: Vec2;
-        static readonly SolveBarrier_s_qca: Vec2;
-        static readonly SolveBarrier_s_dv: Vec2;
-        static readonly SolveBarrier_s_f: Vec2;
-        SolveStaticPressure(step: TimeStep): void;
-        ComputeWeight(): void;
-        SolvePressure(step: TimeStep): void;
-        static readonly SolvePressure_s_f: Vec2;
-        SolveDamping(step: TimeStep): void;
-        static readonly SolveDamping_s_v: Vec2;
-        static readonly SolveDamping_s_f: Vec2;
-        SolveRigidDamping(): void;
-        static readonly SolveRigidDamping_s_t0: Vec2;
-        static readonly SolveRigidDamping_s_t1: Vec2;
-        static readonly SolveRigidDamping_s_p: Vec2;
-        static readonly SolveRigidDamping_s_v: Vec2;
-        SolveExtraDamping(): void;
-        static readonly SolveExtraDamping_s_v: Vec2;
-        static readonly SolveExtraDamping_s_f: Vec2;
-        SolveWall(): void;
-        SolveRigid(step: TimeStep): void;
-        static readonly SolveRigid_s_position: Vec2;
-        static readonly SolveRigid_s_rotation: Rot;
-        static readonly SolveRigid_s_transform: Transform;
-        static readonly SolveRigid_s_velocityTransform: Transform;
-        SolveElastic(step: TimeStep): void;
-        static readonly SolveElastic_s_pa: Vec2;
-        static readonly SolveElastic_s_pb: Vec2;
-        static readonly SolveElastic_s_pc: Vec2;
-        static readonly SolveElastic_s_r: Rot;
-        static readonly SolveElastic_s_t0: Vec2;
-        SolveSpring(step: TimeStep): void;
-        static readonly SolveSpring_s_pa: Vec2;
-        static readonly SolveSpring_s_pb: Vec2;
-        static readonly SolveSpring_s_d: Vec2;
-        static readonly SolveSpring_s_f: Vec2;
-        SolveTensile(step: TimeStep): void;
-        static readonly SolveTensile_s_weightedNormal: Vec2;
-        static readonly SolveTensile_s_s: Vec2;
-        static readonly SolveTensile_s_f: Vec2;
-        SolveViscous(): void;
-        static readonly SolveViscous_s_v: Vec2;
-        static readonly SolveViscous_s_f: Vec2;
-        SolveRepulsive(step: TimeStep): void;
-        static readonly SolveRepulsive_s_f: Vec2;
-        SolvePowder(step: TimeStep): void;
-        static readonly SolvePowder_s_f: Vec2;
-        SolveSolid(step: TimeStep): void;
+        solveBarrier(step: TimeStep): void;
+        static readonly solveBarrier_s_aabb: AABB;
+        static readonly solveBarrier_s_va: Vec2;
+        static readonly solveBarrier_s_vb: Vec2;
+        static readonly solveBarrier_s_pba: Vec2;
+        static readonly solveBarrier_s_vba: Vec2;
+        static readonly solveBarrier_s_vc: Vec2;
+        static readonly solveBarrier_s_pca: Vec2;
+        static readonly solveBarrier_s_vca: Vec2;
+        static readonly solveBarrier_s_qba: Vec2;
+        static readonly solveBarrier_s_qca: Vec2;
+        static readonly solveBarrier_s_dv: Vec2;
+        static readonly solveBarrier_s_f: Vec2;
+        solveStaticPressure(step: TimeStep): void;
+        computeWeight(): void;
+        solvePressure(step: TimeStep): void;
+        static readonly solvePressure_s_f: Vec2;
+        solveDamping(step: TimeStep): void;
+        static readonly solveDamping_s_v: Vec2;
+        static readonly solveDamping_s_f: Vec2;
+        solveRigidDamping(): void;
+        static readonly solveRigidDamping_s_t0: Vec2;
+        static readonly solveRigidDamping_s_t1: Vec2;
+        static readonly solveRigidDamping_s_p: Vec2;
+        static readonly solveRigidDamping_s_v: Vec2;
+        solveExtraDamping(): void;
+        static readonly solveExtraDamping_s_v: Vec2;
+        static readonly solveExtraDamping_s_f: Vec2;
+        solveWall(): void;
+        solveRigid(step: TimeStep): void;
+        static readonly solveRigid_s_position: Vec2;
+        static readonly solveRigid_s_rotation: Rot;
+        static readonly solveRigid_s_transform: Transform;
+        static readonly solveRigid_s_velocityTransform: Transform;
+        solveElastic(step: TimeStep): void;
+        static readonly solveElastic_s_pa: Vec2;
+        static readonly solveElastic_s_pb: Vec2;
+        static readonly solveElastic_s_pc: Vec2;
+        static readonly solveElastic_s_r: Rot;
+        static readonly solveElastic_s_t0: Vec2;
+        solveSpring(step: TimeStep): void;
+        static readonly solveSpring_s_pa: Vec2;
+        static readonly solveSpring_s_pb: Vec2;
+        static readonly solveSpring_s_d: Vec2;
+        static readonly solveSpring_s_f: Vec2;
+        solveTensile(step: TimeStep): void;
+        static readonly solveTensile_s_weightedNormal: Vec2;
+        static readonly solveTensile_s_s: Vec2;
+        static readonly solveTensile_s_f: Vec2;
+        solveViscous(): void;
+        static readonly solveViscous_s_v: Vec2;
+        static readonly solveViscous_s_f: Vec2;
+        solveRepulsive(step: TimeStep): void;
+        static readonly solveRepulsive_s_f: Vec2;
+        solvePowder(step: TimeStep): void;
+        static readonly solvePowder_s_f: Vec2;
+        solveSolid(step: TimeStep): void;
         static readonly SolveSolid_s_f: Vec2;
-        SolveForce(step: TimeStep): void;
-        SolveColorMixing(): void;
-        SolveZombie(): void;
+        solveForce(step: TimeStep): void;
+        solveColorMixing(): void;
+        solveZombie(): void;
         /**
          * Destroy all particles which have outlived their lifetimes set
          * by SetParticleLifetime().
          */
-        SolveLifetimes(step: TimeStep): void;
-        RotateBuffer(start: number, mid: number, end: number): void;
-        GetCriticalVelocity(step: TimeStep): number;
-        GetCriticalVelocitySquared(step: TimeStep): number;
-        GetCriticalPressure(step: TimeStep): number;
-        GetParticleStride(): number;
-        GetParticleMass(): number;
-        GetParticleInvMass(): number;
+        solveLifetimes(step: TimeStep): void;
+        rotateBuffer(start: number, mid: number, end: number): void;
+        getCriticalVelocity(step: TimeStep): number;
+        getCriticalVelocitySquared(step: TimeStep): number;
+        getCriticalPressure(step: TimeStep): number;
+        getParticleStride(): number;
+        getParticleMass(): number;
+        getParticleInvMass(): number;
         /**
          * Get the world's contact filter if any particles with the
          * contactFilterParticle flag are present in the system.
          */
-        GetFixtureContactFilter(): ContactFilter | null;
+        getFixtureContactFilter(): ContactFilter;
         /**
          * Get the world's contact filter if any particles with the
          * particleContactFilterParticle flag are present in the
          * system.
          */
-        GetParticleContactFilter(): ContactFilter | null;
+        getParticleContactFilter(): ContactFilter;
         /**
          * Get the world's contact listener if any particles with the
          * fixtureContactListenerParticle flag are present in the
          * system.
          */
-        GetFixtureContactListener(): ContactListener | null;
+        getFixtureContactListener(): ContactListener;
         /**
          * Get the world's contact listener if any particles with the
          * particleContactListenerParticle flag are present in the
          * system.
          */
-        GetParticleContactListener(): ContactListener | null;
-        SetUserOverridableBuffer<T>(buffer: ParticleSysteUserOverridableBuffer<T>, data: T[]): void;
-        SetGroupFlags(group: ParticleGroup, newFlags: ParticleGroupFlag): void;
-        static BodyContactCompare(lhs: ParticleBodyContact, rhs: ParticleBodyContact): boolean;
-        RemoveSpuriousBodyContacts(): void;
-        private static RemoveSpuriousBodyContacts_s_n;
-        private static RemoveSpuriousBodyContacts_s_pos;
-        private static RemoveSpuriousBodyContacts_s_normal;
-        DetectStuckParticle(particle: number): void;
+        getParticleContactListener(): ContactListener;
+        setUserOverridableBuffer<T>(buffer: ParticleSysteUserOverridableBuffer<T>, data: T[]): void;
+        setGroupFlags(group: ParticleGroup, newFlags: ParticleGroupFlag): void;
+        static bodyContactCompare(lhs: ParticleBodyContact, rhs: ParticleBodyContact): boolean;
+        removeSpuriousBodyContacts(): void;
+        private static removeSpuriousBodyContacts_s_n;
+        private static removeSpuriousBodyContacts_s_pos;
+        private static removeSpuriousBodyContacts_s_normal;
+        detectStuckParticle(particle: number): void;
         /**
          * Determine whether a particle index is valid.
          */
-        ValidateParticleIndex(index: number): boolean;
+        validateParticleIndex(index: number): boolean;
         /**
          * Get the time elapsed in
          * ParticleSystemDef::lifetimeGranularity.
          */
-        GetQuantizedTimeElapsed(): number;
+        getQuantizedTimeElapsed(): number;
         /**
          * Convert a lifetime in seconds to an expiration time.
          */
-        LifetimeToExpirationTime(lifetime: number): number;
-        ForceCanBeApplied(flags: ParticleFlag): boolean;
-        PrepareForceBuffer(): void;
-        IsRigidGroup(group: ParticleGroup | null): boolean;
-        GetLinearVelocity(group: ParticleGroup | null, particleIndex: number, point: Vec2, out: Vec2): Vec2;
-        InitDampingParameter(invMass: number[], invInertia: number[], tangentDistance: number[], mass: number, inertia: number, center: Vec2, point: Vec2, normal: Vec2): void;
-        InitDampingParameterWithRigidGroupOrParticle(invMass: number[], invInertia: number[], tangentDistance: number[], isRigidGroup: boolean, group: ParticleGroup | null, particleIndex: number, point: Vec2, normal: Vec2): void;
-        ComputeDampingImpulse(invMassA: number, invInertiaA: number, tangentDistanceA: number, invMassB: number, invInertiaB: number, tangentDistanceB: number, normalVelocity: number): number;
-        ApplyDamping(invMass: number, invInertia: number, tangentDistance: number, isRigidGroup: boolean, group: ParticleGroup | null, particleIndex: number, impulse: number, normal: Vec2): void;
+        lifetimeToExpirationTime(lifetime: number): number;
+        forceCanBeApplied(flags: ParticleFlag): boolean;
+        prepareForceBuffer(): void;
+        isRigidGroup(group: ParticleGroup): boolean;
+        getLinearVelocity(group: ParticleGroup, particleIndex: number, point: Vec2, out: Vec2): Vec2;
+        initDampingParameter(invMass: number[], invInertia: number[], tangentDistance: number[], mass: number, inertia: number, center: Vec2, point: Vec2, normal: Vec2): void;
+        initDampingParameterWithRigidGroupOrParticle(invMass: number[], invInertia: number[], tangentDistance: number[], isRigidGroup: boolean, group: ParticleGroup, particleIndex: number, point: Vec2, normal: Vec2): void;
+        computeDampingImpulse(invMassA: number, invInertiaA: number, tangentDistanceA: number, invMassB: number, invInertiaB: number, tangentDistanceB: number, normalVelocity: number): number;
+        applyDamping(invMass: number, invInertia: number, tangentDistance: number, isRigidGroup: boolean, group: ParticleGroup, particleIndex: number, impulse: number, normal: Vec2): void;
     }
     class ParticleSysteUserOverridableBuffer<T> {
-        _data: T[] | null;
+        _data: T[];
         data: T[];
         userSuppliedCapacity: number;
     }
     class ParticleSysteProxy {
         index: number;
         tag: number;
-        static CompareProxyProxy(a: ParticleSysteProxy, b: ParticleSysteProxy): boolean;
-        static CompareTagProxy(a: number, b: ParticleSysteProxy): boolean;
-        static CompareProxyTag(a: ParticleSysteProxy, b: number): boolean;
+        static compareProxyProxy(a: ParticleSysteProxy, b: ParticleSysteProxy): boolean;
+        static compareTagProxy(a: number, b: ParticleSysteProxy): boolean;
+        static compareProxyTag(a: ParticleSysteProxy, b: number): boolean;
     }
     class ParticleSysteInsideBoundsEnumerator {
         system: ParticleSystem;
@@ -4119,7 +4058,7 @@ declare namespace b2 {
          * Get index of the next particle. Returns
          * invalidParticleIndex if there are no more particles.
          */
-        GetNext(): number;
+        getNext(): number;
     }
     class ParticleSysteParticleListNode {
         /**
@@ -4129,7 +4068,7 @@ declare namespace b2 {
         /**
          * The next node in the list.
          */
-        next: ParticleSysteParticleListNode | null;
+        next: ParticleSysteParticleListNode;
         /**
          * Number of entries in the list. Valid only for the node at the
          * head of the list.
@@ -4144,13 +4083,13 @@ declare namespace b2 {
      * @constructor
      */
     class ParticleSysteFixedSetAllocator<T> {
-        Allocate(itemSize: number, count: number): number;
-        Clear(): void;
-        GetCount(): number;
-        Invalidate(itemIndex: number): void;
-        GetValidBuffer(): boolean[];
-        GetBuffer(): T[];
-        SetCount(count: number): void;
+        allocate(itemSize: number, count: number): number;
+        clear(): void;
+        getCount(): number;
+        invalidate(itemIndex: number): void;
+        getValidBuffer(): boolean[];
+        getBuffer(): T[];
+        setCount(count: number): void;
     }
     class ParticleSysteFixtureParticle {
         first: Fixture;
@@ -4158,8 +4097,8 @@ declare namespace b2 {
         constructor(fixture: Fixture, particle: number);
     }
     class ParticleSysteFixtureParticleSet extends ParticleSysteFixedSetAllocator<ParticleSysteFixtureParticle> {
-        Initialize(bodyContactBuffer: GrowableBuffer<ParticleBodyContact>, flagsBuffer: ParticleSysteUserOverridableBuffer<ParticleFlag>): void;
-        Find(pair: ParticleSysteFixtureParticle): number;
+        initialize(bodyContactBuffer: GrowableBuffer<ParticleBodyContact>, flagsBuffer: ParticleSysteUserOverridableBuffer<ParticleFlag>): void;
+        find(pair: ParticleSysteFixtureParticle): number;
     }
     class ParticleSysteParticlePair {
         first: number;
@@ -4167,8 +4106,8 @@ declare namespace b2 {
         constructor(particleA: number, particleB: number);
     }
     class ParticlePairSet extends ParticleSysteFixedSetAllocator<ParticleSysteParticlePair> {
-        Initialize(contactBuffer: GrowableBuffer<ParticleContact>, flagsBuffer: ParticleSysteUserOverridableBuffer<ParticleFlag>): void;
-        Find(pair: ParticleSysteParticlePair): number;
+        initialize(contactBuffer: GrowableBuffer<ParticleContact>, flagsBuffer: ParticleSysteUserOverridableBuffer<ParticleFlag>): void;
+        find(pair: ParticleSysteParticlePair): number;
     }
     class ParticleSysteConnectionFilter {
         /**
@@ -4176,15 +4115,15 @@ declare namespace b2 {
          * A pair or a triad should contain at least one 'necessary'
          * particle.
          */
-        IsNecessary(index: number): boolean;
+        isNecessary(index: number): boolean;
         /**
          * An additional condition for creating a pair.
          */
-        ShouldCreatePair(a: number, b: number): boolean;
+        shouldCreatePair(a: number, b: number): boolean;
         /**
          * An additional condition for creating a triad.
          */
-        ShouldCreateTriad(a: number, b: number, c: number): boolean;
+        shouldCreateTriad(a: number, b: number, c: number): boolean;
     }
     class ParticleSysteDestroyParticlesInShapeCallback extends QueryCallback {
         system: ParticleSystem;
@@ -4193,9 +4132,9 @@ declare namespace b2 {
         callDestructionListener: boolean;
         destroyed: number;
         constructor(system: ParticleSystem, shape: Shape, xf: Transform, callDestructionListener: boolean);
-        ReportFixture(fixture: Fixture): boolean;
-        ReportParticle(particleSystem: ParticleSystem, index: number): boolean;
-        Destroyed(): number;
+        reportFixture(fixture: Fixture): boolean;
+        reportParticle(particleSystem: ParticleSystem, index: number): boolean;
+        isDestroyed(): number;
     }
     class ParticleSysteJoinParticleGroupsFilter extends ParticleSysteConnectionFilter {
         threshold: number;
@@ -4203,79 +4142,79 @@ declare namespace b2 {
         /**
          * An additional condition for creating a pair.
          */
-        ShouldCreatePair(a: number, b: number): boolean;
+        shouldCreatePair(a: number, b: number): boolean;
         /**
          * An additional condition for creating a triad.
          */
-        ShouldCreateTriad(a: number, b: number, c: number): boolean;
+        shouldCreateTriad(a: number, b: number, c: number): boolean;
     }
     class ParticleSysteCompositeShape extends Shape {
         constructor(shapes: Shape[], shapeCount?: number);
         shapes: Shape[];
         shapeCount: number;
-        Clone(): Shape;
-        GetChildCount(): number;
+        clone(): Shape;
+        getChildCount(): number;
         /**
          * @see Shape::TestPoint
          */
-        TestPoint(xf: Transform, p: XY): boolean;
+        testPoint(xf: Transform, p: XY): boolean;
         /**
          * @see Shape::ComputeDistance
          */
-        ComputeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
+        computeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number;
         /**
          * Implement Shape.
          */
-        RayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean;
+        rayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean;
         /**
          * @see Shape::ComputeAABB
          */
-        ComputeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
+        computeAABB(aabb: AABB, xf: Transform, childIndex: number): void;
         /**
          * @see Shape::ComputeMass
          */
-        ComputeMass(massData: MassData, density: number): void;
-        SetupDistanceProxy(proxy: DistanceProxy, index: number): void;
-        ComputeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
-        Dump(log: (format: string, ...args: any[]) => void): void;
+        computeMass(massData: MassData, density: number): void;
+        setupDistanceProxy(proxy: DistanceProxy, index: number): void;
+        computeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number;
+        dump(log: (format: string, ...args: any[]) => void): void;
     }
     class ParticleSysteReactiveFilter extends ParticleSysteConnectionFilter {
         flagsBuffer: ParticleSysteUserOverridableBuffer<ParticleFlag>;
         constructor(flagsBuffer: ParticleSysteUserOverridableBuffer<ParticleFlag>);
-        IsNecessary(index: number): boolean;
+        isNecessary(index: number): boolean;
     }
     class ParticleSysteUpdateBodyContactsCallback extends FixtureParticleQueryCallback {
-        contactFilter: ContactFilter | null;
-        constructor(system: ParticleSystem, contactFilter?: ContactFilter | null);
-        ShouldCollideFixtureParticle(fixture: Fixture, particleSystem: ParticleSystem, particleIndex: number): boolean;
-        ReportFixtureAndParticle(fixture: Fixture, childIndex: number, a: number): void;
+        contactFilter: ContactFilter;
+        constructor(system: ParticleSystem, contactFilter?: ContactFilter);
+        shouldCollideFixtureParticle(fixture: Fixture, particleSystem: ParticleSystem, particleIndex: number): boolean;
+        reportFixtureAndParticle(fixture: Fixture, childIndex: number, a: number): void;
         static readonly ReportFixtureAndParticle_s_n: Vec2;
         static readonly ReportFixtureAndParticle_s_rp: Vec2;
     }
     class ParticleSysteSolveCollisionCallback extends FixtureParticleQueryCallback {
         step: TimeStep;
         constructor(system: ParticleSystem, step: TimeStep);
-        ReportFixtureAndParticle(fixture: Fixture, childIndex: number, a: number): void;
+        reportFixtureAndParticle(fixture: Fixture, childIndex: number, a: number): void;
         static readonly ReportFixtureAndParticle_s_p1: Vec2;
         static readonly ReportFixtureAndParticle_s_output: RayCastOutput;
         static readonly ReportFixtureAndParticle_s_input: RayCastInput;
         static readonly ReportFixtureAndParticle_s_p: Vec2;
         static readonly ReportFixtureAndParticle_s_v: Vec2;
         static readonly ReportFixtureAndParticle_s_f: Vec2;
-        ReportParticle(system: ParticleSystem, index: number): boolean;
+        reportParticle(system: ParticleSystem, index: number): boolean;
     }
 }
 declare namespace b2 {
     class StackQueue<T> {
-        readonly buffer: Array<T | null>;
+        readonly buffer: Array<T>;
         front: number;
         back: number;
         readonly capacity: number;
         constructor(capacity: number);
-        Push(item: T): void;
-        Pop(): void;
-        Empty(): boolean;
-        Front(): T;
+        push(item: T): void;
+        pop(): void;
+        empty(): boolean;
+        getFront(): T;
     }
 }
 /**
@@ -4297,7 +4236,7 @@ declare namespace b2 {
          * @param tag a tag used to identify the generator in callback functions.
          * @param necessary whether to callback for nodes associated with the generator.
          */
-        AddGenerator(center: Vec2, tag: number, necessary: boolean): void;
+        addGenerator(center: Vec2, tag: number, necessary: boolean): void;
         /**
          * Generate the Voronoi diagram. It is rasterized with a given
          * interval in the same range as the necessary generators exist.
@@ -4305,12 +4244,12 @@ declare namespace b2 {
          * @param radius the interval of the diagram.
          * @param margin margin for which the range of the diagram is extended.
          */
-        Generate(radius: number, margin: number): void;
+        generate(radius: number, margin: number): void;
         /**
          * Enumerate all nodes that contain at least one necessary
          * generator.
          */
-        GetNodes(callback: VoronoiDiagraNodeCallback): void;
+        getNodes(callback: VoronoiDiagraNodeCallback): void;
     }
     /**
      * Callback used by GetNodes().
@@ -4357,7 +4296,7 @@ declare namespace b2 {
         isometric: boolean;
         fixedEffectiveMass: boolean;
         warmStart: boolean;
-        Copy(other: RopeTuning): this;
+        copy(other: RopeTuning): this;
     }
     class RopeDef {
         readonly position: Vec2;
@@ -4381,18 +4320,18 @@ declare namespace b2 {
         private readonly invMasses;
         private readonly gravity;
         private readonly tuning;
-        Create(def: RopeDef): void;
-        SetTuning(tuning: RopeTuning): void;
-        Step(dt: number, iterations: number, position: Vec2): void;
-        Reset(position: Vec2): void;
-        Draw(draw: Draw): void;
-        private SolveStretch_PBD;
-        private SolveStretch_XPBD;
-        private SolveBend_PBD_Angle;
-        private SolveBend_XPBD_Angle;
-        private SolveBend_PBD_Distance;
-        private SolveBend_PBD_Height;
-        private SolveBend_PBD_Triangle;
-        private ApplyBendForces;
+        create(def: RopeDef): void;
+        setTuning(tuning: RopeTuning): void;
+        step(dt: number, iterations: number, position: Vec2): void;
+        reset(position: Vec2): void;
+        draw(draw: Draw): void;
+        private solveStretchPBD;
+        private solveStretchXPBD;
+        private solveBendPBDAngle;
+        private solveBendXPBDAngle;
+        private solveBendPBDDistance;
+        private solveBendPBDHeight;
+        private solveBendPBDTriangle;
+        private applyBendForces;
     }
 }

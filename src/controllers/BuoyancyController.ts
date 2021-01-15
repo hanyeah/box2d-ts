@@ -60,16 +60,16 @@ namespace b2 {
      */
     public readonly gravity = new Vec2(0, 0);
 
-    public Step(step: TimeStep) {
+    public step(step: TimeStep) {
       if (!this.bodyList) {
         return;
       }
       if (this.useWorldGravity) {
-        this.gravity.Copy(this.bodyList.body.GetWorld().GetGravity());
+        this.gravity.copy(this.bodyList.body.getWorld().gravity);
       }
       for (let i: ControllerEdge = this.bodyList; i; i = i.nextBody) {
         const body = i.body;
-        if (!body.IsAwake()) {
+        if (!body.isAwake()) {
           //Buoyancy force is just a function of position,
           //so unlike most forces, it is safe to ignore sleeping bodes
           continue;
@@ -78,16 +78,16 @@ namespace b2 {
         const massc = new Vec2();
         let area = 0;
         let mass = 0;
-        for (let fixture = body.GetFixtureList(); fixture; fixture = fixture.next) {
+        for (let fixture = body.getFixtureList(); fixture; fixture = fixture.next) {
           const sc = new Vec2();
-          const sarea = fixture.GetShape().ComputeSubmergedArea(this.normal, this.offset, body.GetTransform(), sc);
+          const sarea = fixture.getShape().computeSubmergedArea(this.normal, this.offset, body.getTransform(), sc);
           area += sarea;
           areac.x += sarea * sc.x;
           areac.y += sarea * sc.y;
           let shapeDensity = 0;
           if (this.useDensity) {
             //TODO: Expose density publicly
-            shapeDensity = fixture.GetDensity();
+            shapeDensity = fixture.getDensity();
           } else {
             shapeDensity = 1;
           }
@@ -104,21 +104,21 @@ namespace b2 {
           continue;
         }
         //Buoyancy
-        const buoyancyForce = this.gravity.Clone().SelfNeg();
-        buoyancyForce.SelfMul(this.density * area);
-        body.ApplyForce(buoyancyForce, massc);
+        const buoyancyForce = this.gravity.clone().selfNeg();
+        buoyancyForce.selfMul(this.density * area);
+        body.applyForce(buoyancyForce, massc);
         //Linear drag
-        const dragForce = body.GetLinearVelocityFromWorldPoint(areac, new Vec2());
-        dragForce.SelfSub(this.velocity);
-        dragForce.SelfMul((-this.linearDrag * area));
-        body.ApplyForce(dragForce, areac);
+        const dragForce = body.getLinearVelocityFromWorldPoint(areac, new Vec2());
+        dragForce.selfSub(this.velocity);
+        dragForce.selfMul((-this.linearDrag * area));
+        body.applyForce(dragForce, areac);
         //Angular drag
         //TODO: Something that makes more physical sense?
-        body.ApplyTorque((-body.GetInertia() / body.GetMass() * area * body.GetAngularVelocity() * this.angularDrag));
+        body.applyTorque((-body.getInertia() / body.getMass() * area * body.getAngularVelocity() * this.angularDrag));
       }
     }
 
-    public Draw(debugDraw: Draw) {
+    public draw(debugDraw: Draw) {
       const r = 100;
       const p1 = new Vec2();
       const p2 = new Vec2();
@@ -129,7 +129,7 @@ namespace b2 {
 
       const color = new Color(0, 0, 0.8);
 
-      debugDraw.DrawSegment(p1, p2, color);
+      debugDraw.drawSegment(p1, p2, color);
     }
   }
 

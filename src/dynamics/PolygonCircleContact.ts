@@ -17,15 +17,15 @@
 */
 namespace b2 {
   export class PolygonAndCircleContact extends Contact<PolygonShape, CircleShape> {
-    public static Create(): Contact {
+    public static create(): Contact {
       return new PolygonAndCircleContact();
     }
 
-    public static Destroy(contact: Contact): void {
+    public static destroy(contact: Contact): void {
     }
 
-    public Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void {
-      CollidePolygonAndCircle(manifold, this.GetShapeA(), xfA, this.GetShapeB(), xfB);
+    public evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void {
+      collidePolygonAndCircle(manifold, this.getShapeA(), xfA, this.getShapeB(), xfB);
     }
   }
 }

@@ -141,8 +141,8 @@ namespace b2 {
     public readonly contacts: Contact[] = [/*1024*/]; // TODO: Settings
     public readonly joints: Joint[] = [/*1024*/]; // TODO: Settings
 
-    public readonly positions: Position[] = Position.MakeArray(1024); // TODO: Settings
-    public readonly velocities: Velocity[] = Velocity.MakeArray(1024); // TODO: Settings
+    public readonly positions: Position[] = Position.makeArray(1024); // TODO: Settings
+    public readonly velocities: Velocity[] = Velocity.makeArray(1024); // TODO: Settings
 
     public bodyCount: number = 0;
     public jointCount: number = 0;
@@ -152,7 +152,7 @@ namespace b2 {
     public contactCapacity: number = 0;
     public jointCapacity: number = 0;
 
-    public Initialize(bodyCapacity: number, contactCapacity: number, jointCapacity: number, listener: ContactListener): void {
+    public initialize(bodyCapacity: number, contactCapacity: number, jointCapacity: number, listener: ContactListener): void {
       this.bodyCapacity = bodyCapacity;
       this.contactCapacity = contactCapacity;
       this.jointCapacity = jointCapacity;
@@ -191,24 +191,24 @@ namespace b2 {
       }
     }
 
-    public Clear(): void {
+    public clear(): void {
       this.bodyCount = 0;
       this.contactCount = 0;
       this.jointCount = 0;
     }
 
-    public AddBody(body: Body): void {
+    public addBody(body: Body): void {
       // DEBUG: Assert(this.bodyCount < this.bodyCapacity);
       body.islandIndex = this.bodyCount;
       this.bodies[this.bodyCount++] = body;
     }
 
-    public AddContact(contact: Contact): void {
+    public addContact(contact: Contact): void {
       // DEBUG: Assert(this.contactCount < this.contactCapacity);
       this.contacts[this.contactCount++] = contact;
     }
 
-    public AddJoint(joint: Joint): void {
+    public addJoint(joint: Joint): void {
       // DEBUG: Assert(this.jointCount < this.jointCapacity);
       this.joints[this.jointCount++] = joint;
     }
@@ -218,8 +218,8 @@ namespace b2 {
     private static s_contactSolverDef = new ContactSolverDef();
     private static s_contactSolver = new ContactSolver();
     private static s_translation = new Vec2();
-    public Solve(profile: Profile, step: TimeStep, gravity: Vec2, allowSleep: boolean): void {
-      const timer: Timer = Island.s_timer.Reset();
+    public solve(profile: Profile, step: TimeStep, gravity: Vec2, allowSleep: boolean): void {
+      const timer: Timer = Island.s_timer.reset();
 
       const h: number = step.dt;
 
@@ -228,16 +228,16 @@ namespace b2 {
         const b: Body = this.bodies[i];
 
         // const c: Vec2 =
-        this.positions[i].c.Copy(b.sweep.c);
+        this.positions[i].c.copy(b.sweep.c);
         const a: number = b.sweep.a;
-        const v: Vec2 = this.velocities[i].v.Copy(b.linearVelocity);
+        const v: Vec2 = this.velocities[i].v.copy(b.linearVelocity);
         let w: number = b.angularVelocity;
 
         // Store positions for continuous collision.
-        b.sweep.c0.Copy(b.sweep.c);
+        b.sweep.c0.copy(b.sweep.c);
         b.sweep.a0 = b.sweep.a;
 
-        if (b.type === BodyType.dynamicBody) {
+        if (b.type === BodyType.DynamicBody) {
           // Integrate velocities.
           // v += h * b->invMass * (b->gravityScale * b->mass * gravity + b->force);
           v.x += h * b.invMass * (b.gravityScale * b.mass * gravity.x + b.force.x);
@@ -251,7 +251,7 @@ namespace b2 {
           // v2 = exp(-c * dt) * v1
           // Pade approximation:
           // v2 = v1 * 1 / (1 + c * dt)
-          v.SelfMul(1.0 / (1.0 + h * b.linearDamping));
+          v.selfMul(1.0 / (1.0 + h * b.linearDamping));
           w *= 1.0 / (1.0 + h * b.angularDamping);
         }
 
@@ -261,48 +261,48 @@ namespace b2 {
         this.velocities[i].w = w;
       }
 
-      timer.Reset();
+      timer.reset();
 
       // Solver data
       const solverData: SolverData = Island.s_solverData;
-      solverData.step.Copy(step);
+      solverData.step.copy(step);
       solverData.positions = this.positions;
       solverData.velocities = this.velocities;
 
       // Initialize velocity constraints.
       const contactSolverDef: ContactSolverDef = Island.s_contactSolverDef;
-      contactSolverDef.step.Copy(step);
+      contactSolverDef.step.copy(step);
       contactSolverDef.contacts = this.contacts;
       contactSolverDef.count = this.contactCount;
       contactSolverDef.positions = this.positions;
       contactSolverDef.velocities = this.velocities;
 
-      const contactSolver: ContactSolver = Island.s_contactSolver.Initialize(contactSolverDef);
-      contactSolver.InitializeVelocityConstraints();
+      const contactSolver: ContactSolver = Island.s_contactSolver.initialize(contactSolverDef);
+      contactSolver.initializeVelocityConstraints();
 
       if (step.warmStarting) {
-        contactSolver.WarmStart();
+        contactSolver.warmStart();
       }
 
       for (let i: number = 0; i < this.jointCount; ++i) {
-        this.joints[i].InitVelocityConstraints(solverData);
+        this.joints[i].initVelocityConstraints(solverData);
       }
 
-      profile.solveInit = timer.GetMilliseconds();
+      profile.solveInit = timer.getMilliseconds();
 
       // Solve velocity constraints.
-      timer.Reset();
+      timer.reset();
       for (let i: number = 0; i < step.velocityIterations; ++i) {
         for (let j: number = 0; j < this.jointCount; ++j) {
-          this.joints[j].SolveVelocityConstraints(solverData);
+          this.joints[j].solveVelocityConstraints(solverData);
         }
 
-        contactSolver.SolveVelocityConstraints();
+        contactSolver.solveVelocityConstraints();
       }
 
       // Store impulses for warm starting
-      contactSolver.StoreImpulses();
-      profile.solveVelocity = timer.GetMilliseconds();
+      contactSolver.storeImpulses();
+      profile.solveVelocity = timer.getMilliseconds();
 
       // Integrate positions.
       for (let i: number = 0; i < this.bodyCount; ++i) {
@@ -314,8 +314,8 @@ namespace b2 {
         // Check for large velocities
         const translation: Vec2 = Vec2.MulSV(h, v, Island.s_translation);
         if (Vec2.DotVV(translation, translation) > maxTranslationSquared) {
-          const ratio: number = maxTranslation / translation.Length();
-          v.SelfMul(ratio);
+          const ratio: number = maxTranslation / translation.length();
+          v.selfMul(ratio);
         }
 
         const rotation: number = h * w;
@@ -336,14 +336,14 @@ namespace b2 {
       }
 
       // Solve position constraints
-      timer.Reset();
+      timer.reset();
       let positionSolved: boolean = false;
       for (let i: number = 0; i < step.positionIterations; ++i) {
-        const contactsOkay: boolean = contactSolver.SolvePositionConstraints();
+        const contactsOkay: boolean = contactSolver.solvePositionConstraints();
 
         let jointsOkay: boolean = true;
         for (let j: number = 0; j < this.jointCount; ++j) {
-          const jointOkay: boolean = this.joints[j].SolvePositionConstraints(solverData);
+          const jointOkay: boolean = this.joints[j].solvePositionConstraints(solverData);
           jointsOkay = jointsOkay && jointOkay;
         }
 
@@ -357,16 +357,16 @@ namespace b2 {
       // Copy state buffers back to the bodies
       for (let i: number = 0; i < this.bodyCount; ++i) {
         const body: Body = this.bodies[i];
-        body.sweep.c.Copy(this.positions[i].c);
+        body.sweep.c.copy(this.positions[i].c);
         body.sweep.a = this.positions[i].a;
-        body.linearVelocity.Copy(this.velocities[i].v);
+        body.linearVelocity.copy(this.velocities[i].v);
         body.angularVelocity = this.velocities[i].w;
-        body.SynchronizeTransform();
+        body.synchronizeTransform();
       }
 
-      profile.solvePosition = timer.GetMilliseconds();
+      profile.solvePosition = timer.getMilliseconds();
 
-      this.Report(contactSolver.velocityConstraints);
+      this.report(contactSolver.velocityConstraints);
 
       if (allowSleep) {
         let minSleepTime: number = maxFloat;
@@ -376,7 +376,7 @@ namespace b2 {
 
         for (let i: number = 0; i < this.bodyCount; ++i) {
           const b: Body = this.bodies[i];
-          if (b.GetType() === BodyType.staticBody) {
+          if (b.getType() === BodyType.StaticBody) {
             continue;
           }
 
@@ -394,36 +394,36 @@ namespace b2 {
         if (minSleepTime >= timeToSleep && positionSolved) {
           for (let i: number = 0; i < this.bodyCount; ++i) {
             const b: Body = this.bodies[i];
-            b.SetAwake(false);
+            b.setAwake(false);
           }
         }
       }
     }
 
-    public SolveTOI(subStep: TimeStep, toiIndexA: number, toiIndexB: number): void {
+    public solveTOI(subStep: TimeStep, toiIndexA: number, toiIndexB: number): void {
       // DEBUG: Assert(toiIndexA < this.bodyCount);
       // DEBUG: Assert(toiIndexB < this.bodyCount);
 
       // Initialize the body state.
       for (let i: number = 0; i < this.bodyCount; ++i) {
         const b: Body = this.bodies[i];
-        this.positions[i].c.Copy(b.sweep.c);
+        this.positions[i].c.copy(b.sweep.c);
         this.positions[i].a = b.sweep.a;
-        this.velocities[i].v.Copy(b.linearVelocity);
+        this.velocities[i].v.copy(b.linearVelocity);
         this.velocities[i].w = b.angularVelocity;
       }
 
       const contactSolverDef: ContactSolverDef = Island.s_contactSolverDef;
       contactSolverDef.contacts = this.contacts;
       contactSolverDef.count = this.contactCount;
-      contactSolverDef.step.Copy(subStep);
+      contactSolverDef.step.copy(subStep);
       contactSolverDef.positions = this.positions;
       contactSolverDef.velocities = this.velocities;
-      const contactSolver: ContactSolver = Island.s_contactSolver.Initialize(contactSolverDef);
+      const contactSolver: ContactSolver = Island.s_contactSolver.initialize(contactSolverDef);
 
       // Solve position constraints.
       for (let i: number = 0; i < subStep.positionIterations; ++i) {
-        const contactsOkay: boolean = contactSolver.SolveTOIPositionConstraints(toiIndexA, toiIndexB);
+        const contactsOkay: boolean = contactSolver.solveTOIPositionConstraints(toiIndexA, toiIndexB);
         if (contactsOkay) {
           break;
         }
@@ -463,18 +463,18 @@ namespace b2 {
       */
 
       // Leap of faith to new safe state.
-      this.bodies[toiIndexA].sweep.c0.Copy(this.positions[toiIndexA].c);
+      this.bodies[toiIndexA].sweep.c0.copy(this.positions[toiIndexA].c);
       this.bodies[toiIndexA].sweep.a0 = this.positions[toiIndexA].a;
-      this.bodies[toiIndexB].sweep.c0.Copy(this.positions[toiIndexB].c);
+      this.bodies[toiIndexB].sweep.c0.copy(this.positions[toiIndexB].c);
       this.bodies[toiIndexB].sweep.a0 = this.positions[toiIndexB].a;
 
       // No warm starting is needed for TOI events because warm
       // starting impulses were applied in the discrete solver.
-      contactSolver.InitializeVelocityConstraints();
+      contactSolver.initializeVelocityConstraints();
 
       // Solve velocity constraints.
       for (let i: number = 0; i < subStep.velocityIterations; ++i) {
-        contactSolver.SolveVelocityConstraints();
+        contactSolver.solveVelocityConstraints();
       }
 
       // Don't store the TOI contact forces for warm starting
@@ -492,8 +492,8 @@ namespace b2 {
         // Check for large velocities
         const translation: Vec2 = Vec2.MulSV(h, v, Island.s_translation);
         if (Vec2.DotVV(translation, translation) > maxTranslationSquared) {
-          const ratio: number = maxTranslation / translation.Length();
-          v.SelfMul(ratio);
+          const ratio: number = maxTranslation / translation.length();
+          v.selfMul(ratio);
         }
 
         const rotation: number = h * w;
@@ -503,7 +503,7 @@ namespace b2 {
         }
 
         // Integrate
-        c.SelfMulAdd(h, v);
+        c.selfMulAdd(h, v);
         a += h * w;
 
         // this.positions[i].c = c;
@@ -513,18 +513,18 @@ namespace b2 {
 
         // Sync bodies
         const body: Body = this.bodies[i];
-        body.sweep.c.Copy(c);
+        body.sweep.c.copy(c);
         body.sweep.a = a;
-        body.linearVelocity.Copy(v);
+        body.linearVelocity.copy(v);
         body.angularVelocity = w;
-        body.SynchronizeTransform();
+        body.synchronizeTransform();
       }
 
-      this.Report(contactSolver.velocityConstraints);
+      this.report(contactSolver.velocityConstraints);
     }
 
     private static s_impulse = new ContactImpulse();
-    public Report(constraints: ContactVelocityConstraint[]): void {
+    public report(constraints: ContactVelocityConstraint[]): void {
       if (this.listener === null) {
         return;
       }
@@ -543,7 +543,7 @@ namespace b2 {
           impulse.tangentImpulses[j] = vc.points[j].tangentImpulse;
         }
 
-        this.listener.PostSolve(c, impulse);
+        this.listener.postSolve(c, impulse);
       }
     }
   }

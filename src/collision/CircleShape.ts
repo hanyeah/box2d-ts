@@ -24,50 +24,50 @@ namespace b2 {
     public readonly p: Vec2 = new Vec2();
 
     constructor(radius: number = 0) {
-      super(ShapeType.e_circleShape, radius);
+      super(ShapeType.CircleShape, radius);
     }
 
-    public Set(position: XY, radius: number = this.radius): this {
-      this.p.Copy(position);
+    public set(position: XY, radius: number = this.radius): this {
+      this.p.copy(position);
       this.radius = radius;
       return this;
     }
 
     /// Implement Shape.
-    public Clone(): CircleShape {
-      return new CircleShape().Copy(this);
+    public clone(): CircleShape {
+      return new CircleShape().copy(this);
     }
 
-    public Copy(other: CircleShape): CircleShape {
-      super.Copy(other);
+    public copy(other: CircleShape): CircleShape {
+      super.copy(other);
 
       // DEBUG: Assert(other instanceof CircleShape);
 
-      this.p.Copy(other.p);
+      this.p.copy(other.p);
       return this;
     }
 
     /// @see Shape::GetChildCount
-    public GetChildCount(): number {
+    public getChildCount(): number {
       return 1;
     }
 
     /// Implement Shape.
     private static TestPoint_s_center = new Vec2();
     private static TestPoint_s_d = new Vec2();
-    public TestPoint(transform: Transform, p: XY): boolean {
-      const center: Vec2 = Transform.MulXV(transform, this.p, CircleShape.TestPoint_s_center);
+    public testPoint(transform: Transform, p: XY): boolean {
+      const center: Vec2 = Transform.mulXV(transform, this.p, CircleShape.TestPoint_s_center);
       const d: Vec2 = Vec2.SubVV(p, center, CircleShape.TestPoint_s_d);
-      return Vec2.DotVV(d, d) <= Sq(this.radius);
+      return Vec2.DotVV(d, d) <= sqrt(this.radius);
     }
 
     // #if ENABLE_PARTICLE
     /// @see Shape::ComputeDistance
     private static ComputeDistance_s_center = new Vec2();
-    public ComputeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number {
-      const center = Transform.MulXV(xf, this.p, CircleShape.ComputeDistance_s_center);
+    public computeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number {
+      const center = Transform.mulXV(xf, this.p, CircleShape.ComputeDistance_s_center);
       Vec2.SubVV(p, center, normal);
-      return normal.Normalize() - this.radius;
+      return normal.normalize() - this.radius;
     }
     // #endif
 
@@ -78,16 +78,16 @@ namespace b2 {
     // From Section 3.1.2
     // x = s + a * r
     // norm(x) = radius
-    private static RayCast_s_position = new Vec2();
-    private static RayCast_s_s = new Vec2();
-    private static RayCast_s_r = new Vec2();
-    public RayCast(output: RayCastOutput, input: RayCastInput, transform: Transform, childIndex: number): boolean {
-      const position: Vec2 = Transform.MulXV(transform, this.p, CircleShape.RayCast_s_position);
-      const s: Vec2 = Vec2.SubVV(input.p1, position, CircleShape.RayCast_s_s);
-      const b: number = Vec2.DotVV(s, s) - Sq(this.radius);
+    private static rayCast_s_position = new Vec2();
+    private static rayCast_s_s = new Vec2();
+    private static rayCast_s_r = new Vec2();
+    public rayCast(output: RayCastOutput, input: RayCastInput, transform: Transform, childIndex: number): boolean {
+      const position: Vec2 = Transform.mulXV(transform, this.p, CircleShape.rayCast_s_position);
+      const s: Vec2 = Vec2.SubVV(input.p1, position, CircleShape.rayCast_s_s);
+      const b: number = Vec2.DotVV(s, s) - sqrt(this.radius);
 
       // Solve quadratic equation.
-      const r: Vec2 = Vec2.SubVV(input.p2, input.p1, CircleShape.RayCast_s_r);
+      const r: Vec2 = Vec2.SubVV(input.p2, input.p1, CircleShape.rayCast_s_r);
       const c: number = Vec2.DotVV(s, r);
       const rr: number = Vec2.DotVV(r, r);
       const sigma = c * c - rr * b;
@@ -104,7 +104,7 @@ namespace b2 {
       if (0 <= a && a <= input.maxFraction * rr) {
         a /= rr;
         output.fraction = a;
-        Vec2.AddVMulSV(s, a, r, output.normal).SelfNormalize();
+        Vec2.AddVMulSV(s, a, r, output.normal).selfNormalize();
         return true;
       }
 
@@ -112,32 +112,32 @@ namespace b2 {
     }
 
     /// @see Shape::ComputeAABB
-    private static ComputeAABB_s_p = new Vec2();
-    public ComputeAABB(aabb: AABB, transform: Transform, childIndex: number): void {
-      const p: Vec2 = Transform.MulXV(transform, this.p, CircleShape.ComputeAABB_s_p);
-      aabb.lowerBound.Set(p.x - this.radius, p.y - this.radius);
-      aabb.upperBound.Set(p.x + this.radius, p.y + this.radius);
+    private static computeAABB_s_p = new Vec2();
+    public computeAABB(aabb: AABB, transform: Transform, childIndex: number): void {
+      const p: Vec2 = Transform.mulXV(transform, this.p, CircleShape.computeAABB_s_p);
+      aabb.lowerBound.set(p.x - this.radius, p.y - this.radius);
+      aabb.upperBound.set(p.x + this.radius, p.y + this.radius);
     }
 
     /// @see Shape::ComputeMass
-    public ComputeMass(massData: MassData, density: number): void {
-      const radius_sq: number = Sq(this.radius);
+    public computeMass(massData: MassData, density: number): void {
+      const radius_sq: number = sqrt(this.radius);
       massData.mass = density * pi * radius_sq;
-      massData.center.Copy(this.p);
+      massData.center.copy(this.p);
 
       // inertia about the local origin
       massData.I = massData.mass * (0.5 * radius_sq + Vec2.DotVV(this.p, this.p));
     }
 
-    public SetupDistanceProxy(proxy: DistanceProxy, index: number): void {
+    public setupDistanceProxy(proxy: DistanceProxy, index: number): void {
       proxy.vertices = proxy.buffer;
-      proxy.vertices[0].Copy(this.p);
+      proxy.vertices[0].copy(this.p);
       proxy.count = 1;
       proxy.radius = this.radius;
     }
 
-    public ComputeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number {
-      const p: Vec2 = Transform.MulXV(xf, this.p, new Vec2());
+    public computeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number {
+      const p: Vec2 = Transform.mulXV(xf, this.p, new Vec2());
       const l: number = (-(Vec2.DotVV(normal, p) - offset));
 
       if (l < (-this.radius) + epsilon) {
@@ -146,7 +146,7 @@ namespace b2 {
       }
       if (l > this.radius) {
         // Completely wet
-        c.Copy(p);
+        c.copy(p);
         return pi * this.radius * this.radius;
       }
 
@@ -162,7 +162,7 @@ namespace b2 {
       return area;
     }
 
-    public Dump(log: (format: string, ...args: any[]) => void): void {
+    public dump(log: (format: string, ...args: any[]) => void): void {
       log("    const shape: CircleShape = new CircleShape();\n");
       log("    shape.radius = %.15f;\n", this.radius);
       log("    shape.p.Set(%.15f, %.15f);\n", this.p.x, this.p.y);

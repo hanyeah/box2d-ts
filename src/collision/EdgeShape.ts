@@ -22,16 +22,16 @@ namespace b2 {
 /// to other edge shapes. Edges created independently are two-sided and do
 /// no provide smooth movement across junctions.
   export class EdgeShape extends Shape {
+    public readonly vertex0: Vec2 = new Vec2();
     public readonly vertex1: Vec2 = new Vec2();
     public readonly vertex2: Vec2 = new Vec2();
-    public readonly vertex0: Vec2 = new Vec2();
     public readonly vertex3: Vec2 = new Vec2();
 
     /// Uses vertex0 and vertex3 to create smooth collision.
     public oneSided: boolean = false;
 
     constructor() {
-      super(ShapeType.e_edgeShape, polygonRadius);
+      super(ShapeType.EdgeShape, polygonRadius);
     }
 
     /// Set this as a part of a sequence. Vertex v0 precedes the edge and vertex v3
@@ -39,49 +39,49 @@ namespace b2 {
     /// across junctions. This also makes the collision one-sided. The edge
     /// normal points to the right looking from v1 to v2.
     // void SetOneSided(const Vec2& v0, const Vec2& v1,const Vec2& v2, const Vec2& v3);
-    public SetOneSided(v0: XY, v1: XY, v2: XY, v3: XY): EdgeShape {
-      this.vertex0.Copy(v0);
-      this.vertex1.Copy(v1);
-      this.vertex2.Copy(v2);
-      this.vertex3.Copy(v3);
+    public setOneSided(v0: XY, v1: XY, v2: XY, v3: XY): EdgeShape {
+      this.vertex0.copy(v0);
+      this.vertex1.copy(v1);
+      this.vertex2.copy(v2);
+      this.vertex3.copy(v3);
       this.oneSided = true;
       return this;
     }
 
     /// Set this as an isolated edge. Collision is two-sided.
-    public SetTwoSided(v1: XY, v2: XY): EdgeShape {
-      this.vertex1.Copy(v1);
-      this.vertex2.Copy(v2);
+    public setTwoSided(v1: XY, v2: XY): EdgeShape {
+      this.vertex1.copy(v1);
+      this.vertex2.copy(v2);
       this.oneSided = false;
       return this;
     }
 
     /// Implement Shape.
-    public Clone(): EdgeShape {
-      return new EdgeShape().Copy(this);
+    public clone(): EdgeShape {
+      return new EdgeShape().copy(this);
     }
 
-    public Copy(other: EdgeShape): EdgeShape {
-      super.Copy(other);
+    public copy(other: EdgeShape): EdgeShape {
+      super.copy(other);
 
       // DEBUG: Assert(other instanceof EdgeShape);
 
-      this.vertex1.Copy(other.vertex1);
-      this.vertex2.Copy(other.vertex2);
-      this.vertex0.Copy(other.vertex0);
-      this.vertex3.Copy(other.vertex3);
+      this.vertex1.copy(other.vertex1);
+      this.vertex2.copy(other.vertex2);
+      this.vertex0.copy(other.vertex0);
+      this.vertex3.copy(other.vertex3);
       this.oneSided = other.oneSided;
 
       return this;
     }
 
     /// @see Shape::GetChildCount
-    public GetChildCount(): number {
+    public getChildCount(): number {
       return 1;
     }
 
     /// @see Shape::TestPoint
-    public TestPoint(xf: Transform, p: XY): boolean {
+    public testPoint(xf: Transform, p: XY): boolean {
       return false;
     }
 
@@ -91,9 +91,9 @@ namespace b2 {
     private static ComputeDistance_s_v2 = new Vec2();
     private static ComputeDistance_s_d = new Vec2();
     private static ComputeDistance_s_s = new Vec2();
-    public ComputeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number {
-      const v1 = Transform.MulXV(xf, this.vertex1, EdgeShape.ComputeDistance_s_v1);
-      const v2 = Transform.MulXV(xf, this.vertex2, EdgeShape.ComputeDistance_s_v2);
+    public computeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number {
+      const v1 = Transform.mulXV(xf, this.vertex1, EdgeShape.ComputeDistance_s_v1);
+      const v2 = Transform.mulXV(xf, this.vertex2, EdgeShape.ComputeDistance_s_v2);
 
       const d = Vec2.SubVV(p, v1, EdgeShape.ComputeDistance_s_d);
       const s = Vec2.SubVV(v2, v1, EdgeShape.ComputeDistance_s_s);
@@ -103,11 +103,11 @@ namespace b2 {
         if (ds > s2) {
           Vec2.SubVV(p, v2, d);
         } else {
-          d.SelfMulSub(ds / s2, s);
+          d.selfMulSub(ds / s2, s);
         }
       }
-      normal.Copy(d);
-      return normal.Normalize();
+      normal.copy(d);
+      return normal.normalize();
     }
     // #endif
 
@@ -116,24 +116,24 @@ namespace b2 {
     // v = v1 + s * e
     // p1 + t * d = v1 + s * e
     // s * e - t * d = p1 - v1
-    private static RayCast_s_p1 = new Vec2();
-    private static RayCast_s_p2 = new Vec2();
-    private static RayCast_s_d = new Vec2();
-    private static RayCast_s_e = new Vec2();
-    private static RayCast_s_q = new Vec2();
-    private static RayCast_s_r = new Vec2();
-    public RayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean {
+    private static rayCast_s_p1 = new Vec2();
+    private static rayCast_s_p2 = new Vec2();
+    private static rayCast_s_d = new Vec2();
+    private static rayCast_s_e = new Vec2();
+    private static rayCast_s_q = new Vec2();
+    private static rayCast_s_r = new Vec2();
+    public rayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean {
       // Put the ray into the edge's frame of reference.
-      const p1: Vec2 = Transform.MulTXV(xf, input.p1, EdgeShape.RayCast_s_p1);
-      const p2: Vec2 = Transform.MulTXV(xf, input.p2, EdgeShape.RayCast_s_p2);
-      const d: Vec2 = Vec2.SubVV(p2, p1, EdgeShape.RayCast_s_d);
+      const p1: Vec2 = Transform.mulTXV(xf, input.p1, EdgeShape.rayCast_s_p1);
+      const p2: Vec2 = Transform.mulTXV(xf, input.p2, EdgeShape.rayCast_s_p2);
+      const d: Vec2 = Vec2.SubVV(p2, p1, EdgeShape.rayCast_s_d);
 
       const v1: Vec2 = this.vertex1;
       const v2: Vec2 = this.vertex2;
-      const e: Vec2 = Vec2.SubVV(v2, v1, EdgeShape.RayCast_s_e);
+      const e: Vec2 = Vec2.SubVV(v2, v1, EdgeShape.rayCast_s_e);
 
       // Normal points to the right, looking from v1 at v2
-      const normal: Vec2 = output.normal.Set(e.y, -e.x).SelfNormalize();
+      const normal: Vec2 = output.normal.set(e.y, -e.x).selfNormalize();
 
       // q = p1 + t * d
       // dot(normal, q - v1) = 0
@@ -154,11 +154,11 @@ namespace b2 {
         return false;
       }
 
-      const q: Vec2 = Vec2.AddVMulSV(p1, t, d, EdgeShape.RayCast_s_q);
+      const q: Vec2 = Vec2.AddVMulSV(p1, t, d, EdgeShape.rayCast_s_q);
 
       // q = v1 + s * r
       // s = dot(q - v1, r) / dot(r, r)
-      const r: Vec2 = Vec2.SubVV(v2, v1, EdgeShape.RayCast_s_r);
+      const r: Vec2 = Vec2.SubVV(v2, v1, EdgeShape.rayCast_s_r);
       const rr: number = Vec2.DotVV(r, r);
       if (rr === 0) {
         return false;
@@ -170,49 +170,49 @@ namespace b2 {
       }
 
       output.fraction = t;
-      Rot.MulRV(xf.q, output.normal, output.normal);
+      Rot.mulRV(xf.q, output.normal, output.normal);
       if (numerator > 0) {
-        output.normal.SelfNeg();
+        output.normal.selfNeg();
       }
       return true;
     }
 
     /// @see Shape::ComputeAABB
-    private static ComputeAABB_s_v1 = new Vec2();
-    private static ComputeAABB_s_v2 = new Vec2();
-    public ComputeAABB(aabb: AABB, xf: Transform, childIndex: number): void {
-      const v1: Vec2 = Transform.MulXV(xf, this.vertex1, EdgeShape.ComputeAABB_s_v1);
-      const v2: Vec2 = Transform.MulXV(xf, this.vertex2, EdgeShape.ComputeAABB_s_v2);
+    private static computeAABB_s_v1 = new Vec2();
+    private static computeAABB_s_v2 = new Vec2();
+    public computeAABB(aabb: AABB, xf: Transform, childIndex: number): void {
+      const v1: Vec2 = Transform.mulXV(xf, this.vertex1, EdgeShape.computeAABB_s_v1);
+      const v2: Vec2 = Transform.mulXV(xf, this.vertex2, EdgeShape.computeAABB_s_v2);
 
       Vec2.MinV(v1, v2, aabb.lowerBound);
       Vec2.MaxV(v1, v2, aabb.upperBound);
 
       const r: number = this.radius;
-      aabb.lowerBound.SelfSubXY(r, r);
-      aabb.upperBound.SelfAddXY(r, r);
+      aabb.lowerBound.selfSubXY(r, r);
+      aabb.upperBound.selfAddXY(r, r);
     }
 
     /// @see Shape::ComputeMass
-    public ComputeMass(massData: MassData, density: number): void {
+    public computeMass(massData: MassData, density: number): void {
       massData.mass = 0;
       Vec2.MidVV(this.vertex1, this.vertex2, massData.center);
       massData.I = 0;
     }
 
-    public SetupDistanceProxy(proxy: DistanceProxy, index: number): void {
+    public setupDistanceProxy(proxy: DistanceProxy, index: number): void {
       proxy.vertices = proxy.buffer;
-      proxy.vertices[0].Copy(this.vertex1);
-      proxy.vertices[1].Copy(this.vertex2);
+      proxy.vertices[0].copy(this.vertex1);
+      proxy.vertices[1].copy(this.vertex2);
       proxy.count = 2;
       proxy.radius = this.radius;
     }
 
-    public ComputeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number {
-      c.SetZero();
+    public computeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number {
+      c.setZero();
       return 0;
     }
 
-    public Dump(log: (format: string, ...args: any[]) => void): void {
+    public dump(log: (format: string, ...args: any[]) => void): void {
       log("    const shape: EdgeShape = new EdgeShape();\n");
       log("    shape.radius = %.15f;\n", this.radius);
       log("    shape.vertex0.Set(%.15f, %.15f);\n", this.vertex0.x, this.vertex0.y);

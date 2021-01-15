@@ -23,8 +23,8 @@
 /// queries, and TOI queries.
 namespace b2 {
   export enum ContactFeatureType {
-    e_vertex = 0,
-    e_face = 1,
+    Vertex = 0,
+    Face = 1,
   }
 
 /// The features that intersect to form the contact point
@@ -95,13 +95,13 @@ namespace b2 {
   export class ContactID {
     public readonly cf: ContactFeature = new ContactFeature();
 
-    public Copy(o: ContactID): ContactID {
+    public copy(o: ContactID): ContactID {
       this.key = o.key;
       return this;
     }
 
-    public Clone(): ContactID {
-      return new ContactID().Copy(this);
+    public clone(): ContactID {
+      return new ContactID().copy(this);
     }
 
     public get key(): number {
@@ -129,31 +129,31 @@ namespace b2 {
     public tangentImpulse: number = 0;      ///< the friction impulse
     public readonly id: ContactID = new ContactID(); ///< uniquely identifies a contact point between two shapes
 
-    public static MakeArray(length: number): ManifoldPoint[] {
+    public static makeArray(length: number): ManifoldPoint[] {
       return MakeArray(length, (i: number): ManifoldPoint => new ManifoldPoint());
     }
 
-    public Reset(): void {
-      this.localPoint.SetZero();
+    public reset(): void {
+      this.localPoint.setZero();
       this.normalImpulse = 0;
       this.tangentImpulse = 0;
       this.id.key = 0;
     }
 
-    public Copy(o: ManifoldPoint): ManifoldPoint {
-      this.localPoint.Copy(o.localPoint);
+    public copy(o: ManifoldPoint): ManifoldPoint {
+      this.localPoint.copy(o.localPoint);
       this.normalImpulse = o.normalImpulse;
       this.tangentImpulse = o.tangentImpulse;
-      this.id.Copy(o.id);
+      this.id.copy(o.id);
       return this;
     }
   }
 
   export enum ManifoldType {
-    e_unknown = -1,
-    e_circles = 0,
-    e_faceA = 1,
-    e_faceB = 2,
+    Unknown = -1,
+    Circles = 0,
+    FaceA = 1,
+    FaceB = 2,
   }
 
 /// A manifold for two touching convex shapes.
@@ -173,37 +173,37 @@ namespace b2 {
 /// All contact scenarios must be expressed in one of these types.
 /// This structure is stored across time steps, so we keep it small.
   export class Manifold {
-    public readonly points: ManifoldPoint[] = ManifoldPoint.MakeArray(maxManifoldPoints);
+    public readonly points: ManifoldPoint[] = ManifoldPoint.makeArray(maxManifoldPoints);
     public readonly localNormal: Vec2 = new Vec2();
     public readonly localPoint: Vec2 = new Vec2();
-    public type: ManifoldType = ManifoldType.e_unknown;
+    public type: ManifoldType = ManifoldType.Unknown;
     public pointCount: number = 0;
 
-    public Reset(): void {
+    public reset(): void {
       for (let i: number = 0; i < maxManifoldPoints; ++i) {
         // DEBUG: Assert(this.points[i] instanceof ManifoldPoint);
-        this.points[i].Reset();
+        this.points[i].reset();
       }
-      this.localNormal.SetZero();
-      this.localPoint.SetZero();
-      this.type = ManifoldType.e_unknown;
+      this.localNormal.setZero();
+      this.localPoint.setZero();
+      this.type = ManifoldType.Unknown;
       this.pointCount = 0;
     }
 
-    public Copy(o: Manifold): Manifold {
+    public copy(o: Manifold): Manifold {
       this.pointCount = o.pointCount;
       for (let i: number = 0; i < maxManifoldPoints; ++i) {
         // DEBUG: Assert(this.points[i] instanceof ManifoldPoint);
-        this.points[i].Copy(o.points[i]);
+        this.points[i].copy(o.points[i]);
       }
-      this.localNormal.Copy(o.localNormal);
-      this.localPoint.Copy(o.localPoint);
+      this.localNormal.copy(o.localNormal);
+      this.localPoint.copy(o.localPoint);
       this.type = o.type;
       return this;
     }
 
-    public Clone(): Manifold {
-      return new Manifold().Copy(this);
+    public clone(): Manifold {
+      return new Manifold().copy(this);
     }
   }
 
@@ -218,18 +218,18 @@ namespace b2 {
     private static Initialize_s_cB = new Vec2();
     private static Initialize_s_planePoint = new Vec2();
     private static Initialize_s_clipPoint = new Vec2();
-    public Initialize(manifold: Manifold, xfA: Transform, radiusA: number, xfB: Transform, radiusB: number): void {
+    public initialize(manifold: Manifold, xfA: Transform, radiusA: number, xfB: Transform, radiusB: number): void {
       if (manifold.pointCount === 0) {
         return;
       }
 
       switch (manifold.type) {
-        case ManifoldType.e_circles: {
-          this.normal.Set(1, 0);
-          const pointA: Vec2 = Transform.MulXV(xfA, manifold.localPoint, WorldManifold.Initialize_s_pointA);
-          const pointB: Vec2 = Transform.MulXV(xfB, manifold.points[0].localPoint, WorldManifold.Initialize_s_pointB);
-          if (Vec2.DistanceSquaredVV(pointA, pointB) > epsilon_sq) {
-            Vec2.SubVV(pointB, pointA, this.normal).SelfNormalize();
+        case ManifoldType.Circles: {
+          this.normal.set(1, 0);
+          const pointA: Vec2 = Transform.mulXV(xfA, manifold.localPoint, WorldManifold.Initialize_s_pointA);
+          const pointB: Vec2 = Transform.mulXV(xfB, manifold.points[0].localPoint, WorldManifold.Initialize_s_pointB);
+          if (Vec2.DistanceSquaredVV(pointA, pointB) > epsilonSq) {
+            Vec2.SubVV(pointB, pointA, this.normal).selfNormalize();
           }
 
           const cA: Vec2 = Vec2.AddVMulSV(pointA, radiusA, this.normal, WorldManifold.Initialize_s_cA);
@@ -239,12 +239,12 @@ namespace b2 {
           break;
         }
 
-        case ManifoldType.e_faceA: {
-          Rot.MulRV(xfA.q, manifold.localNormal, this.normal);
-          const planePoint: Vec2 = Transform.MulXV(xfA, manifold.localPoint, WorldManifold.Initialize_s_planePoint);
+        case ManifoldType.FaceA: {
+          Rot.mulRV(xfA.q, manifold.localNormal, this.normal);
+          const planePoint: Vec2 = Transform.mulXV(xfA, manifold.localPoint, WorldManifold.Initialize_s_planePoint);
 
           for (let i: number = 0; i < manifold.pointCount; ++i) {
-            const clipPoint: Vec2 = Transform.MulXV(xfB, manifold.points[i].localPoint, WorldManifold.Initialize_s_clipPoint);
+            const clipPoint: Vec2 = Transform.mulXV(xfB, manifold.points[i].localPoint, WorldManifold.Initialize_s_clipPoint);
             const s: number = radiusA - Vec2.DotVV(Vec2.SubVV(clipPoint, planePoint, Vec2.s_t0), this.normal);
             const cA: Vec2 = Vec2.AddVMulSV(clipPoint, s, this.normal, WorldManifold.Initialize_s_cA);
             const cB: Vec2 = Vec2.SubVMulSV(clipPoint, radiusB, this.normal, WorldManifold.Initialize_s_cB);
@@ -254,12 +254,12 @@ namespace b2 {
           break;
         }
 
-        case ManifoldType.e_faceB: {
-          Rot.MulRV(xfB.q, manifold.localNormal, this.normal);
-          const planePoint: Vec2 = Transform.MulXV(xfB, manifold.localPoint, WorldManifold.Initialize_s_planePoint);
+        case ManifoldType.FaceB: {
+          Rot.mulRV(xfB.q, manifold.localNormal, this.normal);
+          const planePoint: Vec2 = Transform.mulXV(xfB, manifold.localPoint, WorldManifold.Initialize_s_planePoint);
 
           for (let i: number = 0; i < manifold.pointCount; ++i) {
-            const clipPoint: Vec2 = Transform.MulXV(xfA, manifold.points[i].localPoint, WorldManifold.Initialize_s_clipPoint);
+            const clipPoint: Vec2 = Transform.mulXV(xfA, manifold.points[i].localPoint, WorldManifold.Initialize_s_clipPoint);
             const s: number = radiusB - Vec2.DotVV(Vec2.SubVV(clipPoint, planePoint, Vec2.s_t0), this.normal);
             const cB: Vec2 = Vec2.AddVMulSV(clipPoint, s, this.normal, WorldManifold.Initialize_s_cB);
             const cA: Vec2 = Vec2.SubVMulSV(clipPoint, radiusA, this.normal, WorldManifold.Initialize_s_cA);
@@ -268,7 +268,7 @@ namespace b2 {
           }
 
           // Ensure normal points from A to B.
-          this.normal.SelfNeg();
+          this.normal.selfNeg();
           break;
         }
       }
@@ -277,32 +277,32 @@ namespace b2 {
 
 /// This is used for determining the state of contact points.
   export enum PointState {
-    nullState = 0, ///< point does not exist
-    addState = 1, ///< point was added in the update
-    persistState = 2, ///< point persisted across the update
-    removeState = 3,  ///< point was removed in the update
+    NullState = 0, ///< point does not exist
+    AddState = 1, ///< point was added in the update
+    PersistState = 2, ///< point persisted across the update
+    RemoveState = 3,  ///< point was removed in the update
   }
 
 /// Compute the point states given two manifolds. The states pertain to the transition from manifold1
 /// to manifold2. So state1 is either persist or remove while state2 is either add or persist.
-  export function GetPointStates(state1: PointState[], state2: PointState[], manifold1: Manifold, manifold2: Manifold): void {
+  export function getPointStates(state1: PointState[], state2: PointState[], manifold1: Manifold, manifold2: Manifold): void {
     // Detect persists and removes.
     let i: number;
     for (i = 0; i < manifold1.pointCount; ++i) {
       const id: ContactID = manifold1.points[i].id;
       const key: number = id.key;
 
-      state1[i] = PointState.removeState;
+      state1[i] = PointState.RemoveState;
 
       for (let j: number = 0, jct = manifold2.pointCount; j < jct; ++j) {
         if (manifold2.points[j].id.key === key) {
-          state1[i] = PointState.persistState;
+          state1[i] = PointState.PersistState;
           break;
         }
       }
     }
     for (; i < maxManifoldPoints; ++i) {
-      state1[i] = PointState.nullState;
+      state1[i] = PointState.NullState;
     }
 
     // Detect persists and adds.
@@ -310,17 +310,17 @@ namespace b2 {
       const id: ContactID = manifold2.points[i].id;
       const key: number = id.key;
 
-      state2[i] = PointState.addState;
+      state2[i] = PointState.AddState;
 
       for (let j: number = 0, jct = manifold1.pointCount; j < jct; ++j) {
         if (manifold1.points[j].id.key === key) {
-          state2[i] = PointState.persistState;
+          state2[i] = PointState.PersistState;
           break;
         }
       }
     }
     for (; i < maxManifoldPoints; ++i) {
-      state2[i] = PointState.nullState;
+      state2[i] = PointState.NullState;
     }
   }
 
@@ -329,13 +329,13 @@ namespace b2 {
     public readonly v: Vec2 = new Vec2();
     public readonly id: ContactID = new ContactID();
 
-    public static MakeArray(length: number): ClipVertex[] {
+    public static makeArray(length: number): ClipVertex[] {
       return MakeArray(length, (i: number): ClipVertex => new ClipVertex());
     }
 
-    public Copy(other: ClipVertex): ClipVertex {
-      this.v.Copy(other.v);
-      this.id.Copy(other.id);
+    public copy(other: ClipVertex): ClipVertex {
+      this.v.copy(other.v);
+      this.id.copy(other.id);
       return this;
     }
   }
@@ -346,9 +346,9 @@ namespace b2 {
     public readonly p2: Vec2 = new Vec2();
     public maxFraction: number = 1;
 
-    public Copy(o: RayCastInput): RayCastInput {
-      this.p1.Copy(o.p1);
-      this.p2.Copy(o.p2);
+    public copy(o: RayCastInput): RayCastInput {
+      this.p1.copy(o.p1);
+      this.p2.copy(o.p2);
       this.maxFraction = o.maxFraction;
       return this;
     }
@@ -360,8 +360,8 @@ namespace b2 {
     public readonly normal: Vec2 = new Vec2();
     public fraction: number = 0;
 
-    public Copy(o: RayCastOutput): RayCastOutput {
-      this.normal.Copy(o.normal);
+    public copy(o: RayCastOutput): RayCastOutput {
+      this.normal.copy(o.normal);
       this.fraction = o.fraction;
       return this;
     }
@@ -375,40 +375,40 @@ namespace b2 {
     private readonly cache_center: Vec2 = new Vec2(); // access using GetCenter()
     private readonly cache_extent: Vec2 = new Vec2(); // access using GetExtents()
 
-    public Copy(o: AABB): AABB {
-      this.lowerBound.Copy(o.lowerBound);
-      this.upperBound.Copy(o.upperBound);
+    public copy(o: AABB): AABB {
+      this.lowerBound.copy(o.lowerBound);
+      this.upperBound.copy(o.upperBound);
       return this;
     }
 
     /// Verify that the bounds are sorted.
-    public IsValid(): boolean {
-      if (!this.lowerBound.IsValid()) { return false; }
-      if (!this.upperBound.IsValid()) { return false; }
+    public isValid(): boolean {
+      if (!this.lowerBound.isValid()) { return false; }
+      if (!this.upperBound.isValid()) { return false; }
       if (this.upperBound.x < this.lowerBound.x) { return false; }
       if (this.upperBound.y < this.lowerBound.y) { return false; }
       return true;
     }
 
     /// Get the center of the AABB.
-    public GetCenter(): Vec2 {
+    public getCenter(): Vec2 {
       return Vec2.MidVV(this.lowerBound, this.upperBound, this.cache_center);
     }
 
     /// Get the extents of the AABB (half-widths).
-    public GetExtents(): Vec2 {
+    public getExtents(): Vec2 {
       return Vec2.ExtVV(this.lowerBound, this.upperBound, this.cache_extent);
     }
 
     /// Get the perimeter length
-    public GetPerimeter(): number {
+    public getPerimeter(): number {
       const wx: number = this.upperBound.x - this.lowerBound.x;
       const wy: number = this.upperBound.y - this.lowerBound.y;
       return 2 * (wx + wy);
     }
 
     /// Combine an AABB into this one.
-    public Combine1(aabb: AABB): AABB {
+    public combine1(aabb: AABB): AABB {
       this.lowerBound.x = Min(this.lowerBound.x, aabb.lowerBound.x);
       this.lowerBound.y = Min(this.lowerBound.y, aabb.lowerBound.y);
       this.upperBound.x = Max(this.upperBound.x, aabb.upperBound.x);
@@ -417,7 +417,7 @@ namespace b2 {
     }
 
     /// Combine two AABBs into this one.
-    public Combine2(aabb1: AABB, aab: AABB): AABB {
+    public combine2(aabb1: AABB, aab: AABB): AABB {
       this.lowerBound.x = Min(aabb1.lowerBound.x, aab.lowerBound.x);
       this.lowerBound.y = Min(aabb1.lowerBound.y, aab.lowerBound.y);
       this.upperBound.x = Max(aabb1.upperBound.x, aab.upperBound.x);
@@ -425,13 +425,13 @@ namespace b2 {
       return this;
     }
 
-    public static Combine(aabb1: AABB, aab: AABB, out: AABB): AABB {
-      out.Combine2(aabb1, aab);
+    public static combine(aabb1: AABB, aab: AABB, out: AABB): AABB {
+      out.combine2(aabb1, aab);
       return out;
     }
 
     /// Does this aabb contain the provided AABB.
-    public Contains(aabb: AABB): boolean {
+    public contains(aabb: AABB): boolean {
       let result: boolean = true;
       result = result && this.lowerBound.x <= aabb.lowerBound.x;
       result = result && this.lowerBound.y <= aabb.lowerBound.y;
@@ -441,7 +441,7 @@ namespace b2 {
     }
 
     // From Real-time Collision Detection, p179.
-    public RayCast(output: RayCastOutput, input: RayCastInput): boolean {
+    public rayCast(output: RayCastOutput, input: RayCastInput): boolean {
       let tmin: number = (-maxFloat);
       let tmax: number = maxFloat;
 
@@ -536,13 +536,13 @@ namespace b2 {
       return true;
     }
 
-    public TestContain(point: XY): boolean {
+    public testContain(point: XY): boolean {
       if (point.x < this.lowerBound.x || this.upperBound.x < point.x) { return false; }
       if (point.y < this.lowerBound.y || this.upperBound.y < point.y) { return false; }
       return true;
     }
 
-    public TestOverlap(other: AABB): boolean {
+    public testOverlap(other: AABB): boolean {
       if (this.upperBound.x < other.lowerBound.x) { return false; }
       if (this.upperBound.y < other.lowerBound.y) { return false; }
       if (other.upperBound.x < this.lowerBound.x) { return false; }
@@ -551,7 +551,7 @@ namespace b2 {
     }
   }
 
-  export function TestOverlapAABB(a: AABB, b: AABB): boolean {
+  export function testOverlapAABB(a: AABB, b: AABB): boolean {
     if (a.upperBound.x < b.lowerBound.x) { return false; }
     if (a.upperBound.y < b.lowerBound.y) { return false; }
     if (b.upperBound.x < a.lowerBound.x) { return false; }
@@ -560,7 +560,7 @@ namespace b2 {
   }
 
 /// Clipping for contact manifolds.
-  export function ClipSegmentToLine(vOut: [ClipVertex, ClipVertex], vIn: [ClipVertex, ClipVertex], normal: Vec2, offset: number, vertexIndexA: number): number {
+  export function clipSegmentToLine(vOut: [ClipVertex, ClipVertex], vIn: [ClipVertex, ClipVertex], normal: Vec2, offset: number, vertexIndexA: number): number {
     // Start with no output points
     let count: number = 0;
 
@@ -572,8 +572,8 @@ namespace b2 {
     const distance1: number = Vec2.DotVV(normal, vIn1.v) - offset;
 
     // If the points are behind the plane
-    if (distance0 <= 0) { vOut[count++].Copy(vIn0); }
-    if (distance1 <= 0) { vOut[count++].Copy(vIn1); }
+    if (distance0 <= 0) { vOut[count++].copy(vIn0); }
+    if (distance1 <= 0) { vOut[count++].copy(vIn1); }
 
     // If the points are on different sides of the plane
     if (distance0 * distance1 < 0) {
@@ -587,8 +587,8 @@ namespace b2 {
       const id: ContactID = vOut[count].id;
       id.cf.indexA = vertexIndexA;
       id.cf.indexB = vIn0.id.cf.indexB;
-      id.cf.typeA = ContactFeatureType.e_vertex;
-      id.cf.typeB = ContactFeatureType.e_face;
+      id.cf.typeA = ContactFeatureType.Vertex;
+      id.cf.typeB = ContactFeatureType.Face;
       ++count;
 
       // Assert(count === 2);
@@ -598,23 +598,23 @@ namespace b2 {
   }
 
 /// Determine if two generic shapes overlap.
-  const TestOverlapShape_s_input: DistanceInput = new DistanceInput();
-  const TestOverlapShape_s_simplexCache: SimplexCache = new SimplexCache();
-  const TestOverlapShape_s_output: DistanceOutput = new DistanceOutput();
-  export function TestOverlapShape(shapeA: Shape, indexA: number, shapeB: Shape, indexB: number, xfA: Transform, xfB: Transform): boolean {
-    const input: DistanceInput = TestOverlapShape_s_input.Reset();
-    input.proxyA.SetShape(shapeA, indexA);
-    input.proxyB.SetShape(shapeB, indexB);
-    input.transformA.Copy(xfA);
-    input.transformB.Copy(xfB);
+  const testOverlapShape_s_input: DistanceInput = new DistanceInput();
+  const testOverlapShape_s_simplexCache: SimplexCache = new SimplexCache();
+  const testOverlapShape_s_output: DistanceOutput = new DistanceOutput();
+  export function testOverlapShape(shapeA: Shape, indexA: number, shapeB: Shape, indexB: number, xfA: Transform, xfB: Transform): boolean {
+    const input: DistanceInput = testOverlapShape_s_input.reset();
+    input.proxyA.setShape(shapeA, indexA);
+    input.proxyB.setShape(shapeB, indexB);
+    input.transformA.copy(xfA);
+    input.transformB.copy(xfB);
     input.useRadii = true;
 
-    const simplexCache: SimplexCache = TestOverlapShape_s_simplexCache.Reset();
+    const simplexCache: SimplexCache = testOverlapShape_s_simplexCache.reset();
     simplexCache.count = 0;
 
-    const output: DistanceOutput = TestOverlapShape_s_output.Reset();
+    const output: DistanceOutput = testOverlapShape_s_output.reset();
 
-    Distance(output, simplexCache, input);
+    distance(output, simplexCache, input);
 
     return output.distance < 10 * epsilon;
   }

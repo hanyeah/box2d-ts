@@ -17,18 +17,18 @@
 */
 namespace b2 {
   export class ChainAndCircleContact extends Contact<ChainShape, CircleShape> {
-    public static Create(): Contact {
+    public static create(): Contact {
       return new ChainAndCircleContact();
     }
 
-    public static Destroy(contact: Contact): void {
+    public static destroy(contact: Contact): void {
     }
 
-    private static Evaluate_s_edge = new EdgeShape();
-    public Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void {
-      const edge: EdgeShape = ChainAndCircleContact.Evaluate_s_edge;
-      this.GetShapeA().GetChildEdge(edge, this.indexA);
-      CollideEdgeAndCircle(manifold, edge, xfA, this.GetShapeB(), xfB);
+    private static evaluate_s_edge = new EdgeShape();
+    public evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void {
+      const edge: EdgeShape = ChainAndCircleContact.evaluate_s_edge;
+      this.getShapeA().getChildEdge(edge, this.indexA);
+      collideEdgeAndCircle(manifold, edge, xfA, this.getShapeB(), xfB);
     }
   }
 

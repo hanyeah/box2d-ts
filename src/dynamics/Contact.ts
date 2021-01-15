@@ -18,23 +18,23 @@
 namespace b2 {
   /// Friction mixing law. The idea is to allow either fixture to drive the friction to zero.
 /// For example, anything slides on ice.
-  export function MixFriction(friction1: number, friction2: number): number {
+  export function mixFriction(friction1: number, friction2: number): number {
     return Sqrt(friction1 * friction2);
   }
 
 /// Restitution mixing law. The idea is allow for anything to bounce off an inelastic surface.
 /// For example, a superball bounces on anything.
-  export function MixRestitution(restitution1: number, restitution2: number): number {
+  export function mixRestitution(restitution1: number, restitution2: number): number {
     return restitution1 > restitution2 ? restitution1 : restitution2;
   }
 
 /// Restitution mixing law. This picks the lowest value.
-  export function MixRestitutionThreshold(threshold1: number, threshold2: number): number {
+  export function mixRestitutionThreshold(threshold1: number, threshold2: number): number {
     return threshold1 < threshold2 ? threshold1 : threshold2;
   }
 
   export class ContactEdge {
-    private _other: Body | null = null; ///< provides quick access to the other body attached.
+    private _other: Body = null; ///< provides quick access to the other body attached.
     public get other(): Body {
       if (this._other === null) { throw new Error(); }
       return this._other;
@@ -44,12 +44,12 @@ namespace b2 {
       this._other = value;
     }
     public readonly contact: Contact; ///< the contact
-    public prev: ContactEdge | null = null; ///< the previous contact edge in the body's contact list
-    public next: ContactEdge | null = null; ///< the next contact edge in the body's contact list
+    public prev: ContactEdge = null; ///< the previous contact edge in the body's contact list
+    public next: ContactEdge = null; ///< the next contact edge in the body's contact list
     constructor(contact: Contact) {
       this.contact = contact;
     }
-    public Reset(): void {
+    public reset(): void {
       this._other = null;
       this.prev = null;
       this.next = null;
@@ -64,8 +64,8 @@ namespace b2 {
     public bulletHitFlag: boolean = false; /// This bullet contact had a TOI event
     public toiFlag: boolean = false; /// This contact has a valid TOI in toi
 
-    public prev: Contact | null = null;
-    public next: Contact | null = null;
+    public prev: Contact = null;
+    public next: Contact = null;
 
     public readonly nodeA: ContactEdge = new ContactEdge(this);
     public readonly nodeB: ContactEdge = new ContactEdge(this);
@@ -89,113 +89,113 @@ namespace b2 {
 
     public oldManifold: Manifold = new Manifold(); // TODO: readonly
 
-    public GetManifold() {
+    public getManifold() {
       return this.manifold;
     }
 
-    public GetWorldManifold(worldManifold: WorldManifold): void {
-      const bodyA: Body = this.fixtureA.GetBody();
-      const bodyB: Body = this.fixtureB.GetBody();
-      const shapeA: A = this.GetShapeA();
-      const shapeB: B = this.GetShapeB();
-      worldManifold.Initialize(this.manifold, bodyA.GetTransform(), shapeA.radius, bodyB.GetTransform(), shapeB.radius);
+    public getWorldManifold(worldManifold: WorldManifold): void {
+      const bodyA: Body = this.fixtureA.getBody();
+      const bodyB: Body = this.fixtureB.getBody();
+      const shapeA: A = this.getShapeA();
+      const shapeB: B = this.getShapeB();
+      worldManifold.initialize(this.manifold, bodyA.getTransform(), shapeA.radius, bodyB.getTransform(), shapeB.radius);
     }
 
-    public IsTouching(): boolean {
+    public isTouching(): boolean {
       return this.touchingFlag;
     }
 
-    public SetEnabled(flag: boolean): void {
+    public setEnabled(flag: boolean): void {
       this.enabledFlag = flag;
     }
 
-    public IsEnabled(): boolean {
+    public isEnabled(): boolean {
       return this.enabledFlag;
     }
 
-    public GetNext(): Contact | null {
+    public getNext(): Contact {
       return this.next;
     }
 
-    public GetFixtureA(): Fixture {
+    public getFixtureA(): Fixture {
       return this.fixtureA;
     }
 
-    public GetChildIndexA(): number {
+    public getChildIndexA(): number {
       return this.indexA;
     }
 
-    public GetShapeA(): A {
-      return this.fixtureA.GetShape() as A;
+    public getShapeA(): A {
+      return this.fixtureA.getShape() as A;
     }
 
-    public GetFixtureB(): Fixture {
+    public getFixtureB(): Fixture {
       return this.fixtureB;
     }
 
-    public GetChildIndexB(): number {
+    public getChildIndexB(): number {
       return this.indexB;
     }
 
-    public GetShapeB(): B {
-      return this.fixtureB.GetShape() as B;
+    public getShapeB(): B {
+      return this.fixtureB.getShape() as B;
     }
 
-    public abstract Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
+    public abstract evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void;
 
-    public FlagForFiltering(): void {
+    public glagForFiltering(): void {
       this.filterFlag = true;
     }
 
-    public SetFriction(friction: number): void {
+    public setFriction(friction: number): void {
       this.friction = friction;
     }
 
-    public GetFriction(): number {
+    public getFriction(): number {
       return this.friction;
     }
 
-    public ResetFriction(): void {
-      this.friction = MixFriction(this.fixtureA.friction, this.fixtureB.friction);
+    public resetFriction(): void {
+      this.friction = mixFriction(this.fixtureA.friction, this.fixtureB.friction);
     }
 
-    public SetRestitution(restitution: number): void {
+    public setRestitution(restitution: number): void {
       this.restitution = restitution;
     }
 
-    public GetRestitution(): number {
+    public getRestitution(): number {
       return this.restitution;
     }
 
-    public ResetRestitution(): void {
-      this.restitution = MixRestitution(this.fixtureA.restitution, this.fixtureB.restitution);
+    public resetRestitution(): void {
+      this.restitution = mixRestitution(this.fixtureA.restitution, this.fixtureB.restitution);
     }
 
     /// Override the default restitution velocity threshold mixture. You can call this in ContactListener::PreSolve.
     /// The value persists until you set or reset.
-    public SetRestitutionThreshold(threshold: number): void {
+    public setRestitutionThreshold(threshold: number): void {
       this.restitutionThreshold = threshold;
     }
 
     /// Get the restitution threshold.
-    public GetRestitutionThreshold(): number {
+    public getRestitutionThreshold(): number {
       return this.restitutionThreshold;
     }
 
     /// Reset the restitution threshold to the default value.
-    public ResetRestitutionThreshold(): void {
-      this.restitutionThreshold = MixRestitutionThreshold(this.fixtureA.restitutionThreshold, this.fixtureB.restitutionThreshold);
+    public resetRestitutionThreshold(): void {
+      this.restitutionThreshold = mixRestitutionThreshold(this.fixtureA.restitutionThreshold, this.fixtureB.restitutionThreshold);
     }
 
-    public SetTangentSpeed(speed: number): void {
+    public setTangentSpeed(speed: number): void {
       this.tangentSpeed = speed;
     }
 
-    public GetTangentSpeed(): number {
+    public getTangentSpeed(): number {
       return this.tangentSpeed;
     }
 
-    public Reset(fixtureA: Fixture, indexA: number, fixtureB: Fixture, indexB: number): void {
+    public reset(fixtureA: Fixture, indexA: number, fixtureB: Fixture, indexB: number): void {
       this.islandFlag = false;
       this.touchingFlag = false;
       this.enabledFlag = true;
@@ -214,17 +214,17 @@ namespace b2 {
       this.prev = null;
       this.next = null;
 
-      this.nodeA.Reset();
-      this.nodeB.Reset();
+      this.nodeA.reset();
+      this.nodeB.reset();
 
       this.toiCount = 0;
 
-      this.friction = MixFriction(this.fixtureA.friction, this.fixtureB.friction);
-      this.restitution = MixRestitution(this.fixtureA.restitution, this.fixtureB.restitution);
-      this.restitutionThreshold = MixRestitutionThreshold(this.fixtureA.restitutionThreshold, this.fixtureB.restitutionThreshold);
+      this.friction = mixFriction(this.fixtureA.friction, this.fixtureB.friction);
+      this.restitution = mixRestitution(this.fixtureA.restitution, this.fixtureB.restitution);
+      this.restitutionThreshold = mixRestitutionThreshold(this.fixtureA.restitutionThreshold, this.fixtureB.restitutionThreshold);
     }
 
-    public Update(listener: ContactListener): void {
+    public update(listener: ContactListener): void {
       const tManifold: Manifold = this.oldManifold;
       this.oldManifold = this.manifold;
       this.manifold = tManifold;
@@ -235,25 +235,25 @@ namespace b2 {
       let touching: boolean = false;
       const wasTouching: boolean = this.touchingFlag;
 
-      const sensorA: boolean = this.fixtureA.IsSensor();
-      const sensorB: boolean = this.fixtureB.IsSensor();
+      const sensorA: boolean = this.fixtureA.isSensor;
+      const sensorB: boolean = this.fixtureB.isSensor;
       const sensor: boolean = sensorA || sensorB;
 
-      const bodyA: Body = this.fixtureA.GetBody();
-      const bodyB: Body = this.fixtureB.GetBody();
-      const xfA: Transform = bodyA.GetTransform();
-      const xfB: Transform = bodyB.GetTransform();
+      const bodyA: Body = this.fixtureA.getBody();
+      const bodyB: Body = this.fixtureB.getBody();
+      const xfA: Transform = bodyA.getTransform();
+      const xfB: Transform = bodyB.getTransform();
 
       // Is this contact a sensor?
       if (sensor) {
-        const shapeA: A = this.GetShapeA();
-        const shapeB: B = this.GetShapeB();
-        touching = TestOverlapShape(shapeA, this.indexA, shapeB, this.indexB, xfA, xfB);
+        const shapeA: A = this.getShapeA();
+        const shapeB: B = this.getShapeB();
+        touching = testOverlapShape(shapeA, this.indexA, shapeB, this.indexB, xfA, xfB);
 
         // Sensors don't generate manifolds.
         this.manifold.pointCount = 0;
       } else {
-        this.Evaluate(this.manifold, xfA, xfB);
+        this.evaluate(this.manifold, xfA, xfB);
         touching = this.manifold.pointCount > 0;
 
         // Match old contact ids to new contact ids and copy the
@@ -276,39 +276,39 @@ namespace b2 {
         }
 
         if (touching !== wasTouching) {
-          bodyA.SetAwake(true);
-          bodyB.SetAwake(true);
+          bodyA.setAwake(true);
+          bodyB.setAwake(true);
         }
       }
 
       this.touchingFlag = touching;
 
       if (!wasTouching && touching && listener) {
-        listener.BeginContact(this);
+        listener.beginContact(this);
       }
 
       if (wasTouching && !touching && listener) {
-        listener.EndContact(this);
+        listener.endContact(this);
       }
 
       if (!sensor && touching && listener) {
-        listener.PreSolve(this, this.oldManifold);
+        listener.preSolve(this, this.oldManifold);
       }
     }
 
-    private static ComputeTOI_s_input = new TOIInput();
-    private static ComputeTOI_s_output = new TOIOutput();
-    public ComputeTOI(sweepA: Sweep, sweepB: Sweep): number {
-      const input: TOIInput = Contact.ComputeTOI_s_input;
-      input.proxyA.SetShape(this.GetShapeA(), this.indexA);
-      input.proxyB.SetShape(this.GetShapeB(), this.indexB);
-      input.sweepA.Copy(sweepA);
-      input.sweepB.Copy(sweepB);
+    private static computeTOI_s_input = new TOIInput();
+    private static computeTOI_s_output = new TOIOutput();
+    public computeTOI(sweepA: Sweep, sweepB: Sweep): number {
+      const input: TOIInput = Contact.computeTOI_s_input;
+      input.proxyA.setShape(this.getShapeA(), this.indexA);
+      input.proxyB.setShape(this.getShapeB(), this.indexB);
+      input.sweepA.copy(sweepA);
+      input.sweepB.copy(sweepB);
       input.tMax = linearSlop;
 
-      const output: TOIOutput = Contact.ComputeTOI_s_output;
+      const output: TOIOutput = Contact.computeTOI_s_output;
 
-      TimeOfImpact(output, input);
+      timeOfImpact(output, input);
 
       return output.t;
     }

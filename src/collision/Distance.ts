@@ -26,11 +26,11 @@ namespace b2 {
     public count: number = 0;
     public radius: number = 0;
 
-    public Copy(other: DistanceProxy): this {
+    public copy(other: DistanceProxy): this {
       if (other.vertices === other.buffer) {
         this.vertices = this.buffer;
-        this.buffer[0].Copy(other.buffer[0]);
-        this.buffer[1].Copy(other.buffer[1]);
+        this.buffer[0].copy(other.buffer[0]);
+        this.buffer[1].copy(other.buffer[1]);
       } else {
         this.vertices = other.vertices;
       }
@@ -39,24 +39,24 @@ namespace b2 {
       return this;
     }
 
-    public Reset(): DistanceProxy {
+    public reset(): DistanceProxy {
       this.vertices = this.buffer;
       this.count = 0;
       this.radius = 0;
       return this;
     }
 
-    public SetShape(shape: Shape, index: number): void {
-      shape.SetupDistanceProxy(this, index);
+    public setShape(shape: Shape, index: number): void {
+      shape.setupDistanceProxy(this, index);
     }
 
-    public SetVerticesRadius(vertices: Vec2[], count: number, radius: number): void {
+    public setVerticesRadius(vertices: Vec2[], count: number, radius: number): void {
       this.vertices = vertices;
       this.count = count;
       this.radius = radius;
     }
 
-    public GetSupport(d: Vec2): number {
+    public getSupport(d: Vec2): number {
       let bestIndex: number = 0;
       let bestValue: number = Vec2.DotVV(this.vertices[0], d);
       for (let i: number = 1; i < this.count; ++i) {
@@ -70,7 +70,7 @@ namespace b2 {
       return bestIndex;
     }
 
-    public GetSupportVertex(d: Vec2): Vec2 {
+    public getSupportVertex(d: Vec2): Vec2 {
       let bestIndex: number = 0;
       let bestValue: number = Vec2.DotVV(this.vertices[0], d);
       for (let i: number = 1; i < this.count; ++i) {
@@ -84,11 +84,11 @@ namespace b2 {
       return this.vertices[bestIndex];
     }
 
-    public GetVertexCount(): number {
+    public getVertexCount(): number {
       return this.count;
     }
 
-    public GetVertex(index: number): Vec2 {
+    public getVertex(index: number): Vec2 {
       // DEBUG: Assert(0 <= index && index < this.count);
       return this.vertices[index];
     }
@@ -100,7 +100,7 @@ namespace b2 {
     public readonly indexA: [number, number, number] = [0, 0, 0];
     public readonly indexB: [number, number, number] = [0, 0, 0];
 
-    public Reset(): SimplexCache {
+    public reset(): SimplexCache {
       this.metric = 0;
       this.count = 0;
       return this;
@@ -114,11 +114,11 @@ namespace b2 {
     public readonly transformB: Transform = new Transform();
     public useRadii: boolean = false;
 
-    public Reset(): DistanceInput {
-      this.proxyA.Reset();
-      this.proxyB.Reset();
-      this.transformA.SetIdentity();
-      this.transformB.SetIdentity();
+    public reset(): DistanceInput {
+      this.proxyA.reset();
+      this.proxyB.reset();
+      this.transformA.setIdentity();
+      this.transformB.setIdentity();
       this.useRadii = false;
       return this;
     }
@@ -130,9 +130,9 @@ namespace b2 {
     public distance: number = 0;
     public iterations: number = 0; ///< number of GJK iterations used
 
-    public Reset(): DistanceOutput {
-      this.pointA.SetZero();
-      this.pointB.SetZero();
+    public reset(): DistanceOutput {
+      this.pointA.setZero();
+      this.pointB.setZero();
       this.distance = 0;
       this.iterations = 0;
       return this;
@@ -159,7 +159,7 @@ namespace b2 {
   export let gjkCalls: number = 0;
   export let gjkIters: number = 0;
   export let gjkMaxIters: number = 0;
-  export function gjk_reset(): void {
+  export function gjkReset(): void {
     gjkCalls = 0;
     gjkIters = 0;
     gjkMaxIters = 0;
@@ -173,10 +173,10 @@ namespace b2 {
     public indexA: number = 0; // wA index
     public indexB: number = 0; // wB index
 
-    public Copy(other: SimplexVertex): SimplexVertex {
-      this.wA.Copy(other.wA);     // support point in proxyA
-      this.wB.Copy(other.wB);     // support point in proxyB
-      this.w.Copy(other.w);       // wB - wA
+    public copy(other: SimplexVertex): SimplexVertex {
+      this.wA.copy(other.wA);     // support point in proxyA
+      this.wB.copy(other.wB);     // support point in proxyB
+      this.w.copy(other.w);       // wB - wA
       this.a = other.a;           // barycentric coordinate for closest point
       this.indexA = other.indexA; // wA index
       this.indexB = other.indexB; // wB index
@@ -197,7 +197,7 @@ namespace b2 {
       this.vertices[2] = this.v3;
     }
 
-    public ReadCache(cache: SimplexCache, proxyA: DistanceProxy, transformA: Transform, proxyB: DistanceProxy, transformB: Transform): void {
+    public readCache(cache: SimplexCache, proxyA: DistanceProxy, transformA: Transform, proxyB: DistanceProxy, transformB: Transform): void {
       // DEBUG: Assert(0 <= cache.count && cache.count <= 3);
 
       // Copy data from cache.
@@ -207,10 +207,10 @@ namespace b2 {
         const v: SimplexVertex = vertices[i];
         v.indexA = cache.indexA[i];
         v.indexB = cache.indexB[i];
-        const wALocal: Vec2 = proxyA.GetVertex(v.indexA);
-        const wBLocal: Vec2 = proxyB.GetVertex(v.indexB);
-        Transform.MulXV(transformA, wALocal, v.wA);
-        Transform.MulXV(transformB, wBLocal, v.wB);
+        const wALocal: Vec2 = proxyA.getVertex(v.indexA);
+        const wBLocal: Vec2 = proxyB.getVertex(v.indexB);
+        Transform.mulXV(transformA, wALocal, v.wA);
+        Transform.mulXV(transformB, wBLocal, v.wB);
         Vec2.SubVV(v.wB, v.wA, v.w);
         v.a = 0;
       }
@@ -219,7 +219,7 @@ namespace b2 {
       // old metric then flush the simplex.
       if (this.count > 1) {
         const metric1: number = cache.metric;
-        const metric2: number = this.GetMetric();
+        const metric2: number = this.getMetric();
         if (metric2 < 0.5 * metric1 || 2 * metric1 < metric2 || metric2 < epsilon) {
           // Reset the simplex.
           this.count = 0;
@@ -231,18 +231,18 @@ namespace b2 {
         const v: SimplexVertex = vertices[0];
         v.indexA = 0;
         v.indexB = 0;
-        const wALocal: Vec2 = proxyA.GetVertex(0);
-        const wBLocal: Vec2 = proxyB.GetVertex(0);
-        Transform.MulXV(transformA, wALocal, v.wA);
-        Transform.MulXV(transformB, wBLocal, v.wB);
+        const wALocal: Vec2 = proxyA.getVertex(0);
+        const wBLocal: Vec2 = proxyB.getVertex(0);
+        Transform.mulXV(transformA, wALocal, v.wA);
+        Transform.mulXV(transformB, wBLocal, v.wB);
         Vec2.SubVV(v.wB, v.wA, v.w);
         v.a = 1;
         this.count = 1;
       }
     }
 
-    public WriteCache(cache: SimplexCache): void {
-      cache.metric = this.GetMetric();
+    public writeCache(cache: SimplexCache): void {
+      cache.metric = this.getMetric();
       cache.count = this.count;
       const vertices: SimplexVertex[] = this.vertices;
       for (let i: number = 0; i < this.count; ++i) {
@@ -251,7 +251,7 @@ namespace b2 {
       }
     }
 
-    public GetSearchDirection(out: Vec2): Vec2 {
+    public getSearchDirection(out: Vec2): Vec2 {
       switch (this.count) {
         case 1:
           return Vec2.NegV(this.v1.w, out);
@@ -270,42 +270,42 @@ namespace b2 {
 
         default:
           // DEBUG: Assert(false);
-          return out.SetZero();
+          return out.setZero();
       }
     }
 
-    public GetClosestPoint(out: Vec2): Vec2 {
+    public getClosestPoint(out: Vec2): Vec2 {
       switch (this.count) {
         case 0:
           // DEBUG: Assert(false);
-          return out.SetZero();
+          return out.setZero();
 
         case 1:
-          return out.Copy(this.v1.w);
+          return out.copy(this.v1.w);
 
         case 2:
-          return out.Set(
+          return out.set(
             this.v1.a * this.v1.w.x + this.v2.a * this.v2.w.x,
             this.v1.a * this.v1.w.y + this.v2.a * this.v2.w.y);
 
         case 3:
-          return out.SetZero();
+          return out.setZero();
 
         default:
           // DEBUG: Assert(false);
-          return out.SetZero();
+          return out.setZero();
       }
     }
 
-    public GetWitnessPoints(pA: Vec2, pB: Vec2): void {
+    public getWitnessPoints(pA: Vec2, pB: Vec2): void {
       switch (this.count) {
         case 0:
           // DEBUG: Assert(false);
           break;
 
         case 1:
-          pA.Copy(this.v1.wA);
-          pB.Copy(this.v1.wB);
+          pA.copy(this.v1.wA);
+          pB.copy(this.v1.wB);
           break;
 
         case 2:
@@ -326,7 +326,7 @@ namespace b2 {
       }
     }
 
-    public GetMetric(): number {
+    public getMetric(): number {
       switch (this.count) {
         case 0:
           // DEBUG: Assert(false);
@@ -347,7 +347,7 @@ namespace b2 {
       }
     }
 
-    public Solve2(): void {
+    public solve2(): void {
       const w1: Vec2 = this.v1.w;
       const w2: Vec2 = this.v2.w;
       const e12: Vec2 = Vec2.SubVV(w2, w1, Simplex.s_e12);
@@ -367,7 +367,7 @@ namespace b2 {
         // a1 <= 0, so we clamp it to 0
         this.v2.a = 1;
         this.count = 1;
-        this.v1.Copy(this.v2);
+        this.v1.copy(this.v2);
         return;
       }
 
@@ -378,7 +378,7 @@ namespace b2 {
       this.count = 2;
     }
 
-    public Solve3(): void {
+    public solve3(): void {
       const w1: Vec2 = this.v1.w;
       const w2: Vec2 = this.v2.w;
       const w3: Vec2 = this.v3.w;
@@ -442,7 +442,7 @@ namespace b2 {
         this.v1.a = d13_1 * inv_d13;
         this.v3.a = d13_2 * inv_d13;
         this.count = 2;
-        this.v2.Copy(this.v3);
+        this.v2.copy(this.v3);
         return;
       }
 
@@ -450,7 +450,7 @@ namespace b2 {
       if (d12_1 <= 0 && d23_2 <= 0) {
         this.v2.a = 1;
         this.count = 1;
-        this.v1.Copy(this.v2);
+        this.v1.copy(this.v2);
         return;
       }
 
@@ -458,7 +458,7 @@ namespace b2 {
       if (d13_1 <= 0 && d23_1 <= 0) {
         this.v3.a = 1;
         this.count = 1;
-        this.v1.Copy(this.v3);
+        this.v1.copy(this.v3);
         return;
       }
 
@@ -468,7 +468,7 @@ namespace b2 {
         this.v2.a = d23_1 * inv_d23;
         this.v3.a = d23_2 * inv_d23;
         this.count = 2;
-        this.v1.Copy(this.v3);
+        this.v1.copy(this.v3);
         return;
       }
 
@@ -484,15 +484,15 @@ namespace b2 {
     private static s_e23: Vec2 = new Vec2();
   }
 
-  const Distance_s_simplex: Simplex = new Simplex();
-  const Distance_s_saveA: [number, number, number] = [0, 0, 0];
-  const Distance_s_saveB: [number, number, number] = [0, 0, 0];
-  const Distance_s_p: Vec2 = new Vec2();
-  const Distance_s_d: Vec2 = new Vec2();
-  const Distance_s_normal: Vec2 = new Vec2();
-  const Distance_s_supportA: Vec2 = new Vec2();
-  const Distance_s_supportB: Vec2 = new Vec2();
-  export function Distance(output: DistanceOutput, cache: SimplexCache, input: DistanceInput): void {
+  const distance_s_simplex: Simplex = new Simplex();
+  const distance_s_saveA: [number, number, number] = [0, 0, 0];
+  const distance_s_saveB: [number, number, number] = [0, 0, 0];
+  const distance_s_p: Vec2 = new Vec2();
+  const distance_s_d: Vec2 = new Vec2();
+  const distance_s_normal: Vec2 = new Vec2();
+  const distance_s_supportA: Vec2 = new Vec2();
+  const distance_s_supportB: Vec2 = new Vec2();
+  export function distance(output: DistanceOutput, cache: SimplexCache, input: DistanceInput): void {
     ++gjkCalls;
 
     const proxyA: DistanceProxy = input.proxyA;
@@ -502,8 +502,8 @@ namespace b2 {
     const transformB: Transform = input.transformB;
 
     // Initialize the simplex.
-    const simplex: Simplex = Distance_s_simplex;
-    simplex.ReadCache(cache, proxyA, transformA, proxyB, transformB);
+    const simplex: Simplex = distance_s_simplex;
+    simplex.readCache(cache, proxyA, transformA, proxyB, transformB);
 
     // Get simplex vertices as an array.
     const vertices: SimplexVertex[] = simplex.vertices;
@@ -511,8 +511,8 @@ namespace b2 {
 
     // These store the vertices of the last simplex so that we
     // can check for duplicates and prevent cycling.
-    const saveA: [number, number, number] = Distance_s_saveA;
-    const saveB: [number, number, number] = Distance_s_saveB;
+    const saveA: [number, number, number] = distance_s_saveA;
+    const saveB: [number, number, number] = distance_s_saveB;
     let saveCount: number = 0;
 
     // Main iteration loop.
@@ -530,11 +530,11 @@ namespace b2 {
           break;
 
         case 2:
-          simplex.Solve2();
+          simplex.solve2();
           break;
 
         case 3:
-          simplex.Solve3();
+          simplex.solve3();
           break;
 
         default:
@@ -548,10 +548,10 @@ namespace b2 {
       }
 
       // Get search direction.
-      const d: Vec2 = simplex.GetSearchDirection(Distance_s_d);
+      const d: Vec2 = simplex.getSearchDirection(distance_s_d);
 
       // Ensure the search direction is numerically fit.
-      if (d.LengthSquared() < epsilon_sq) {
+      if (d.lengthSquared() < epsilonSq) {
         // The origin is probably contained by a line segment
         // or triangle. Thus the shapes are overlapped.
 
@@ -563,10 +563,10 @@ namespace b2 {
 
       // Compute a tentative new simplex vertex using support points.
       const vertex: SimplexVertex = vertices[simplex.count];
-      vertex.indexA = proxyA.GetSupport(Rot.MulTRV(transformA.q, Vec2.NegV(d, Vec2.s_t0), Distance_s_supportA));
-      Transform.MulXV(transformA, proxyA.GetVertex(vertex.indexA), vertex.wA);
-      vertex.indexB = proxyB.GetSupport(Rot.MulTRV(transformB.q, d, Distance_s_supportB));
-      Transform.MulXV(transformB, proxyB.GetVertex(vertex.indexB), vertex.wB);
+      vertex.indexA = proxyA.getSupport(Rot.mulTRV(transformA.q, Vec2.NegV(d, Vec2.s_t0), distance_s_supportA));
+      Transform.mulXV(transformA, proxyA.getVertex(vertex.indexA), vertex.wA);
+      vertex.indexB = proxyB.getSupport(Rot.mulTRV(transformB.q, d, distance_s_supportB));
+      Transform.mulXV(transformB, proxyB.getVertex(vertex.indexB), vertex.wB);
       Vec2.SubVV(vertex.wB, vertex.wA, vertex.w);
 
       // Iteration count is equated to the number of support point calls.
@@ -594,12 +594,12 @@ namespace b2 {
     gjkMaxIters = Max(gjkMaxIters, iter);
 
     // Prepare output.
-    simplex.GetWitnessPoints(output.pointA, output.pointB);
+    simplex.getWitnessPoints(output.pointA, output.pointB);
     output.distance = Vec2.DistanceVV(output.pointA, output.pointB);
     output.iterations = iter;
 
     // Cache the simplex.
-    simplex.WriteCache(cache);
+    simplex.writeCache(cache);
 
     // Apply radii if requested.
     if (input.useRadii) {
@@ -610,16 +610,16 @@ namespace b2 {
         // Shapes are still no overlapped.
         // Move the witness points to the outer surface.
         output.distance -= rA + rB;
-        const normal: Vec2 = Vec2.SubVV(output.pointB, output.pointA, Distance_s_normal);
-        normal.Normalize();
-        output.pointA.SelfMulAdd(rA, normal);
-        output.pointB.SelfMulSub(rB, normal);
+        const normal: Vec2 = Vec2.SubVV(output.pointB, output.pointA, distance_s_normal);
+        normal.normalize();
+        output.pointA.selfMulAdd(rA, normal);
+        output.pointB.selfMulSub(rB, normal);
       } else {
         // Shapes are overlapped when radii are considered.
         // Move the witness points to the middle.
-        const p: Vec2 = Vec2.MidVV(output.pointA, output.pointB, Distance_s_p);
-        output.pointA.Copy(p);
-        output.pointB.Copy(p);
+        const p: Vec2 = Vec2.MidVV(output.pointA, output.pointB, distance_s_p);
+        output.pointA.copy(p);
+        output.pointB.copy(p);
         output.distance = 0;
       }
     }
@@ -631,19 +631,19 @@ namespace b2 {
 // Algorithm by Gino van den Bergen.
 // "Smooth Mesh Contacts with GJK" in Game Physics Pearls. 2010
 // bool ShapeCast(ShapeCastOutput* output, const ShapeCastInput* input);
-  const ShapeCast_s_n = new Vec2();
-  const ShapeCast_s_simplex = new Simplex();
-  const ShapeCast_s_wA = new Vec2();
-  const ShapeCast_s_wB = new Vec2();
-  const ShapeCast_s_v = new Vec2();
-  const ShapeCast_s_p = new Vec2();
-  const ShapeCast_s_pointA = new Vec2();
-  const ShapeCast_s_pointB = new Vec2();
-  export function ShapeCast(output: ShapeCastOutput, input: ShapeCastInput): boolean {
+  const shapeCast_s_n = new Vec2();
+  const shapeCast_s_simplex = new Simplex();
+  const shapeCast_s_wA = new Vec2();
+  const shapeCast_s_wB = new Vec2();
+  const shapeCast_s_v = new Vec2();
+  const shapeCast_s_p = new Vec2();
+  const shapeCast_s_pointA = new Vec2();
+  const shapeCast_s_pointB = new Vec2();
+  export function shapeCast(output: ShapeCastOutput, input: ShapeCastInput): boolean {
     output.iterations = 0;
     output.lambda = 1.0;
-    output.normal.SetZero();
-    output.point.SetZero();
+    output.normal.setZero();
+    output.point.setZero();
 
     // const DistanceProxy* proxyA = &input.proxyA;
     const proxyA = input.proxyA;
@@ -665,12 +665,12 @@ namespace b2 {
     // Vec2 r = input.translationB;
     const r = input.translationB;
     // Vec2 n(0.0f, 0.0f);
-    const n = ShapeCast_s_n.Set(0.0, 0.0);
+    const n = shapeCast_s_n.set(0.0, 0.0);
     // float32 lambda = 0.0f;
     let lambda = 0.0;
 
     // Initial simplex
-    const simplex = ShapeCast_s_simplex;
+    const simplex = shapeCast_s_simplex;
     simplex.count = 0;
 
     // Get simplex vertices as an array.
@@ -679,15 +679,15 @@ namespace b2 {
 
     // Get support point in -r direction
     // int32 indexA = proxyA.GetSupport(MulT(xfA.q, -r));
-    let indexA = proxyA.GetSupport(Rot.MulTRV(xfA.q, Vec2.NegV(r, Vec2.s_t1), Vec2.s_t0));
+    let indexA = proxyA.getSupport(Rot.mulTRV(xfA.q, Vec2.NegV(r, Vec2.s_t1), Vec2.s_t0));
     // Vec2 wA = Mul(xfA, proxyA.GetVertex(indexA));
-    let wA = Transform.MulXV(xfA, proxyA.GetVertex(indexA), ShapeCast_s_wA);
+    let wA = Transform.mulXV(xfA, proxyA.getVertex(indexA), shapeCast_s_wA);
     // int32 indexB = proxyB.GetSupport(MulT(xfB.q, r));
-    let indexB = proxyB.GetSupport(Rot.MulTRV(xfB.q, r, Vec2.s_t0));
+    let indexB = proxyB.getSupport(Rot.mulTRV(xfB.q, r, Vec2.s_t0));
     // Vec2 wB = Mul(xfB, proxyB.GetVertex(indexB));
-    let wB = Transform.MulXV(xfB, proxyB.GetVertex(indexB), ShapeCast_s_wB);
+    let wB = Transform.mulXV(xfB, proxyB.getVertex(indexB), shapeCast_s_wB);
     // Vec2 v = wA - wB;
-    const v = Vec2.SubVV(wA, wB, ShapeCast_s_v);
+    const v = Vec2.SubVV(wA, wB, shapeCast_s_v);
 
     // Sigma is the target distance between polygons
     // float32 sigma = Max(polygonRadius, radius - polygonRadius);
@@ -701,25 +701,25 @@ namespace b2 {
     // int32 iter = 0;
     let iter = 0;
     // while (iter < k_maxIters && v.Length() - sigma > tolerance)
-    while (iter < k_maxIters && v.Length() - sigma > tolerance) {
+    while (iter < k_maxIters && v.length() - sigma > tolerance) {
       // DEBUG: Assert(simplex.count < 3);
 
       output.iterations += 1;
 
       // Support in direction -v (A - B)
       // indexA = proxyA.GetSupport(MulT(xfA.q, -v));
-      indexA = proxyA.GetSupport(Rot.MulTRV(xfA.q, Vec2.NegV(v, Vec2.s_t1), Vec2.s_t0));
+      indexA = proxyA.getSupport(Rot.mulTRV(xfA.q, Vec2.NegV(v, Vec2.s_t1), Vec2.s_t0));
       // wA = Mul(xfA, proxyA.GetVertex(indexA));
-      wA = Transform.MulXV(xfA, proxyA.GetVertex(indexA), ShapeCast_s_wA);
+      wA = Transform.mulXV(xfA, proxyA.getVertex(indexA), shapeCast_s_wA);
       // indexB = proxyB.GetSupport(MulT(xfB.q, v));
-      indexB = proxyB.GetSupport(Rot.MulTRV(xfB.q, v, Vec2.s_t0));
+      indexB = proxyB.getSupport(Rot.mulTRV(xfB.q, v, Vec2.s_t0));
       // wB = Mul(xfB, proxyB.GetVertex(indexB));
-      wB = Transform.MulXV(xfB, proxyB.GetVertex(indexB), ShapeCast_s_wB);
+      wB = Transform.mulXV(xfB, proxyB.getVertex(indexB), shapeCast_s_wB);
       // Vec2 p = wA - wB;
-      const p = Vec2.SubVV(wA, wB, ShapeCast_s_p);
+      const p = Vec2.SubVV(wA, wB, shapeCast_s_p);
 
       // -v is a normal at p
-      v.Normalize();
+      v.normalize();
 
       // Intersect ray with plane
       const vp = Vec2.DotVV(v, p);
@@ -735,7 +735,7 @@ namespace b2 {
         }
 
         // n = -v;
-        n.Copy(v).SelfNeg();
+        n.copy(v).selfNeg();
         simplex.count = 0;
       }
 
@@ -747,12 +747,12 @@ namespace b2 {
       const vertex: SimplexVertex = vertices[simplex.count];
       vertex.indexA = indexB;
       // vertex.wA = wB + lambda * r;
-      vertex.wA.Copy(wB).SelfMulAdd(lambda, r);
+      vertex.wA.copy(wB).selfMulAdd(lambda, r);
       vertex.indexB = indexA;
       // vertex.wB = wA;
-      vertex.wB.Copy(wA);
+      vertex.wB.copy(wA);
       // vertex.w = vertex.wB - vertex.wA;
-      vertex.w.Copy(vertex.wB).SelfSub(vertex.wA);
+      vertex.w.copy(vertex.wB).selfSub(vertex.wA);
       vertex.a = 1.0;
       simplex.count += 1;
 
@@ -761,11 +761,11 @@ namespace b2 {
           break;
 
         case 2:
-          simplex.Solve2();
+          simplex.solve2();
           break;
 
         case 3:
-          simplex.Solve3();
+          simplex.solve3();
           break;
 
         default:
@@ -780,7 +780,7 @@ namespace b2 {
 
       // Get search direction.
       // v = simplex.GetClosestPoint();
-      simplex.GetClosestPoint(v);
+      simplex.getClosestPoint(v);
 
       // Iteration count is equated to the number of support point calls.
       ++iter;
@@ -792,18 +792,18 @@ namespace b2 {
     }
 
     // Prepare output.
-    const pointA = ShapeCast_s_pointA;
-    const pointB = ShapeCast_s_pointB;
-    simplex.GetWitnessPoints(pointA, pointB);
+    const pointA = shapeCast_s_pointA;
+    const pointB = shapeCast_s_pointB;
+    simplex.getWitnessPoints(pointA, pointB);
 
-    if (v.LengthSquared() > 0.0) {
+    if (v.lengthSquared() > 0.0) {
       // n = -v;
-      n.Copy(v).SelfNeg();
-      n.Normalize();
+      n.copy(v).selfNeg();
+      n.normalize();
     }
 
     // output.point = pointA + radiusA * n;
-    output.normal.Copy(n);
+    output.normal.copy(n);
     output.lambda = lambda;
     output.iterations = iter;
     return true;

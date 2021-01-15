@@ -27,7 +27,7 @@ namespace b2 {
     public broadphase: number = 0;
     public solveTOI: number = 0;
 
-    public Reset() {
+    public reset() {
       this.step = 0;
       this.collide = 0;
       this.solve = 0;
@@ -52,7 +52,7 @@ namespace b2 {
     // #endif
     public warmStarting: boolean = false;
 
-    public Copy(step: TimeStep): TimeStep {
+    public copy(step: TimeStep): TimeStep {
       this.dt = step.dt;
       this.inv_dt = step.inv_dt;
       this.dtRatio = step.dtRatio;
@@ -70,7 +70,7 @@ namespace b2 {
     public readonly c: Vec2 = new Vec2();
     public a: number = 0;
 
-    public static MakeArray(length: number): Position[] {
+    public static makeArray(length: number): Position[] {
       return MakeArray(length, (i: number): Position => new Position());
     }
   }
@@ -79,7 +79,7 @@ namespace b2 {
     public readonly v: Vec2 = new Vec2();
     public w: number = 0;
 
-    public static MakeArray(length: number): Velocity[] {
+    public static makeArray(length: number): Velocity[] {
       return MakeArray(length, (i: number): Velocity => new Velocity());
     }
   }

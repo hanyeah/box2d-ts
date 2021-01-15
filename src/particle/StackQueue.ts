@@ -17,7 +17,7 @@
  */
 namespace b2 {
   export class StackQueue<T> {
-    public readonly buffer: Array<T | null> = [];
+    public readonly buffer: Array<T> = [];
     public front: number = 0;
     public back: number = 0;
     public get capacity(): number { return this.buffer.length; }
@@ -26,7 +26,7 @@ namespace b2 {
         this.buffer[i] = null;
       }
     }
-    public Push(item: T): void {
+    public push(item: T): void {
       if (this.back >= this.capacity) {
         for (let i = this.front; i < this.back; i++) {
           this.buffer[i - this.front] = this.buffer[i];
@@ -37,16 +37,16 @@ namespace b2 {
       this.buffer[this.back] = item;
       this.back++;
     }
-    public Pop(): void {
+    public pop(): void {
       // DEBUG: Assert(this.front < this.back);
       this.buffer[this.front] = null;
       this.front++;
     }
-    public Empty(): boolean {
+    public empty(): boolean {
       // DEBUG: Assert(this.front <= this.back);
       return this.front === this.back;
     }
-    public Front(): T {
+    public getFront(): T {
       const item = this.buffer[this.front];
       if (!item) { throw new Error(); }
       return item;

@@ -49,7 +49,7 @@ namespace b2 {
     public fixedEffectiveMass: boolean = false;
     public warmStart: boolean = false;
 
-    public Copy(other: RopeTuning): this {
+    public copy(other: RopeTuning): this {
       this.stretchingModel = other.stretchingModel;
       this.bendingModel = other.bendingModel;
       this.damping = other.damping;
@@ -138,9 +138,9 @@ namespace b2 {
 
     private readonly tuning: RopeTuning = new RopeTuning();
 
-    public Create(def: RopeDef): void {
+    public create(def: RopeDef): void {
       // Assert(def.count >= 3);
-      this.position.Copy(def.position);
+      this.position.copy(def.position);
       this.count = def.count;
       function make_array<T>(array: T[], count: number, make: (index: number) => T): void {
         for (let index = 0; index < count; ++index) {
@@ -159,12 +159,12 @@ namespace b2 {
       make_array(this.invMasses, this.count, () => 0.0);
 
       for (let i = 0; i < this.count; ++i) {
-        this.bindPositions[i].Copy(def.vertices[i]);
+        this.bindPositions[i].copy(def.vertices[i]);
         // this.ps[i] = def.vertices[i] + this.position;
-        this.ps[i].Copy(def.vertices[i]).SelfAdd(this.position);
+        this.ps[i].copy(def.vertices[i]).selfAdd(this.position);
         // this.p0s[i] = def.vertices[i] + this.position;
-        this.p0s[i].Copy(def.vertices[i]).SelfAdd(this.position);
-        this.vs[i].SetZero();
+        this.p0s[i].copy(def.vertices[i]).selfAdd(this.position);
+        this.vs[i].setZero();
 
         const m: number = def.masses[i];
         if (m > 0.0) {
@@ -219,31 +219,31 @@ namespace b2 {
         // Pre-compute effective mass (TODO use flattened config)
         const e1: Vec2 = Vec2.SubVV(p2, p1, new Vec2());
         const e2: Vec2 = Vec2.SubVV(p3, p2, new Vec2());
-        const L1sqr: number = e1.LengthSquared();
-        const L2sqr: number = e2.LengthSquared();
+        const L1sqr: number = e1.lengthSquared();
+        const L2sqr: number = e2.lengthSquared();
 
         if (L1sqr * L2sqr === 0.0) {
           continue;
         }
 
         // Vec2 Jd1 = (-1.0 / L1sqr) * e1.Skew();
-        const Jd1: Vec2 = new Vec2().Copy(e1).SelfSkew().SelfMul(-1.0 / L1sqr);
+        const Jd1: Vec2 = new Vec2().copy(e1).selfSkew().selfMul(-1.0 / L1sqr);
         // Vec2 Jd2 = (1.0 / L2sqr) * e2.Skew();
-        const Jd2: Vec2 = new Vec2().Copy(e2).SelfSkew().SelfMul(1.0 / L2sqr);
+        const Jd2: Vec2 = new Vec2().copy(e2).selfSkew().selfMul(1.0 / L2sqr);
 
         // Vec2 J1 = -Jd1;
-        const J1 = Jd1.Clone().SelfNeg();
+        const J1 = Jd1.clone().selfNeg();
         // Vec2 J2 = Jd1 - Jd2;
-        const J2 = Jd1.Clone().SelfSub(Jd2);
+        const J2 = Jd1.clone().selfSub(Jd2);
         // Vec2 J3 = Jd2;
-        const J3 = Jd2.Clone();
+        const J3 = Jd2.clone();
 
         c.invEffectiveMass = c.invMass1 * Vec2.DotVV(J1, J1) + c.invMass2 * Vec2.DotVV(J2, J2) + c.invMass3 * Vec2.DotVV(J3, J3);
 
         // Vec2 r = p3 - p1;
         const r: Vec2 = Vec2.SubVV(p3, p1, new Vec2());
 
-        const rr: number = r.LengthSquared();
+        const rr: number = r.lengthSquared();
         if (rr === 0.0) {
           continue;
         }
@@ -254,13 +254,13 @@ namespace b2 {
         c.alpha2 = Vec2.DotVV(e1, r) / rr;
       }
 
-      this.gravity.Copy(def.gravity);
+      this.gravity.copy(def.gravity);
 
-      this.SetTuning(def.tuning);
+      this.setTuning(def.tuning);
     }
 
-    public SetTuning(tuning: RopeTuning): void {
-      this.tuning.Copy(tuning);
+    public setTuning(tuning: RopeTuning): void {
+      this.tuning.copy(tuning);
 
       // Pre-compute spring and damper values based on tuning
 
@@ -310,7 +310,7 @@ namespace b2 {
       }
     }
 
-    public Step(dt: number, iterations: number, position: Vec2): void {
+    public step(dt: number, iterations: number, position: Vec2): void {
       if (dt === 0.0) {
         return;
       }
@@ -337,7 +337,7 @@ namespace b2 {
 
       // Apply bending spring
       if (this.tuning.bendingModel === BendingModel.springAngleBendingModel) {
-        this.ApplyBendForces(dt);
+        this.applyBendForces(dt);
       }
 
       for (let i = 0; i < this.bendCount; ++i) {
@@ -358,26 +358,26 @@ namespace b2 {
       // Solve constraints
       for (let i = 0; i < iterations; ++i) {
         if (this.tuning.bendingModel === BendingModel.pbdAngleBendingModel) {
-          this.SolveBend_PBD_Angle();
+          this.solveBendPBDAngle();
         }
         else if (this.tuning.bendingModel === BendingModel.xpbdAngleBendingModel) {
-          this.SolveBend_XPBD_Angle(dt);
+          this.solveBendXPBDAngle(dt);
         }
         else if (this.tuning.bendingModel === BendingModel.pbdDistanceBendingModel) {
-          this.SolveBend_PBD_Distance();
+          this.solveBendPBDDistance();
         }
         else if (this.tuning.bendingModel === BendingModel.pbdHeightBendingModel) {
-          this.SolveBend_PBD_Height();
+          this.solveBendPBDHeight();
         }
         else if (this.tuning.bendingModel === BendingModel.pbdTriangleBendingModel) {
-          this.SolveBend_PBD_Triangle();
+          this.solveBendPBDTriangle();
         }
 
         if (this.tuning.stretchingModel === StretchingModel.pbdStretchingModel) {
-          this.SolveStretch_PBD();
+          this.solveStretchPBD();
         }
         else if (this.tuning.stretchingModel === StretchingModel.xpbdStretchingModel) {
-          this.SolveStretch_XPBD(dt);
+          this.solveStretchXPBD(dt);
         }
       }
 
@@ -386,12 +386,12 @@ namespace b2 {
         // this.vs[i] = inv_dt * (this.ps[i] - this.p0s[i]);
         this.vs[i].x = inv_dt * (this.ps[i].x - this.p0s[i].x);
         this.vs[i].y = inv_dt * (this.ps[i].y - this.p0s[i].y);
-        this.p0s[i].Copy(this.ps[i]);
+        this.p0s[i].copy(this.ps[i]);
       }
     }
 
-    public Reset(position: Vec2): void {
-      this.position.Copy(position);
+    public reset(position: Vec2): void {
+      this.position.copy(position);
 
       for (let i = 0; i < this.count; ++i) {
         // this.ps[i] = this.bindPositions[i] + this.position;
@@ -400,7 +400,7 @@ namespace b2 {
         // this.p0s[i] = this.bindPositions[i] + this.position;
         this.p0s[i].x = this.bindPositions[i].x + this.position.x;
         this.p0s[i].y = this.bindPositions[i].y + this.position.y;
-        this.vs[i].SetZero();
+        this.vs[i].setZero();
       }
 
       for (let i = 0; i < this.bendCount; ++i) {
@@ -412,34 +412,34 @@ namespace b2 {
       }
     }
 
-    public Draw(draw: Draw): void {
+    public draw(draw: Draw): void {
       const c: Color = new Color(0.4, 0.5, 0.7);
       const pg: Color = new Color(0.1, 0.8, 0.1);
       const pd: Color = new Color(0.7, 0.2, 0.4);
 
       for (let i = 0; i < this.count - 1; ++i) {
-        draw.DrawSegment(this.ps[i], this.ps[i + 1], c);
+        draw.drawSegment(this.ps[i], this.ps[i + 1], c);
 
         const pc: Color = this.invMasses[i] > 0.0 ? pd : pg;
-        draw.DrawPoint(this.ps[i], 5.0, pc);
+        draw.drawPoint(this.ps[i], 5.0, pc);
       }
 
       const pc: Color = this.invMasses[this.count - 1] > 0.0 ? pd : pg;
-      draw.DrawPoint(this.ps[this.count - 1], 5.0, pc);
+      draw.drawPoint(this.ps[this.count - 1], 5.0, pc);
     }
 
-    private SolveStretch_PBD(): void {
+    private solveStretchPBD(): void {
       const stiffness: number = this.tuning.stretchStiffness;
 
       for (let i = 0; i < this.stretchCount; ++i) {
         const c: RopeStretch = this.stretchConstraints[i];
 
-        const p1: Vec2 = this.ps[c.i1].Clone();
-        const p2: Vec2 = this.ps[c.i2].Clone();
+        const p1: Vec2 = this.ps[c.i1].clone();
+        const p2: Vec2 = this.ps[c.i2].clone();
 
         // Vec2 d = p2 - p1;
-        const d: Vec2 = p2.Clone().SelfSub(p1);
-        const L: number = d.Normalize();
+        const d: Vec2 = p2.clone().selfSub(p1);
+        const L: number = d.normalize();
 
         const sum: number = c.invMass1 + c.invMass2;
         if (sum === 0.0) {
@@ -456,29 +456,29 @@ namespace b2 {
         p2.x += stiffness * s2 * (c.L - L) * d.x;
         p2.y += stiffness * s2 * (c.L - L) * d.y;
 
-        this.ps[c.i1].Copy(p1);
-        this.ps[c.i2].Copy(p2);
+        this.ps[c.i1].copy(p1);
+        this.ps[c.i2].copy(p2);
       }
     }
 
-    private SolveStretch_XPBD(dt: number): void {
+    private solveStretchXPBD(dt: number): void {
       // 	Assert(dt > 0.0);
 
       for (let i = 0; i < this.stretchCount; ++i) {
         const c: RopeStretch = this.stretchConstraints[i];
 
-        const p1: Vec2 = this.ps[c.i1].Clone();
-        const p2: Vec2 = this.ps[c.i2].Clone();
+        const p1: Vec2 = this.ps[c.i1].clone();
+        const p2: Vec2 = this.ps[c.i2].clone();
 
-        const dp1: Vec2 = p1.Clone().SelfSub(this.p0s[c.i1]);
-        const dp2: Vec2 = p2.Clone().SelfSub(this.p0s[c.i2]);
+        const dp1: Vec2 = p1.clone().selfSub(this.p0s[c.i1]);
+        const dp2: Vec2 = p2.clone().selfSub(this.p0s[c.i2]);
 
         // Vec2 u = p2 - p1;
-        const u: Vec2 = p2.Clone().SelfSub(p1);
-        const L: number = u.Normalize();
+        const u: Vec2 = p2.clone().selfSub(p1);
+        const L: number = u.normalize();
 
         // Vec2 J1 = -u;
-        const J1: Vec2 = u.Clone().SelfNeg();
+        const J1: Vec2 = u.clone().selfNeg();
         // Vec2 J2 = u;
         const J2: Vec2 = u;
 
@@ -507,13 +507,13 @@ namespace b2 {
         p2.x += (c.invMass2 * impulse) * J2.x;
         p2.y += (c.invMass2 * impulse) * J2.y;
 
-        this.ps[c.i1].Copy(p1);
-        this.ps[c.i2].Copy(p2);
+        this.ps[c.i1].copy(p1);
+        this.ps[c.i2].copy(p2);
         c.lambda += impulse;
       }
     }
 
-    private SolveBend_PBD_Angle(): void {
+    private solveBendPBDAngle(): void {
       const stiffness: number = this.tuning.bendStiffness;
 
       for (let i = 0; i < this.bendCount; ++i) {
@@ -524,9 +524,9 @@ namespace b2 {
         const p3: Vec2 = this.ps[c.i3];
 
         // Vec2 d1 = p2 - p1;
-        const d1 = p2.Clone().SelfSub(p1);
+        const d1 = p2.clone().selfSub(p1);
         // Vec2 d2 = p3 - p2;
-        const d2 = p3.Clone().SelfSub(p2);
+        const d2 = p3.clone().selfSub(p2);
         const a: number = Vec2.CrossVV(d1, d2);
         const b: number = Vec2.DotVV(d1, d2);
 
@@ -539,8 +539,8 @@ namespace b2 {
           L2sqr = c.L2 * c.L2;
         }
         else {
-          L1sqr = d1.LengthSquared();
-          L2sqr = d2.LengthSquared();
+          L1sqr = d1.lengthSquared();
+          L2sqr = d2.lengthSquared();
         }
 
         if (L1sqr * L2sqr === 0.0) {
@@ -548,14 +548,14 @@ namespace b2 {
         }
 
         // Vec2 Jd1 = (-1.0 / L1sqr) * d1.Skew();
-        const Jd1: Vec2 = new Vec2().Copy(d1).SelfSkew().SelfMul(-1.0 / L1sqr);
+        const Jd1: Vec2 = new Vec2().copy(d1).selfSkew().selfMul(-1.0 / L1sqr);
         // Vec2 Jd2 = (1.0 / L2sqr) * d2.Skew();
-        const Jd2: Vec2 = new Vec2().Copy(d2).SelfSkew().SelfMul(1.0 / L2sqr);
+        const Jd2: Vec2 = new Vec2().copy(d2).selfSkew().selfMul(1.0 / L2sqr);
 
         // Vec2 J1 = -Jd1;
-        const J1 = Jd1.Clone().SelfNeg();
+        const J1 = Jd1.clone().selfNeg();
         // Vec2 J2 = Jd1 - Jd2;
-        const J2 = Jd1.Clone().SelfSub(Jd2);
+        const J2 = Jd1.clone().selfSub(Jd2);
         // Vec2 J3 = Jd2;
         const J3 = Jd2;
 
@@ -583,13 +583,13 @@ namespace b2 {
         p3.x += (c.invMass3 * impulse) * J3.x;
         p3.y += (c.invMass3 * impulse) * J3.y;
 
-        this.ps[c.i1].Copy(p1);
-        this.ps[c.i2].Copy(p2);
-        this.ps[c.i3].Copy(p3);
+        this.ps[c.i1].copy(p1);
+        this.ps[c.i2].copy(p2);
+        this.ps[c.i3].copy(p3);
       }
     }
 
-    private SolveBend_XPBD_Angle(dt: number): void {
+    private solveBendXPBDAngle(dt: number): void {
       // Assert(dt > 0.0);
 
       for (let i = 0; i < this.bendCount; ++i) {
@@ -599,14 +599,14 @@ namespace b2 {
         const p2: Vec2 = this.ps[c.i2];
         const p3: Vec2 = this.ps[c.i3];
 
-        const dp1: Vec2 = p1.Clone().SelfSub(this.p0s[c.i1]);
-        const dp2: Vec2 = p2.Clone().SelfSub(this.p0s[c.i2]);
-        const dp3: Vec2 = p3.Clone().SelfSub(this.p0s[c.i3]);
+        const dp1: Vec2 = p1.clone().selfSub(this.p0s[c.i1]);
+        const dp2: Vec2 = p2.clone().selfSub(this.p0s[c.i2]);
+        const dp3: Vec2 = p3.clone().selfSub(this.p0s[c.i3]);
 
         // Vec2 d1 = p2 - p1;
-        const d1 = p2.Clone().SelfSub(p1);
+        const d1 = p2.clone().selfSub(p1);
         // Vec2 d2 = p3 - p2;
-        const d2 = p3.Clone().SelfSub(p2);
+        const d2 = p3.clone().selfSub(p2);
 
         let L1sqr: number, L2sqr: number;
 
@@ -615,8 +615,8 @@ namespace b2 {
           L2sqr = c.L2 * c.L2;
         }
         else {
-          L1sqr = d1.LengthSquared();
-          L2sqr = d2.LengthSquared();
+          L1sqr = d1.lengthSquared();
+          L2sqr = d2.lengthSquared();
         }
 
         if (L1sqr * L2sqr === 0.0) {
@@ -636,14 +636,14 @@ namespace b2 {
         // Vec2 J3 = Jd2;
 
         // Vec2 Jd1 = (-1.0 / L1sqr) * d1.Skew();
-        const Jd1: Vec2 = new Vec2().Copy(d1).SelfSkew().SelfMul(-1.0 / L1sqr);
+        const Jd1: Vec2 = new Vec2().copy(d1).selfSkew().selfMul(-1.0 / L1sqr);
         // Vec2 Jd2 = (1.0 / L2sqr) * d2.Skew();
-        const Jd2: Vec2 = new Vec2().Copy(d2).SelfSkew().SelfMul(1.0 / L2sqr);
+        const Jd2: Vec2 = new Vec2().copy(d2).selfSkew().selfMul(1.0 / L2sqr);
 
         // Vec2 J1 = -Jd1;
-        const J1 = Jd1.Clone().SelfNeg();
+        const J1 = Jd1.clone().selfNeg();
         // Vec2 J2 = Jd1 - Jd2;
-        const J2 = Jd1.Clone().SelfSub(Jd2);
+        const J2 = Jd1.clone().selfSub(Jd2);
         // Vec2 J3 = Jd2;
         const J3 = Jd2;
 
@@ -682,14 +682,14 @@ namespace b2 {
         p3.x += (c.invMass3 * impulse) * J3.x;
         p3.y += (c.invMass3 * impulse) * J3.y;
 
-        this.ps[c.i1].Copy(p1);
-        this.ps[c.i2].Copy(p2);
-        this.ps[c.i3].Copy(p3);
+        this.ps[c.i1].copy(p1);
+        this.ps[c.i2].copy(p2);
+        this.ps[c.i3].copy(p3);
         c.lambda += impulse;
       }
     }
 
-    private SolveBend_PBD_Distance(): void {
+    private solveBendPBDDistance(): void {
       const stiffness: number = this.tuning.bendStiffness;
 
       for (let i = 0; i < this.bendCount; ++i) {
@@ -698,12 +698,12 @@ namespace b2 {
         const i1: number = c.i1;
         const i2: number = c.i3;
 
-        const p1: Vec2 = this.ps[i1].Clone();
-        const p2: Vec2 = this.ps[i2].Clone();
+        const p1: Vec2 = this.ps[i1].clone();
+        const p2: Vec2 = this.ps[i2].clone();
 
         // Vec2 d = p2 - p1;
-        const d = p2.Clone().SelfSub(p1);
-        const L: number = d.Normalize();
+        const d = p2.clone().selfSub(p1);
+        const L: number = d.normalize();
 
         const sum: number = c.invMass1 + c.invMass3;
         if (sum === 0.0) {
@@ -720,41 +720,41 @@ namespace b2 {
         p2.x += stiffness * s2 * (c.L1 + c.L2 - L) * d.x;
         p2.y += stiffness * s2 * (c.L1 + c.L2 - L) * d.y;
 
-        this.ps[i1].Copy(p1);
-        this.ps[i2].Copy(p2);
+        this.ps[i1].copy(p1);
+        this.ps[i2].copy(p2);
       }
     }
 
-    private SolveBend_PBD_Height(): void {
+    private solveBendPBDHeight(): void {
       const stiffness: number = this.tuning.bendStiffness;
 
       for (let i = 0; i < this.bendCount; ++i) {
         const c: RopeBend = this.bendConstraints[i];
 
-        const p1: Vec2 = this.ps[c.i1].Clone();
-        const p2: Vec2 = this.ps[c.i2].Clone();
-        const p3: Vec2 = this.ps[c.i3].Clone();
+        const p1: Vec2 = this.ps[c.i1].clone();
+        const p2: Vec2 = this.ps[c.i2].clone();
+        const p3: Vec2 = this.ps[c.i3].clone();
 
         // Barycentric coordinates are held constant
         const d = new Vec2();
         // Vec2 d = c.alpha1 * p1 + c.alpha2 * p3 - p2;
         d.x = c.alpha1 * p1.x + c.alpha2 * p3.x - p2.x;
         d.y = c.alpha1 * p1.y + c.alpha2 * p3.y - p2.y;
-        const dLen: number = d.Length();
+        const dLen: number = d.length();
 
         if (dLen === 0.0) {
           continue;
         }
 
         // Vec2 dHat = (1.0 / dLen) * d;
-        const dHat = d.Clone().SelfMul(1.0 / dLen);
+        const dHat = d.clone().selfMul(1.0 / dLen);
 
         // Vec2 J1 = c.alpha1 * dHat;
-        const J1 = dHat.Clone().SelfMul(c.alpha1);
+        const J1 = dHat.clone().selfMul(c.alpha1);
         // Vec2 J2 = -dHat;
-        const J2 = dHat.Clone().SelfNeg();
+        const J2 = dHat.clone().selfNeg();
         // Vec2 J3 = c.alpha2 * dHat;
-        const J3 = dHat.Clone().SelfMul(c.alpha2);
+        const J3 = dHat.clone().selfMul(c.alpha2);
 
         const sum: number = c.invMass1 * c.alpha1 * c.alpha1 + c.invMass2 + c.invMass3 * c.alpha2 * c.alpha2;
 
@@ -776,22 +776,22 @@ namespace b2 {
         p3.x += (c.invMass3 * impulse) * J3.x;
         p3.y += (c.invMass3 * impulse) * J3.y;
 
-        this.ps[c.i1].Copy(p1);
-        this.ps[c.i2].Copy(p2);
-        this.ps[c.i3].Copy(p3);
+        this.ps[c.i1].copy(p1);
+        this.ps[c.i2].copy(p2);
+        this.ps[c.i3].copy(p3);
       }
     }
 
     // M. Kelager: A Triangle Bending Constraint Model for PBD
-    private SolveBend_PBD_Triangle(): void {
+    private solveBendPBDTriangle(): void {
       const stiffness = this.tuning.bendStiffness;
 
       for (let i = 0; i < this.bendCount; ++i) {
         const c: RopeBend = this.bendConstraints[i];
 
-        const b0 = this.ps[c.i1].Clone();
-        const v = this.ps[c.i2].Clone();
-        const b1 = this.ps[c.i3].Clone();
+        const b0 = this.ps[c.i1].clone();
+        const v = this.ps[c.i2].clone();
+        const b1 = this.ps[c.i3].clone();
 
         const wb0 = c.invMass1;
         const wv = c.invMass2;
@@ -814,35 +814,35 @@ namespace b2 {
         db1.x = 2.0 * wb1 * invW * d.x;
         db1.y = 2.0 * wb1 * invW * d.y;
 
-        b0.SelfAdd(db0);
-        v.SelfAdd(dv);
-        b1.SelfAdd(db1);
+        b0.selfAdd(db0);
+        v.selfAdd(dv);
+        b1.selfAdd(db1);
 
-        this.ps[c.i1].Copy(b0);
-        this.ps[c.i2].Copy(v);
-        this.ps[c.i3].Copy(b1);
+        this.ps[c.i1].copy(b0);
+        this.ps[c.i2].copy(v);
+        this.ps[c.i3].copy(b1);
       }
     }
 
-    private ApplyBendForces(dt: number): void {
+    private applyBendForces(dt: number): void {
       // omega = 2 * pi * hz
       const omega: number = 2.0 * pi * this.tuning.bendHertz;
 
       for (let i = 0; i < this.bendCount; ++i) {
         const c: RopeBend = this.bendConstraints[i];
 
-        const p1: Vec2 = this.ps[c.i1].Clone();
-        const p2: Vec2 = this.ps[c.i2].Clone();
-        const p3: Vec2 = this.ps[c.i3].Clone();
+        const p1: Vec2 = this.ps[c.i1].clone();
+        const p2: Vec2 = this.ps[c.i2].clone();
+        const p3: Vec2 = this.ps[c.i3].clone();
 
         const v1: Vec2 = this.vs[c.i1];
         const v2: Vec2 = this.vs[c.i2];
         const v3: Vec2 = this.vs[c.i3];
 
         // Vec2 d1 = p2 - p1;
-        const d1 = p1.Clone().SelfSub(p1);
+        const d1 = p1.clone().selfSub(p1);
         // Vec2 d2 = p3 - p2;
-        const d2 = p3.Clone().SelfSub(p2);
+        const d2 = p3.clone().selfSub(p2);
 
         let L1sqr: number, L2sqr: number;
 
@@ -851,8 +851,8 @@ namespace b2 {
           L2sqr = c.L2 * c.L2;
         }
         else {
-          L1sqr = d1.LengthSquared();
-          L2sqr = d2.LengthSquared();
+          L1sqr = d1.lengthSquared();
+          L2sqr = d2.lengthSquared();
         }
 
         if (L1sqr * L2sqr === 0.0) {
@@ -872,14 +872,14 @@ namespace b2 {
         // Vec2 J3 = Jd2;
 
         // Vec2 Jd1 = (-1.0 / L1sqr) * d1.Skew();
-        const Jd1: Vec2 = new Vec2().Copy(d1).SelfSkew().SelfMul(-1.0 / L1sqr);
+        const Jd1: Vec2 = new Vec2().copy(d1).selfSkew().selfMul(-1.0 / L1sqr);
         // Vec2 Jd2 = (1.0 / L2sqr) * d2.Skew();
-        const Jd2: Vec2 = new Vec2().Copy(d2).SelfSkew().SelfMul(1.0 / L2sqr);
+        const Jd2: Vec2 = new Vec2().copy(d2).selfSkew().selfMul(1.0 / L2sqr);
 
         // Vec2 J1 = -Jd1;
-        const J1 = Jd1.Clone().SelfNeg();
+        const J1 = Jd1.clone().selfNeg();
         // Vec2 J2 = Jd1 - Jd2;
-        const J2 = Jd1.Clone().SelfSub(Jd2);
+        const J2 = Jd1.clone().selfSub(Jd2);
         // Vec2 J3 = Jd2;
         const J3 = Jd2;
 

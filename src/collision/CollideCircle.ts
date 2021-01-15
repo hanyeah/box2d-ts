@@ -1,11 +1,11 @@
 namespace b2 {
   const CollideCircles_s_pA: Vec2 = new Vec2();
   const CollideCircles_s_pB: Vec2 = new Vec2();
-  export function CollideCircles(manifold: Manifold, circleA: CircleShape, xfA: Transform, circleB: CircleShape, xfB: Transform): void {
+  export function collideCircles(manifold: Manifold, circleA: CircleShape, xfA: Transform, circleB: CircleShape, xfB: Transform): void {
     manifold.pointCount = 0;
 
-    const pA: Vec2 = Transform.MulXV(xfA, circleA.p, CollideCircles_s_pA);
-    const pB: Vec2 = Transform.MulXV(xfB, circleB.p, CollideCircles_s_pB);
+    const pA: Vec2 = Transform.mulXV(xfA, circleA.p, CollideCircles_s_pA);
+    const pB: Vec2 = Transform.mulXV(xfB, circleB.p, CollideCircles_s_pB);
 
     const distSqr: number = Vec2.DistanceSquaredVV(pA, pB);
     const radius: number = circleA.radius + circleB.radius;
@@ -13,24 +13,24 @@ namespace b2 {
       return;
     }
 
-    manifold.type = ManifoldType.e_circles;
-    manifold.localPoint.Copy(circleA.p);
-    manifold.localNormal.SetZero();
+    manifold.type = ManifoldType.Circles;
+    manifold.localPoint.copy(circleA.p);
+    manifold.localNormal.setZero();
     manifold.pointCount = 1;
 
-    manifold.points[0].localPoint.Copy(circleB.p);
+    manifold.points[0].localPoint.copy(circleB.p);
     manifold.points[0].id.key = 0;
   }
 
   const CollidePolygonAndCircle_s_c: Vec2 = new Vec2();
   const CollidePolygonAndCircle_s_cLocal: Vec2 = new Vec2();
   const CollidePolygonAndCircle_s_faceCenter: Vec2 = new Vec2();
-  export function CollidePolygonAndCircle(manifold: Manifold, polygonA: PolygonShape, xfA: Transform, circleB: CircleShape, xfB: Transform): void {
+  export function collidePolygonAndCircle(manifold: Manifold, polygonA: PolygonShape, xfA: Transform, circleB: CircleShape, xfB: Transform): void {
     manifold.pointCount = 0;
 
     // Compute circle position in the frame of the polygon.
-    const c: Vec2 = Transform.MulXV(xfB, circleB.p, CollidePolygonAndCircle_s_c);
-    const cLocal: Vec2 = Transform.MulTXV(xfA, c, CollidePolygonAndCircle_s_cLocal);
+    const c: Vec2 = Transform.mulXV(xfB, circleB.p, CollidePolygonAndCircle_s_c);
+    const cLocal: Vec2 = Transform.mulTXV(xfA, c, CollidePolygonAndCircle_s_cLocal);
 
     // Find the min separating edge.
     let normalIndex: number = 0;
@@ -63,10 +63,10 @@ namespace b2 {
     // If the center is inside the polygon ...
     if (separation < epsilon) {
       manifold.pointCount = 1;
-      manifold.type = ManifoldType.e_faceA;
-      manifold.localNormal.Copy(normals[normalIndex]);
+      manifold.type = ManifoldType.FaceA;
+      manifold.localNormal.copy(normals[normalIndex]);
       Vec2.MidVV(v1, v2, manifold.localPoint);
-      manifold.points[0].localPoint.Copy(circleB.p);
+      manifold.points[0].localPoint.copy(circleB.p);
       manifold.points[0].id.key = 0;
       return;
     }
@@ -80,10 +80,10 @@ namespace b2 {
       }
 
       manifold.pointCount = 1;
-      manifold.type = ManifoldType.e_faceA;
-      Vec2.SubVV(cLocal, v1, manifold.localNormal).SelfNormalize();
-      manifold.localPoint.Copy(v1);
-      manifold.points[0].localPoint.Copy(circleB.p);
+      manifold.type = ManifoldType.FaceA;
+      Vec2.SubVV(cLocal, v1, manifold.localNormal).selfNormalize();
+      manifold.localPoint.copy(v1);
+      manifold.points[0].localPoint.copy(circleB.p);
       manifold.points[0].id.key = 0;
     } else if (u2 <= 0) {
       if (Vec2.DistanceSquaredVV(cLocal, v2) > radius * radius) {
@@ -91,10 +91,10 @@ namespace b2 {
       }
 
       manifold.pointCount = 1;
-      manifold.type = ManifoldType.e_faceA;
-      Vec2.SubVV(cLocal, v2, manifold.localNormal).SelfNormalize();
-      manifold.localPoint.Copy(v2);
-      manifold.points[0].localPoint.Copy(circleB.p);
+      manifold.type = ManifoldType.FaceA;
+      Vec2.SubVV(cLocal, v2, manifold.localNormal).selfNormalize();
+      manifold.localPoint.copy(v2);
+      manifold.points[0].localPoint.copy(circleB.p);
       manifold.points[0].id.key = 0;
     } else {
       const faceCenter: Vec2 = Vec2.MidVV(v1, v2, CollidePolygonAndCircle_s_faceCenter);
@@ -104,10 +104,10 @@ namespace b2 {
       }
 
       manifold.pointCount = 1;
-      manifold.type = ManifoldType.e_faceA;
-      manifold.localNormal.Copy(normals[vertIndex1]).SelfNormalize();
-      manifold.localPoint.Copy(faceCenter);
-      manifold.points[0].localPoint.Copy(circleB.p);
+      manifold.type = ManifoldType.FaceA;
+      manifold.localNormal.copy(normals[vertIndex1]).selfNormalize();
+      manifold.localPoint.copy(faceCenter);
+      manifold.points[0].localPoint.copy(circleB.p);
       manifold.points[0].id.key = 0;
     }
   }

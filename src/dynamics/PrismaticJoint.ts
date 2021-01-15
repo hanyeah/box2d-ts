@@ -66,16 +66,16 @@ namespace b2 {
     public motorSpeed: number = 0;
 
     constructor() {
-      super(JointType.e_prismaticJoint);
+      super(JointType.PrismaticJoint);
     }
 
-    public Initialize(bA: Body, bB: Body, anchor: Vec2, axis: Vec2): void {
+    public initialize(bA: Body, bB: Body, anchor: Vec2, axis: Vec2): void {
       this.bodyA = bA;
       this.bodyB = bB;
-      this.bodyA.GetLocalPoint(anchor, this.localAnchorA);
-      this.bodyB.GetLocalPoint(anchor, this.localAnchorB);
-      this.bodyA.GetLocalVector(axis, this.localAxisA);
-      this.referenceAngle = this.bodyB.GetAngle() - this.bodyA.GetAngle();
+      this.bodyA.getLocalPoint(anchor, this.localAnchorA);
+      this.bodyB.getLocalPoint(anchor, this.localAnchorB);
+      this.bodyA.getLocalVector(axis, this.localAxisA);
+      this.referenceAngle = this.bodyB.getAngle() - this.bodyA.getAngle();
     }
   }
 
@@ -172,27 +172,27 @@ namespace b2 {
     constructor(def: IPrismaticJointDef) {
       super(def);
 
-      this.localAnchorA.Copy(Maybe(def.localAnchorA, Vec2.ZERO));
-      this.localAnchorB.Copy(Maybe(def.localAnchorB, Vec2.ZERO));
-      this.localXAxisA.Copy(Maybe(def.localAxisA, new Vec2(1, 0))).SelfNormalize();
+      this.localAnchorA.copy(maybe(def.localAnchorA, Vec2.ZERO));
+      this.localAnchorB.copy(maybe(def.localAnchorB, Vec2.ZERO));
+      this.localXAxisA.copy(maybe(def.localAxisA, new Vec2(1, 0))).selfNormalize();
       Vec2.CrossOneV(this.localXAxisA, this.localYAxisA);
-      this.referenceAngle = Maybe(def.referenceAngle, 0);
-      this.lowerTranslation = Maybe(def.lowerTranslation, 0);
-      this.upperTranslation = Maybe(def.upperTranslation, 0);
+      this.referenceAngle = maybe(def.referenceAngle, 0);
+      this.lowerTranslation = maybe(def.lowerTranslation, 0);
+      this.upperTranslation = maybe(def.upperTranslation, 0);
       // Assert(this.lowerTranslation <= this.upperTranslation);
-      this.maxMotorForce = Maybe(def.maxMotorForce, 0);
-      this.motorSpeed = Maybe(def.motorSpeed, 0);
-      this.enableLimit = Maybe(def.enableLimit, false);
-      this.enableMotor = Maybe(def.enableMotor, false);
+      this.maxMotorForce = maybe(def.maxMotorForce, 0);
+      this.motorSpeed = maybe(def.motorSpeed, 0);
+      this.enableLimit = maybe(def.enableLimit, false);
+      this.enableMotor = maybe(def.enableMotor, false);
     }
 
-    private static InitVelocityConstraints_s_d = new Vec2();
-    private static InitVelocityConstraints_s_P = new Vec2();
-    public InitVelocityConstraints(data: SolverData): void {
+    private static initVelocityConstraints_s_d = new Vec2();
+    private static initVelocityConstraints_s_P = new Vec2();
+    public initVelocityConstraints(data: SolverData): void {
       this.indexA = this.bodyA.islandIndex;
       this.indexB = this.bodyB.islandIndex;
-      this.localCenterA.Copy(this.bodyA.sweep.localCenter);
-      this.localCenterB.Copy(this.bodyB.sweep.localCenter);
+      this.localCenterA.copy(this.bodyA.sweep.localCenter);
+      this.localCenterB.copy(this.bodyB.sweep.localCenter);
       this.invMassA = this.bodyA.invMass;
       this.invMassB = this.bodyB.invMass;
       this.invIA = this.bodyA.invI;
@@ -208,20 +208,20 @@ namespace b2 {
       const vB: Vec2 = data.velocities[this.indexB].v;
       let wB: number = data.velocities[this.indexB].w;
 
-      const qA: Rot = this.qA.SetAngle(aA), qB: Rot = this.qB.SetAngle(aB);
+      const qA: Rot = this.qA.setAngle(aA), qB: Rot = this.qB.setAngle(aB);
 
       // Compute the effective masses.
       // Vec2 rA = Mul(qA, localAnchorA - localCenterA);
       Vec2.SubVV(this.localAnchorA, this.localCenterA, this.lalcA);
-      const rA: Vec2 = Rot.MulRV(qA, this.lalcA, this.rA);
+      const rA: Vec2 = Rot.mulRV(qA, this.lalcA, this.rA);
       // Vec2 rB = Mul(qB, localAnchorB - localCenterB);
       Vec2.SubVV(this.localAnchorB, this.localCenterB, this.lalcB);
-      const rB: Vec2 = Rot.MulRV(qB, this.lalcB, this.rB);
+      const rB: Vec2 = Rot.mulRV(qB, this.lalcB, this.rB);
       // Vec2 d = (cB - cA) + rB - rA;
       const d: Vec2 = Vec2.AddVV(
         Vec2.SubVV(cB, cA, Vec2.s_t0),
         Vec2.SubVV(rB, rA, Vec2.s_t1),
-        PrismaticJoint.InitVelocityConstraints_s_d);
+        PrismaticJoint.initVelocityConstraints_s_d);
 
       const mA: number = this.invMassA, mB: number = this.invMassB;
       const iA: number = this.invIA, iB: number = this.invIB;
@@ -229,7 +229,7 @@ namespace b2 {
       // Compute motor Jacobian and effective mass.
       {
         // axis = Mul(qA, localXAxisA);
-        Rot.MulRV(qA, this.localXAxisA, this.axis);
+        Rot.mulRV(qA, this.localXAxisA, this.axis);
         // a1 = Cross(d + rA, axis);
         this.a1 = Vec2.CrossVV(Vec2.AddVV(d, rA, Vec2.s_t0), this.axis);
         // a2 = Cross(rB, axis);
@@ -244,7 +244,7 @@ namespace b2 {
       // Prismatic constraint.
       {
         // perp = Mul(qA, localYAxisA);
-        Rot.MulRV(qA, this.localYAxisA, this.perp);
+        Rot.mulRV(qA, this.localYAxisA, this.perp);
 
         // s1 = Cross(d + rA, perp);
         this.s1 = Vec2.CrossVV(Vec2.AddVV(d, rA, Vec2.s_t0), this.perp);
@@ -282,7 +282,7 @@ namespace b2 {
       if (data.step.warmStarting) {
         // Account for variable time step.
         // impulse *= data.step.dtRatio;
-        this.impulse.SelfMul(data.step.dtRatio);
+        this.impulse.selfMul(data.step.dtRatio);
         this.motorImpulse *= data.step.dtRatio;
         this.lowerImpulse *= data.step.dtRatio;
         this.upperImpulse *= data.step.dtRatio;
@@ -292,21 +292,21 @@ namespace b2 {
         const P: Vec2 = Vec2.AddVV(
           Vec2.MulSV(this.impulse.x, this.perp, Vec2.s_t0),
           Vec2.MulSV(axialImpulse, this.axis, Vec2.s_t1),
-          PrismaticJoint.InitVelocityConstraints_s_P);
+          PrismaticJoint.initVelocityConstraints_s_P);
         // float LA = impulse.x * s1 + impulse.y + axialImpulse * a1;
         const LA = this.impulse.x * this.s1 + this.impulse.y + axialImpulse * this.a1;
         // float LB = impulse.x * s2 + impulse.y + axialImpulse * a2;
         const LB = this.impulse.x * this.s2 + this.impulse.y + axialImpulse * this.a2;
 
         // vA -= mA * P;
-        vA.SelfMulSub(mA, P);
+        vA.selfMulSub(mA, P);
         wA -= iA * LA;
 
         // vB += mB * P;
-        vB.SelfMulAdd(mB, P);
+        vB.selfMulAdd(mB, P);
         wB += iB * LB;
       } else {
-        this.impulse.SetZero();
+        this.impulse.setZero();
         this.motorImpulse = 0.0;
         this.lowerImpulse = 0.0;
         this.upperImpulse = 0.0;
@@ -318,12 +318,12 @@ namespace b2 {
       data.velocities[this.indexB].w = wB;
     }
 
-    private static SolveVelocityConstraints_s_P = new Vec2();
-    // private static SolveVelocityConstraints_s_f2r = new Vec2();
-    // private static SolveVelocityConstraints_s_f1 = new Vec3();
-    // private static SolveVelocityConstraints_s_df3 = new Vec3();
-    private static SolveVelocityConstraints_s_df = new Vec2();
-    public SolveVelocityConstraints(data: SolverData): void {
+    private static solveVelocityConstraints_s_P = new Vec2();
+    // private static solveVelocityConstraints_s_f2r = new Vec2();
+    // private static solveVelocityConstraints_s_f1 = new Vec3();
+    // private static solveVelocityConstraints_s_df3 = new Vec3();
+    private static solveVelocityConstraints_s_df = new Vec2();
+    public solveVelocityConstraints(data: SolverData): void {
       const vA: Vec2 = data.velocities[this.indexA].v;
       let wA: number = data.velocities[this.indexA].w;
       const vB: Vec2 = data.velocities[this.indexB].v;
@@ -339,19 +339,19 @@ namespace b2 {
         let impulse = this.axialMass * (this.motorSpeed - Cdot);
         const oldImpulse = this.motorImpulse;
         const maxImpulse = data.step.dt * this.maxMotorForce;
-        this.motorImpulse = Clamp(this.motorImpulse + impulse, (-maxImpulse), maxImpulse);
+        this.motorImpulse = clamp(this.motorImpulse + impulse, (-maxImpulse), maxImpulse);
         impulse = this.motorImpulse - oldImpulse;
 
         // Vec2 P = impulse * axis;
-        const P: Vec2 = Vec2.MulSV(impulse, this.axis, PrismaticJoint.SolveVelocityConstraints_s_P);
+        const P: Vec2 = Vec2.MulSV(impulse, this.axis, PrismaticJoint.solveVelocityConstraints_s_P);
         const LA = impulse * this.a1;
         const LB = impulse * this.a2;
 
         // vA -= mA * P;
-        vA.SelfMulSub(mA, P);
+        vA.selfMulSub(mA, P);
         wA -= iA * LA;
         // vB += mB * P;
-        vB.SelfMulAdd(mB, P);
+        vB.selfMulAdd(mB, P);
         wB += iB * LB;
       }
 
@@ -366,15 +366,15 @@ namespace b2 {
           impulse = this.lowerImpulse - oldImpulse;
 
           // Vec2 P = impulse * this.axis;
-          const P: Vec2 = Vec2.MulSV(impulse, this.axis, PrismaticJoint.SolveVelocityConstraints_s_P);
+          const P: Vec2 = Vec2.MulSV(impulse, this.axis, PrismaticJoint.solveVelocityConstraints_s_P);
           const LA: number = impulse * this.a1;
           const LB: number = impulse * this.a2;
 
           // vA -= mA * P;
-          vA.SelfMulSub(mA, P);
+          vA.selfMulSub(mA, P);
           wA -= iA * LA;
           // vB += mB * P;
-          vB.SelfMulAdd(mB, P);
+          vB.selfMulAdd(mB, P);
           wB += iB * LB;
         }
 
@@ -390,15 +390,15 @@ namespace b2 {
           impulse = this.upperImpulse - oldImpulse;
 
           // Vec2 P = impulse * this.axis;
-          const P: Vec2 = Vec2.MulSV(impulse, this.axis, PrismaticJoint.SolveVelocityConstraints_s_P);
+          const P: Vec2 = Vec2.MulSV(impulse, this.axis, PrismaticJoint.solveVelocityConstraints_s_P);
           const LA: number = impulse * this.a1;
           const LB: number = impulse * this.a2;
 
           // vA += mA * P;
-          vA.SelfMulAdd(mA, P);
+          vA.selfMulAdd(mA, P);
           wA += iA * LA;
           // vB -= mB * P;
-          vB.SelfMulSub(mB, P);
+          vB.selfMulSub(mB, P);
           wB -= iB * LB;
         }
       }
@@ -412,23 +412,23 @@ namespace b2 {
         const Cdot_y = wB - wA;
 
         // Vec2 df = K.Solve(-Cdot);
-        const df = this.K.Solve(-Cdot_x, -Cdot_y, PrismaticJoint.SolveVelocityConstraints_s_df);
+        const df = this.K.solve(-Cdot_x, -Cdot_y, PrismaticJoint.solveVelocityConstraints_s_df);
         // impulse += df;
-        this.impulse.SelfAdd(df);
+        this.impulse.selfAdd(df);
 
         // Vec2 P = df.x * perp;
-        const P: Vec2 = Vec2.MulSV(df.x, this.perp, PrismaticJoint.SolveVelocityConstraints_s_P);
+        const P: Vec2 = Vec2.MulSV(df.x, this.perp, PrismaticJoint.solveVelocityConstraints_s_P);
         // float32 LA = df.x * s1 + df.y;
         const LA = df.x * this.s1 + df.y;
         // float32 LB = df.x * s2 + df.y;
         const LB = df.x * this.s2 + df.y;
 
         // vA -= mA * P;
-        vA.SelfMulSub(mA, P);
+        vA.selfMulSub(mA, P);
         wA -= iA * LA;
 
         // vB += mB * P;
-        vB.SelfMulAdd(mB, P);
+        vB.selfMulAdd(mB, P);
         wB += iB * LB;
       }
 
@@ -445,39 +445,39 @@ namespace b2 {
     //
     // We could take the active state from the velocity solver.However, the joint might push past the limit when the velocity
     // solver indicates the limit is inactive.
-    private static SolvePositionConstraints_s_d = new Vec2();
-    private static SolvePositionConstraints_s_impulse = new Vec3();
-    private static SolvePositionConstraints_s_impulse1 = new Vec2();
-    private static SolvePositionConstraints_s_P = new Vec2();
-    public SolvePositionConstraints(data: SolverData): boolean {
+    private static solvePositionConstraints_s_d = new Vec2();
+    private static solvePositionConstraints_s_impulse = new Vec3();
+    private static solvePositionConstraints_s_impulse1 = new Vec2();
+    private static solvePositionConstraints_s_P = new Vec2();
+    public solvePositionConstraints(data: SolverData): boolean {
       const cA: Vec2 = data.positions[this.indexA].c;
       let aA: number = data.positions[this.indexA].a;
       const cB: Vec2 = data.positions[this.indexB].c;
       let aB: number = data.positions[this.indexB].a;
 
-      const qA: Rot = this.qA.SetAngle(aA), qB: Rot = this.qB.SetAngle(aB);
+      const qA: Rot = this.qA.setAngle(aA), qB: Rot = this.qB.setAngle(aB);
 
       const mA: number = this.invMassA, mB: number = this.invMassB;
       const iA: number = this.invIA, iB: number = this.invIB;
 
       // Vec2 rA = Mul(qA, localAnchorA - localCenterA);
-      const rA: Vec2 = Rot.MulRV(qA, this.lalcA, this.rA);
+      const rA: Vec2 = Rot.mulRV(qA, this.lalcA, this.rA);
       // Vec2 rB = Mul(qB, localAnchorB - localCenterB);
-      const rB: Vec2 = Rot.MulRV(qB, this.lalcB, this.rB);
+      const rB: Vec2 = Rot.mulRV(qB, this.lalcB, this.rB);
       // Vec2 d = cB + rB - cA - rA;
       const d: Vec2 = Vec2.SubVV(
         Vec2.AddVV(cB, rB, Vec2.s_t0),
         Vec2.AddVV(cA, rA, Vec2.s_t1),
-        PrismaticJoint.SolvePositionConstraints_s_d);
+        PrismaticJoint.solvePositionConstraints_s_d);
 
       // Vec2 axis = Mul(qA, localXAxisA);
-      const axis: Vec2 = Rot.MulRV(qA, this.localXAxisA, this.axis);
+      const axis: Vec2 = Rot.mulRV(qA, this.localXAxisA, this.axis);
       // float32 a1 = Cross(d + rA, axis);
       const a1 = Vec2.CrossVV(Vec2.AddVV(d, rA, Vec2.s_t0), axis);
       // float32 a2 = Cross(rB, axis);
       const a2 = Vec2.CrossVV(rB, axis);
       // Vec2 perp = Mul(qA, localYAxisA);
-      const perp: Vec2 = Rot.MulRV(qA, this.localYAxisA, this.perp);
+      const perp: Vec2 = Rot.mulRV(qA, this.localYAxisA, this.perp);
 
       // float32 s1 = Cross(d + rA, perp);
       const s1 = Vec2.CrossVV(Vec2.AddVV(d, rA, Vec2.s_t0), perp);
@@ -485,7 +485,7 @@ namespace b2 {
       const s2 = Vec2.CrossVV(rB, perp);
 
       // Vec3 impulse;
-      let impulse = PrismaticJoint.SolvePositionConstraints_s_impulse;
+      let impulse = PrismaticJoint.solvePositionConstraints_s_impulse;
       // Vec2 C1;
       // C1.x = Dot(perp, d);
       const C1_x: number = Vec2.DotVV(perp, d);
@@ -536,11 +536,11 @@ namespace b2 {
         // Mat33 K;
         const K = this.K3;
         // K.ex.Set(k11, k12, k13);
-        K.ex.SetXYZ(k11, k12, k13);
+        K.ex.setXYZ(k11, k12, k13);
         // K.ey.Set(k12, k22, k23);
-        K.ey.SetXYZ(k12, k22, k23);
+        K.ey.setXYZ(k12, k22, k23);
         // K.ez.Set(k13, k23, k33);
-        K.ez.SetXYZ(k13, k23, k33);
+        K.ez.setXYZ(k13, k23, k33);
 
         // Vec3 C;
         // C.x = C1.x;
@@ -548,7 +548,7 @@ namespace b2 {
         // C.z = C2;
 
         // impulse = K.Solve33(-C);
-        impulse = K.Solve33((-C1_x), (-C1_y), (-C2), impulse);
+        impulse = K.solve33((-C1_x), (-C1_y), (-C2), impulse);
       } else {
         // float32 k11 = mA + mB + iA * s1 * s1 + iB * s2 * s2;
         const k11 = mA + mB + iA * s1 * s1 + iB * s2 * s2;
@@ -563,12 +563,12 @@ namespace b2 {
         // Mat22 K;
         const K2 = this.K2;
         // K.ex.Set(k11, k12);
-        K2.ex.Set(k11, k12);
+        K2.ex.set(k11, k12);
         // K.ey.Set(k12, k22);
-        K2.ey.Set(k12, k22);
+        K2.ey.set(k12, k22);
 
         // Vec2 impulse1 = K.Solve(-C1);
-        const impulse1 = K2.Solve((-C1_x), (-C1_y), PrismaticJoint.SolvePositionConstraints_s_impulse1);
+        const impulse1 = K2.solve((-C1_x), (-C1_y), PrismaticJoint.solvePositionConstraints_s_impulse1);
         impulse.x = impulse1.x;
         impulse.y = impulse1.y;
         impulse.z = 0;
@@ -578,17 +578,17 @@ namespace b2 {
       const P: Vec2 = Vec2.AddVV(
         Vec2.MulSV(impulse.x, perp, Vec2.s_t0),
         Vec2.MulSV(impulse.z, axis, Vec2.s_t1),
-        PrismaticJoint.SolvePositionConstraints_s_P);
+        PrismaticJoint.solvePositionConstraints_s_P);
       // float32 LA = impulse.x * s1 + impulse.y + impulse.z * a1;
       const LA = impulse.x * s1 + impulse.y + impulse.z * a1;
       // float32 LB = impulse.x * s2 + impulse.y + impulse.z * a2;
       const LB = impulse.x * s2 + impulse.y + impulse.z * a2;
 
       // cA -= mA * P;
-      cA.SelfMulSub(mA, P);
+      cA.selfMulSub(mA, P);
       aA -= iA * LA;
       // cB += mB * P;
-      cB.SelfMulAdd(mB, P);
+      cB.selfMulAdd(mB, P);
       aB += iB * LB;
 
       // data.positions[this.indexA].c = cA;
@@ -599,61 +599,53 @@ namespace b2 {
       return linearError <= linearSlop && angularError <= angularSlop;
     }
 
-    public GetAnchorA<T extends XY>(out: T): T {
-      return this.bodyA.GetWorldPoint(this.localAnchorA, out);
+    public getAnchorA<T extends XY>(out: T): T {
+      return this.bodyA.getWorldPoint(this.localAnchorA, out);
     }
 
-    public GetAnchorB<T extends XY>(out: T): T {
-      return this.bodyB.GetWorldPoint(this.localAnchorB, out);
+    public getAnchorB<T extends XY>(out: T): T {
+      return this.bodyB.getWorldPoint(this.localAnchorB, out);
     }
 
-    public GetReactionForce<T extends XY>(inv_dt: number, out: T): T {
+    public getReactionForce<T extends XY>(inv_dt: number, out: T): T {
       out.x = inv_dt * (this.impulse.x * this.perp.x + (this.motorImpulse + this.lowerImpulse - this.upperImpulse) * this.axis.x);
       out.y = inv_dt * (this.impulse.y * this.perp.y + (this.motorImpulse + this.lowerImpulse - this.upperImpulse) * this.axis.y);
       return out;
     }
 
-    public GetReactionTorque(inv_dt: number): number {
+    public getReactionTorque(inv_dt: number): number {
       return inv_dt * this.impulse.y;
     }
-
-    public GetLocalAnchorA(): Vec2 { return this.localAnchorA; }
-
-    public GetLocalAnchorB(): Vec2 { return this.localAnchorB; }
-
-    public GetLocalAxisA(): Vec2 { return this.localXAxisA; }
-
-    public GetReferenceAngle() { return this.referenceAngle; }
-
-    private static GetJointTranslation_s_pA = new Vec2();
-    private static GetJointTranslation_s_pB = new Vec2();
-    private static GetJointTranslation_s_d = new Vec2();
-    private static GetJointTranslation_s_axis = new Vec2();
-    public GetJointTranslation(): number {
+    
+    private static getJointTranslation_s_pA = new Vec2();
+    private static getJointTranslation_s_pB = new Vec2();
+    private static getJointTranslation_s_d = new Vec2();
+    private static getJointTranslation_s_axis = new Vec2();
+    public getJointTranslation(): number {
       // Vec2 pA = bodyA.GetWorldPoint(localAnchorA);
-      const pA = this.bodyA.GetWorldPoint(this.localAnchorA, PrismaticJoint.GetJointTranslation_s_pA);
+      const pA = this.bodyA.getWorldPoint(this.localAnchorA, PrismaticJoint.getJointTranslation_s_pA);
       // Vec2 pB = bodyB.GetWorldPoint(localAnchorB);
-      const pB = this.bodyB.GetWorldPoint(this.localAnchorB, PrismaticJoint.GetJointTranslation_s_pB);
+      const pB = this.bodyB.getWorldPoint(this.localAnchorB, PrismaticJoint.getJointTranslation_s_pB);
       // Vec2 d = pB - pA;
-      const d: Vec2 = Vec2.SubVV(pB, pA, PrismaticJoint.GetJointTranslation_s_d);
+      const d: Vec2 = Vec2.SubVV(pB, pA, PrismaticJoint.getJointTranslation_s_d);
       // Vec2 axis = bodyA.GetWorldVector(localXAxisA);
-      const axis = this.bodyA.GetWorldVector(this.localXAxisA, PrismaticJoint.GetJointTranslation_s_axis);
+      const axis = this.bodyA.getWorldVector(this.localXAxisA, PrismaticJoint.getJointTranslation_s_axis);
 
       // float32 translation = Dot(d, axis);
       const translation: number = Vec2.DotVV(d, axis);
       return translation;
     }
 
-    public GetJointSpeed(): number {
+    public getJointSpeed(): number {
       const bA: Body = this.bodyA;
       const bB: Body = this.bodyB;
 
       // Vec2 rA = Mul(bA->xf.q, localAnchorA - bA->sweep.localCenter);
       Vec2.SubVV(this.localAnchorA, bA.sweep.localCenter, this.lalcA);
-      const rA: Vec2 = Rot.MulRV(bA.xf.q, this.lalcA, this.rA);
+      const rA: Vec2 = Rot.mulRV(bA.xf.q, this.lalcA, this.rA);
       // Vec2 rB = Mul(bB->xf.q, localAnchorB - bB->sweep.localCenter);
       Vec2.SubVV(this.localAnchorB, bB.sweep.localCenter, this.lalcB);
-      const rB: Vec2 = Rot.MulRV(bB.xf.q, this.lalcB, this.rB);
+      const rB: Vec2 = Rot.mulRV(bB.xf.q, this.lalcB, this.rB);
       // Vec2 pA = bA->sweep.c + rA;
       const pA: Vec2 = Vec2.AddVV(bA.sweep.c, rA, Vec2.s_t0); // pA uses s_t0
       // Vec2 pB = bB->sweep.c + rB;
@@ -661,7 +653,7 @@ namespace b2 {
       // Vec2 d = pB - pA;
       const d: Vec2 = Vec2.SubVV(pB, pA, Vec2.s_t2); // d uses s_t2
       // Vec2 axis = Mul(bA.xf.q, localXAxisA);
-      const axis = bA.GetWorldVector(this.localXAxisA, this.axis);
+      const axis = bA.getWorldVector(this.localXAxisA, this.axis);
 
       const vA = bA.linearVelocity;
       const vB = bB.linearVelocity;
@@ -680,32 +672,32 @@ namespace b2 {
       return speed;
     }
 
-    public IsLimitEnabled() {
+    public isLimitEnabled() {
       return this.enableLimit;
     }
 
-    public EnableLimit(flag: boolean) {
+    public setEnableLimit(flag: boolean) {
       if (flag !== this.enableLimit) {
-        this.bodyA.SetAwake(true);
-        this.bodyB.SetAwake(true);
+        this.bodyA.setAwake(true);
+        this.bodyB.setAwake(true);
         this.enableLimit = flag;
         this.lowerImpulse = 0.0;
         this.upperImpulse = 0.0;
       }
     }
 
-    public GetLowerLimit() {
+    public getLowerLimit() {
       return this.lowerTranslation;
     }
 
-    public GetUpperLimit() {
+    public getUpperLimit() {
       return this.upperTranslation;
     }
 
-    public SetLimits(lower: number, upper: number): void {
+    public setLimits(lower: number, upper: number): void {
       if (lower !== this.lowerTranslation || upper !== this.upperTranslation) {
-        this.bodyA.SetAwake(true);
-        this.bodyB.SetAwake(true);
+        this.bodyA.setAwake(true);
+        this.bodyB.setAwake(true);
         this.lowerTranslation = lower;
         this.upperTranslation = upper;
         this.lowerImpulse = 0.0;
@@ -713,45 +705,45 @@ namespace b2 {
       }
     }
 
-    public IsMotorEnabled(): boolean {
+    public isMotorEnabled(): boolean {
       return this.enableMotor;
     }
 
-    public EnableMotor(flag: boolean): void {
+    public setEnableMotor(flag: boolean): void {
       if (flag !== this.enableMotor) {
-        this.bodyA.SetAwake(true);
-        this.bodyB.SetAwake(true);
+        this.bodyA.setAwake(true);
+        this.bodyB.setAwake(true);
         this.enableMotor = flag;
       }
     }
 
-    public SetMotorSpeed(speed: number): void {
+    public setMotorSpeed(speed: number): void {
       if (speed !== this.motorSpeed) {
-        this.bodyA.SetAwake(true);
-        this.bodyB.SetAwake(true);
+        this.bodyA.setAwake(true);
+        this.bodyB.setAwake(true);
         this.motorSpeed = speed;
       }
     }
 
-    public GetMotorSpeed() {
+    public getMotorSpeed() {
       return this.motorSpeed;
     }
 
-    public SetMaxMotorForce(force: number): void {
+    public setMaxMotorForce(force: number): void {
       if (force !== this.maxMotorForce) {
-        this.bodyA.SetAwake(true);
-        this.bodyB.SetAwake(true);
+        this.bodyA.setAwake(true);
+        this.bodyB.setAwake(true);
         this.maxMotorForce = force;
       }
     }
 
-    public GetMaxMotorForce(): number { return this.maxMotorForce; }
+    public getMaxMotorForce(): number { return this.maxMotorForce; }
 
-    public GetMotorForce(inv_dt: number): number {
+    public getMotorForce(inv_dt: number): number {
       return inv_dt * this.motorImpulse;
     }
 
-    public Dump(log: (format: string, ...args: any[]) => void) {
+    public dump(log: (format: string, ...args: any[]) => void) {
       const indexA = this.bodyA.islandIndex;
       const indexB = this.bodyB.islandIndex;
 
@@ -772,53 +764,53 @@ namespace b2 {
       log("  joints[%d] = this.world.CreateJoint(jd);\n", this.index);
     }
 
-    private static Draw_s_pA = new Vec2();
-    private static Draw_s_pB = new Vec2();
-    private static Draw_s_axis = new Vec2();
-    private static Draw_s_c1 = new Color(0.7, 0.7, 0.7);
-    private static Draw_s_c2 = new Color(0.3, 0.9, 0.3);
-    private static Draw_s_c3 = new Color(0.9, 0.3, 0.3);
-    private static Draw_s_c4 = new Color(0.3, 0.3, 0.9);
-    private static Draw_s_c5 = new Color(0.4, 0.4, 0.4);
-    private static Draw_s_lower = new Vec2();
-    private static Draw_s_upper = new Vec2();
-    private static Draw_s_perp = new Vec2();
-    public Draw(draw: Draw): void {
-      const xfA: Transform = this.bodyA.GetTransform();
-      const xfB: Transform = this.bodyB.GetTransform();
-      const pA = Transform.MulXV(xfA, this.localAnchorA, PrismaticJoint.Draw_s_pA);
-      const pB = Transform.MulXV(xfB, this.localAnchorB, PrismaticJoint.Draw_s_pB);
+    private static draw_s_pA = new Vec2();
+    private static draw_s_pB = new Vec2();
+    private static draw_s_axis = new Vec2();
+    private static draw_s_c1 = new Color(0.7, 0.7, 0.7);
+    private static draw_s_c2 = new Color(0.3, 0.9, 0.3);
+    private static draw_s_c3 = new Color(0.9, 0.3, 0.3);
+    private static draw_s_c4 = new Color(0.3, 0.3, 0.9);
+    private static draw_s_c5 = new Color(0.4, 0.4, 0.4);
+    private static draw_s_lower = new Vec2();
+    private static draw_s_upper = new Vec2();
+    private static draw_s_perp = new Vec2();
+    public draw(draw: Draw): void {
+      const xfA: Transform = this.bodyA.getTransform();
+      const xfB: Transform = this.bodyB.getTransform();
+      const pA = Transform.mulXV(xfA, this.localAnchorA, PrismaticJoint.draw_s_pA);
+      const pB = Transform.mulXV(xfB, this.localAnchorB, PrismaticJoint.draw_s_pB);
 
       // Vec2 axis = Mul(xfA.q, localXAxisA);
-      const axis: Vec2 = Rot.MulRV(xfA.q, this.localXAxisA, PrismaticJoint.Draw_s_axis);
+      const axis: Vec2 = Rot.mulRV(xfA.q, this.localXAxisA, PrismaticJoint.draw_s_axis);
 
-      const c1 = PrismaticJoint.Draw_s_c1; // Color c1(0.7f, 0.7f, 0.7f);
-      const c2 = PrismaticJoint.Draw_s_c2; // Color c2(0.3f, 0.9f, 0.3f);
-      const c3 = PrismaticJoint.Draw_s_c3; // Color c3(0.9f, 0.3f, 0.3f);
-      const c4 = PrismaticJoint.Draw_s_c4; // Color c4(0.3f, 0.3f, 0.9f);
-      const c5 = PrismaticJoint.Draw_s_c5; // Color c5(0.4f, 0.4f, 0.4f);
+      const c1 = PrismaticJoint.draw_s_c1; // Color c1(0.7f, 0.7f, 0.7f);
+      const c2 = PrismaticJoint.draw_s_c2; // Color c2(0.3f, 0.9f, 0.3f);
+      const c3 = PrismaticJoint.draw_s_c3; // Color c3(0.9f, 0.3f, 0.3f);
+      const c4 = PrismaticJoint.draw_s_c4; // Color c4(0.3f, 0.3f, 0.9f);
+      const c5 = PrismaticJoint.draw_s_c5; // Color c5(0.4f, 0.4f, 0.4f);
 
-      draw.DrawSegment(pA, pB, c5);
+      draw.drawSegment(pA, pB, c5);
 
       if (this.enableLimit) {
         // Vec2 lower = pA + lowerTranslation * axis;
-        const lower = Vec2.AddVMulSV(pA, this.lowerTranslation, axis, PrismaticJoint.Draw_s_lower);
+        const lower = Vec2.AddVMulSV(pA, this.lowerTranslation, axis, PrismaticJoint.draw_s_lower);
         // Vec2 upper = pA + upperTranslation * axis;
-        const upper = Vec2.AddVMulSV(pA, this.upperTranslation, axis, PrismaticJoint.Draw_s_upper);
+        const upper = Vec2.AddVMulSV(pA, this.upperTranslation, axis, PrismaticJoint.draw_s_upper);
         // Vec2 perp = Mul(xfA.q, localYAxisA);
-        const perp = Rot.MulRV(xfA.q, this.localYAxisA, PrismaticJoint.Draw_s_perp);
-        draw.DrawSegment(lower, upper, c1);
+        const perp = Rot.mulRV(xfA.q, this.localYAxisA, PrismaticJoint.draw_s_perp);
+        draw.drawSegment(lower, upper, c1);
         // draw.DrawSegment(lower - 0.5 * perp, lower + 0.5 * perp, c2);
-        draw.DrawSegment(Vec2.AddVMulSV(lower, -0.5, perp, Vec2.s_t0), Vec2.AddVMulSV(lower, 0.5, perp, Vec2.s_t1), c2);
+        draw.drawSegment(Vec2.AddVMulSV(lower, -0.5, perp, Vec2.s_t0), Vec2.AddVMulSV(lower, 0.5, perp, Vec2.s_t1), c2);
         // draw.DrawSegment(upper - 0.5 * perp, upper + 0.5 * perp, c3);
-        draw.DrawSegment(Vec2.AddVMulSV(upper, -0.5, perp, Vec2.s_t0), Vec2.AddVMulSV(upper, 0.5, perp, Vec2.s_t1), c3);
+        draw.drawSegment(Vec2.AddVMulSV(upper, -0.5, perp, Vec2.s_t0), Vec2.AddVMulSV(upper, 0.5, perp, Vec2.s_t1), c3);
       } else {
         // draw.DrawSegment(pA - 1.0 * axis, pA + 1.0 * axis, c1);
-        draw.DrawSegment(Vec2.AddVMulSV(pA, -1.0, axis, Vec2.s_t0), Vec2.AddVMulSV(pA, 1.0, axis, Vec2.s_t1), c1);
+        draw.drawSegment(Vec2.AddVMulSV(pA, -1.0, axis, Vec2.s_t0), Vec2.AddVMulSV(pA, 1.0, axis, Vec2.s_t1), c1);
       }
 
-      draw.DrawPoint(pA, 5.0, c1);
-      draw.DrawPoint(pB, 5.0, c4);
+      draw.drawPoint(pA, 5.0, c1);
+      draw.drawPoint(pB, 5.0, c4);
     }
   }
 }

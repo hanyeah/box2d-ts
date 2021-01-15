@@ -31,17 +31,17 @@ namespace b2 {
       this.count = 0;
     }
 
-    public Reset(): this {
+    public reset(): this {
       this.count = 0;
       return this;
     }
 
-    public Push(element: T): void {
+    public push(element: T): void {
       this.stack[this.count] = element;
       this.count++;
     }
 
-    public Pop(): T {
+    public pop(): T {
       // DEBUG: Assert(this.count > 0);
       this.count--;
       const element: T = this.stack[this.count];
@@ -49,7 +49,7 @@ namespace b2 {
       return element;
     }
 
-    public GetCount(): number {
+    public getCount(): number {
       return this.count;
     }
   }

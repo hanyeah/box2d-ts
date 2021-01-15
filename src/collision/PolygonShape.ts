@@ -28,32 +28,32 @@ namespace b2 {
     public count: number = 0;
 
     constructor() {
-      super(ShapeType.e_polygonShape, polygonRadius);
+      super(ShapeType.PolygonShape, polygonRadius);
     }
 
     /// Implement Shape.
-    public Clone(): PolygonShape {
-      return new PolygonShape().Copy(this);
+    public clone(): PolygonShape {
+      return new PolygonShape().copy(this);
     }
 
-    public Copy(other: PolygonShape): PolygonShape {
-      super.Copy(other);
+    public copy(other: PolygonShape): PolygonShape {
+      super.copy(other);
 
       // DEBUG: Assert(other instanceof PolygonShape);
 
-      this.centroid.Copy(other.centroid);
+      this.centroid.copy(other.centroid);
       this.count = other.count;
       this.vertices = Vec2.MakeArray(this.count);
       this.normals = Vec2.MakeArray(this.count);
       for (let i: number = 0; i < this.count; ++i) {
-        this.vertices[i].Copy(other.vertices[i]);
-        this.normals[i].Copy(other.normals[i]);
+        this.vertices[i].copy(other.vertices[i]);
+        this.normals[i].copy(other.normals[i]);
       }
       return this;
     }
 
     /// @see Shape::GetChildCount
-    public GetChildCount(): number {
+    public getChildCount(): number {
       return 1;
     }
 
@@ -63,25 +63,25 @@ namespace b2 {
     /// may lead to poor stacking behavior.
     private static Set_s_r = new Vec2();
     private static Set_s_v = new Vec2();
-    public Set(vertices: XY[]): PolygonShape;
-    public Set(vertices: XY[], count: number): PolygonShape;
-    public Set(vertices: number[]): PolygonShape;
-    public Set(...args: any[]): PolygonShape {
+    public set(vertices: XY[]): PolygonShape;
+    public set(vertices: XY[], count: number): PolygonShape;
+    public set(vertices: number[]): PolygonShape;
+    public set(...args: any[]): PolygonShape {
       if (typeof args[0][0] === "number") {
         const vertices: number[] = args[0];
         if (vertices.length % 2 !== 0) { throw new Error(); }
-        return this._Set((index: number): XY => ({ x: vertices[index * 2], y: vertices[index * 2 + 1] }), vertices.length / 2);
+        return this._set((index: number): XY => ({ x: vertices[index * 2], y: vertices[index * 2 + 1] }), vertices.length / 2);
       } else {
         const vertices: XY[] = args[0];
         const count: number = args[1] || vertices.length;
-        return this._Set((index: number): XY => vertices[index], count);
+        return this._set((index: number): XY => vertices[index], count);
       }
     }
-    public _Set(vertices: (index: number) => XY, count: number): PolygonShape {
+    public _set(vertices: (index: number) => XY, count: number): PolygonShape {
 
       // DEBUG: Assert(3 <= count);
       if (count < 3) {
-        return this.SetAsBox(1, 1);
+        return this.setAsBox(1, 1);
       }
 
       let n: number = count;
@@ -108,7 +108,7 @@ namespace b2 {
       if (n < 3) {
         // Polygon is degenerate.
         // DEBUG: Assert(false);
-        return this.SetAsBox(1.0, 1.0);
+        return this.setAsBox(1.0, 1.0);
       }
 
       // Create the convex hull using the Gift wrapping algorithm
@@ -147,7 +147,7 @@ namespace b2 {
           }
 
           // Collinearity check
-          if (c === 0 && v.LengthSquared() > r.LengthSquared()) {
+          if (c === 0 && v.lengthSquared() > r.lengthSquared()) {
             ie = j;
           }
         }
@@ -166,7 +166,7 @@ namespace b2 {
 
       // Copy vertices.
       for (let i: number = 0; i < m; ++i) {
-        this.vertices[i].Copy(ps[hull[i]]);
+        this.vertices[i].copy(ps[hull[i]]);
       }
 
       // Compute normals. Ensure the edges have non-zero length.
@@ -175,11 +175,11 @@ namespace b2 {
         const vertexi2: Vec2 = this.vertices[(i + 1) % m];
         const edge: Vec2 = Vec2.SubVV(vertexi2, vertexi1, Vec2.s_t0); // edge uses s_t0
         // DEBUG: Assert(edge.LengthSquared() > epsilon_sq);
-        Vec2.CrossVOne(edge, this.normals[i]).SelfNormalize();
+        Vec2.CrossVOne(edge, this.normals[i]).selfNormalize();
       }
 
       // Compute the polygon centroid.
-      PolygonShape.ComputeCentroid(this.vertices, m, this.centroid);
+      PolygonShape.computeCentroid(this.vertices, m, this.centroid);
 
       return this;
     }
@@ -189,31 +189,31 @@ namespace b2 {
     /// @param hy the half-height.
     /// @param center the center of the box in local coordinates.
     /// @param angle the rotation of the box in local coordinates.
-    public SetAsBox(hx: number, hy: number, center?: XY, angle: number = 0): PolygonShape {
+    public setAsBox(hx: number, hy: number, center?: XY, angle: number = 0): PolygonShape {
       this.count = 4;
       this.vertices = Vec2.MakeArray(this.count);
       this.normals = Vec2.MakeArray(this.count);
-      this.vertices[0].Set((-hx), (-hy));
-      this.vertices[1].Set(hx, (-hy));
-      this.vertices[2].Set(hx, hy);
-      this.vertices[3].Set((-hx), hy);
-      this.normals[0].Set(0, (-1));
-      this.normals[1].Set(1, 0);
-      this.normals[2].Set(0, 1);
-      this.normals[3].Set((-1), 0);
-      this.centroid.SetZero();
+      this.vertices[0].set((-hx), (-hy));
+      this.vertices[1].set(hx, (-hy));
+      this.vertices[2].set(hx, hy);
+      this.vertices[3].set((-hx), hy);
+      this.normals[0].set(0, (-1));
+      this.normals[1].set(1, 0);
+      this.normals[2].set(0, 1);
+      this.normals[3].set((-1), 0);
+      this.centroid.setZero();
 
       if (center) {
-        this.centroid.Copy(center);
+        this.centroid.copy(center);
 
         const xf: Transform = new Transform();
-        xf.SetPosition(center);
-        xf.SetRotationAngle(angle);
+        xf.setPosition(center);
+        xf.setRotationAngle(angle);
 
         // Transform vertices and normals.
         for (let i: number = 0; i < this.count; ++i) {
-          Transform.MulXV(xf, this.vertices[i], this.vertices[i]);
-          Rot.MulRV(xf.q, this.normals[i], this.normals[i]);
+          Transform.mulXV(xf, this.vertices[i], this.vertices[i]);
+          Rot.mulRV(xf.q, this.normals[i], this.normals[i]);
         }
       }
 
@@ -221,9 +221,9 @@ namespace b2 {
     }
 
     /// @see Shape::TestPoint
-    private static TestPoint_s_pLocal = new Vec2();
-    public TestPoint(xf: Transform, p: XY): boolean {
-      const pLocal: Vec2 = Transform.MulTXV(xf, p, PolygonShape.TestPoint_s_pLocal);
+    private static testPointSPLocal = new Vec2();
+    public testPoint(xf: Transform, p: XY): boolean {
+      const pLocal: Vec2 = Transform.mulTXV(xf, p, PolygonShape.testPointSPLocal);
 
       for (let i: number = 0; i < this.count; ++i) {
         const dot: number = Vec2.DotVV(this.normals[i], Vec2.SubVV(pLocal, this.vertices[i], Vec2.s_t0));
@@ -237,40 +237,40 @@ namespace b2 {
 
     // #if ENABLE_PARTICLE
     /// @see Shape::ComputeDistance
-    private static ComputeDistance_s_pLocal = new Vec2();
-    private static ComputeDistance_s_normalForMaxDistance = new Vec2();
-    private static ComputeDistance_s_minDistance = new Vec2();
-    private static ComputeDistance_s_distance = new Vec2();
-    public ComputeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number {
-      const pLocal = Transform.MulTXV(xf, p, PolygonShape.ComputeDistance_s_pLocal);
+    private static computeDistance_s_pLocal = new Vec2();
+    private static computeDistance_s_normalForMaxDistance = new Vec2();
+    private static computeDistance_s_minDistance = new Vec2();
+    private static computeDistance_s_distance = new Vec2();
+    public computeDistance(xf: Transform, p: Vec2, normal: Vec2, childIndex: number): number {
+      const pLocal = Transform.mulTXV(xf, p, PolygonShape.computeDistance_s_pLocal);
       let maxDistance = -maxFloat;
-      const normalForMaxDistance = PolygonShape.ComputeDistance_s_normalForMaxDistance.Copy(pLocal);
+      const normalForMaxDistance = PolygonShape.computeDistance_s_normalForMaxDistance.copy(pLocal);
 
       for (let i = 0; i < this.count; ++i) {
         const dot = Vec2.DotVV(this.normals[i], Vec2.SubVV(pLocal, this.vertices[i], Vec2.s_t0));
         if (dot > maxDistance) {
           maxDistance = dot;
-          normalForMaxDistance.Copy(this.normals[i]);
+          normalForMaxDistance.copy(this.normals[i]);
         }
       }
 
       if (maxDistance > 0) {
-        const minDistance = PolygonShape.ComputeDistance_s_minDistance.Copy(normalForMaxDistance);
+        const minDistance = PolygonShape.computeDistance_s_minDistance.copy(normalForMaxDistance);
         let minDistance2 = maxDistance * maxDistance;
         for (let i = 0; i < this.count; ++i) {
-          const distance = Vec2.SubVV(pLocal, this.vertices[i], PolygonShape.ComputeDistance_s_distance);
-          const distance2 = distance.LengthSquared();
+          const distance = Vec2.SubVV(pLocal, this.vertices[i], PolygonShape.computeDistance_s_distance);
+          const distance2 = distance.lengthSquared();
           if (minDistance2 > distance2) {
-            minDistance.Copy(distance);
+            minDistance.copy(distance);
             minDistance2 = distance2;
           }
         }
 
-        Rot.MulRV(xf.q, minDistance, normal);
-        normal.Normalize();
+        Rot.mulRV(xf.q, minDistance, normal);
+        normal.normalize();
         return Math.sqrt(minDistance2);
       } else {
-        Rot.MulRV(xf.q, normalForMaxDistance, normal);
+        Rot.mulRV(xf.q, normalForMaxDistance, normal);
         return maxDistance;
       }
     }
@@ -279,14 +279,14 @@ namespace b2 {
     /// Implement Shape.
     /// @note because the polygon is solid, rays that start inside do not hit because the normal is
     /// not defined.
-    private static RayCast_s_p1 = new Vec2();
-    private static RayCast_s_p2 = new Vec2();
-    private static RayCast_s_d = new Vec2();
-    public RayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean {
+    private static rayCast_s_p1 = new Vec2();
+    private static rayCast_s_p2 = new Vec2();
+    private static rayCast_s_d = new Vec2();
+    public rayCast(output: RayCastOutput, input: RayCastInput, xf: Transform, childIndex: number): boolean {
       // Put the ray into the polygon's frame of reference.
-      const p1: Vec2 = Transform.MulTXV(xf, input.p1, PolygonShape.RayCast_s_p1);
-      const p2: Vec2 = Transform.MulTXV(xf, input.p2, PolygonShape.RayCast_s_p2);
-      const d: Vec2 = Vec2.SubVV(p2, p1, PolygonShape.RayCast_s_d);
+      const p1: Vec2 = Transform.mulTXV(xf, input.p1, PolygonShape.rayCast_s_p1);
+      const p2: Vec2 = Transform.mulTXV(xf, input.p2, PolygonShape.rayCast_s_p2);
+      const d: Vec2 = Vec2.SubVV(p2, p1, PolygonShape.rayCast_s_d);
 
       let lower: number = 0, upper = input.maxFraction;
 
@@ -333,7 +333,7 @@ namespace b2 {
 
       if (index >= 0) {
         output.fraction = lower;
-        Rot.MulRV(xf.q, this.normals[index], output.normal);
+        Rot.mulRV(xf.q, this.normals[index], output.normal);
         return true;
       }
 
@@ -341,28 +341,28 @@ namespace b2 {
     }
 
     /// @see Shape::ComputeAABB
-    private static ComputeAABB_s_v = new Vec2();
-    public ComputeAABB(aabb: AABB, xf: Transform, childIndex: number): void {
-      const lower: Vec2 = Transform.MulXV(xf, this.vertices[0], aabb.lowerBound);
-      const upper: Vec2 = aabb.upperBound.Copy(lower);
+    private static computeAABB_s_v = new Vec2();
+    public computeAABB(aabb: AABB, xf: Transform, childIndex: number): void {
+      const lower: Vec2 = Transform.mulXV(xf, this.vertices[0], aabb.lowerBound);
+      const upper: Vec2 = aabb.upperBound.copy(lower);
 
       for (let i: number = 0; i < this.count; ++i) {
-        const v: Vec2 = Transform.MulXV(xf, this.vertices[i], PolygonShape.ComputeAABB_s_v);
+        const v: Vec2 = Transform.mulXV(xf, this.vertices[i], PolygonShape.computeAABB_s_v);
         Vec2.MinV(v, lower, lower);
         Vec2.MaxV(v, upper, upper);
       }
 
       const r: number = this.radius;
-      lower.SelfSubXY(r, r);
-      upper.SelfAddXY(r, r);
+      lower.selfSubXY(r, r);
+      upper.selfAddXY(r, r);
     }
 
     /// @see Shape::ComputeMass
-    private static ComputeMass_s_center = new Vec2();
-    private static ComputeMass_s_s = new Vec2();
-    private static ComputeMass_s_e1 = new Vec2();
-    private static ComputeMass_s_e2 = new Vec2();
-    public ComputeMass(massData: MassData, density: number): void {
+    private static computeMass_s_center = new Vec2();
+    private static computeMass_s_s = new Vec2();
+    private static computeMass_s_e1 = new Vec2();
+    private static computeMass_s_e2 = new Vec2();
+    public computeMass(massData: MassData, density: number): void {
       // Polygon mass, centroid, and inertia.
       // Let rho be the polygon density in mass per unit area.
       // Then:
@@ -389,20 +389,20 @@ namespace b2 {
 
       // DEBUG: Assert(this.count >= 3);
 
-      const center: Vec2 = PolygonShape.ComputeMass_s_center.SetZero();
+      const center: Vec2 = PolygonShape.computeMass_s_center.setZero();
       let area: number = 0;
       let I: number = 0;
 
       // Get a reference point for forming triangles.
       // Use the first vertex to reduce round-off errors.
-      const s: Vec2 = PolygonShape.ComputeMass_s_s.Copy(this.vertices[0]);
+      const s: Vec2 = PolygonShape.computeMass_s_s.copy(this.vertices[0]);
 
       const k_inv3: number = 1 / 3;
 
       for (let i: number = 0; i < this.count; ++i) {
         // Triangle vertices.
-        const e1: Vec2 = Vec2.SubVV(this.vertices[i], s, PolygonShape.ComputeMass_s_e1);
-        const e2: Vec2 = Vec2.SubVV(this.vertices[(i + 1) % this.count], s, PolygonShape.ComputeMass_s_e2);
+        const e1: Vec2 = Vec2.SubVV(this.vertices[i], s, PolygonShape.computeMass_s_e1);
+        const e2: Vec2 = Vec2.SubVV(this.vertices[(i + 1) % this.count], s, PolygonShape.computeMass_s_e2);
 
         const D: number = Vec2.CrossVV(e1, e2);
 
@@ -410,7 +410,7 @@ namespace b2 {
         area += triangleArea;
 
         // Area weighted centroid
-        center.SelfAdd(Vec2.MulSV(triangleArea * k_inv3, Vec2.AddVV(e1, e2, Vec2.s_t0), Vec2.s_t1));
+        center.selfAdd(Vec2.MulSV(triangleArea * k_inv3, Vec2.AddVV(e1, e2, Vec2.s_t0), Vec2.s_t1));
 
         const ex1: number = e1.x;
         const ey1: number = e1.y;
@@ -428,7 +428,7 @@ namespace b2 {
 
       // Center of mass
       // DEBUG: Assert(area > epsilon);
-      center.SelfMul(1 / area);
+      center.selfMul(1 / area);
       Vec2.AddVV(center, s, massData.center);
 
       // Inertia tensor relative to the local origin (point s).
@@ -438,21 +438,21 @@ namespace b2 {
       massData.I += massData.mass * (Vec2.DotVV(massData.center, massData.center) - Vec2.DotVV(center, center));
     }
 
-    private static Validate_s_e = new Vec2();
-    private static Validate_s_v = new Vec2();
-    public Validate(): boolean {
+    private static validate_s_e = new Vec2();
+    private static validate_s_v = new Vec2();
+    public validate(): boolean {
       for (let i: number = 0; i < this.count; ++i) {
         const i1 = i;
         const i2 = (i + 1) % this.count;
         const p: Vec2 = this.vertices[i1];
-        const e: Vec2 = Vec2.SubVV(this.vertices[i2], p, PolygonShape.Validate_s_e);
+        const e: Vec2 = Vec2.SubVV(this.vertices[i2], p, PolygonShape.validate_s_e);
 
         for (let j: number = 0; j < this.count; ++j) {
           if (j === i1 || j === i2) {
             continue;
           }
 
-          const v: Vec2 = Vec2.SubVV(this.vertices[j], p, PolygonShape.Validate_s_v);
+          const v: Vec2 = Vec2.SubVV(this.vertices[j], p, PolygonShape.validate_s_v);
           const c: number = Vec2.CrossVV(e, v);
           if (c < 0) {
             return false;
@@ -463,7 +463,7 @@ namespace b2 {
       return true;
     }
 
-    public SetupDistanceProxy(proxy: DistanceProxy, index: number): void {
+    public setupDistanceProxy(proxy: DistanceProxy, index: number): void {
       proxy.vertices = this.vertices;
       proxy.count = this.count;
       proxy.radius = this.radius;
@@ -474,9 +474,9 @@ namespace b2 {
     private static ComputeSubmergedArea_s_intoVec = new Vec2();
     private static ComputeSubmergedArea_s_outoVec = new Vec2();
     private static ComputeSubmergedArea_s_center = new Vec2();
-    public ComputeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number {
+    public computeSubmergedArea(normal: Vec2, offset: number, xf: Transform, c: Vec2): number {
       // Transform plane into shape co-ordinates
-      const normalL: Vec2 = Rot.MulTRV(xf.q, normal, PolygonShape.ComputeSubmergedArea_s_normalL);
+      const normalL: Vec2 = Rot.mulTRV(xf.q, normal, PolygonShape.ComputeSubmergedArea_s_normalL);
       const offsetL: number = offset - Vec2.DotVV(normal, xf.p);
 
       const depths: number[] = [];
@@ -508,8 +508,8 @@ namespace b2 {
           if (lastSubmerged) {
             // Completely submerged
             const md: MassData = PolygonShape.ComputeSubmergedArea_s_md;
-            this.ComputeMass(md, 1);
-            Transform.MulXV(xf, md.center, c);
+            this.computeMass(md, 1);
+            Transform.mulXV(xf, md.center, c);
             return md.mass;
           } else {
             // Completely dry
@@ -528,16 +528,16 @@ namespace b2 {
       const intoLamdda: number = (0 - depths[intoIndex]) / (depths[intoIndex2] - depths[intoIndex]);
       const outoLamdda: number = (0 - depths[outoIndex]) / (depths[outoIndex2] - depths[outoIndex]);
 
-      const intoVec: Vec2 = PolygonShape.ComputeSubmergedArea_s_intoVec.Set(
+      const intoVec: Vec2 = PolygonShape.ComputeSubmergedArea_s_intoVec.set(
         this.vertices[intoIndex].x * (1 - intoLamdda) + this.vertices[intoIndex2].x * intoLamdda,
         this.vertices[intoIndex].y * (1 - intoLamdda) + this.vertices[intoIndex2].y * intoLamdda);
-      const outoVec: Vec2 = PolygonShape.ComputeSubmergedArea_s_outoVec.Set(
+      const outoVec: Vec2 = PolygonShape.ComputeSubmergedArea_s_outoVec.set(
         this.vertices[outoIndex].x * (1 - outoLamdda) + this.vertices[outoIndex2].x * outoLamdda,
         this.vertices[outoIndex].y * (1 - outoLamdda) + this.vertices[outoIndex2].y * outoLamdda);
 
       // Initialize accumulator
       let area: number = 0;
-      const center: Vec2 = PolygonShape.ComputeSubmergedArea_s_center.SetZero();
+      const center: Vec2 = PolygonShape.ComputeSubmergedArea_s_center.setZero();
       let p2: Vec2 = this.vertices[intoIndex2];
       let p3: Vec2;
 
@@ -561,13 +561,13 @@ namespace b2 {
       }
 
       // Normalize and transform centroid
-      center.SelfMul(1 / area);
-      Transform.MulXV(xf, center, c);
+      center.selfMul(1 / area);
+      Transform.mulXV(xf, center, c);
 
       return area;
     }
 
-    public Dump(log: (format: string, ...args: any[]) => void): void {
+    public dump(log: (format: string, ...args: any[]) => void): void {
       log("    const shape: PolygonShape = new PolygonShape();\n");
       log("    const vs: Vec2[] = [];\n");
       for (let i: number = 0; i < this.count; ++i) {
@@ -576,32 +576,32 @@ namespace b2 {
       log("    shape.Set(vs, %d);\n", this.count);
     }
 
-    private static ComputeCentroid_s_s = new Vec2();
-    private static ComputeCentroid_s_p1 = new Vec2();
-    private static ComputeCentroid_s_p2 = new Vec2();
-    private static ComputeCentroid_s_p3 = new Vec2();
-    private static ComputeCentroid_s_e1 = new Vec2();
-    private static ComputeCentroid_s_e2 = new Vec2();
-    public static ComputeCentroid(vs: Vec2[], count: number, out: Vec2): Vec2 {
+    private static computeCentroid_s_s = new Vec2();
+    private static computeCentroid_s_p1 = new Vec2();
+    private static computeCentroid_s_p2 = new Vec2();
+    private static computeCentroid_s_p3 = new Vec2();
+    private static computeCentroid_s_e1 = new Vec2();
+    private static computeCentroid_s_e2 = new Vec2();
+    public static computeCentroid(vs: Vec2[], count: number, out: Vec2): Vec2 {
       // DEBUG: Assert(count >= 3);
 
-      const c: Vec2 = out; c.SetZero();
+      const c: Vec2 = out; c.setZero();
       let area: number = 0;
 
       // Get a reference point for forming triangles.
       // Use the first vertex to reduce round-off errors.
-      const s: Vec2 = PolygonShape.ComputeCentroid_s_s.Copy(vs[0]);
+      const s: Vec2 = PolygonShape.computeCentroid_s_s.copy(vs[0]);
 
       const inv3: number = 1 / 3;
 
       for (let i: number = 0; i < count; ++i) {
         // Triangle vertices.
-        const p1: Vec2 = Vec2.SubVV(vs[0], s, PolygonShape.ComputeCentroid_s_p1);
-        const p2: Vec2 = Vec2.SubVV(vs[i], s, PolygonShape.ComputeCentroid_s_p2);
-        const p3: Vec2 = Vec2.SubVV(vs[(i + 1) % count], s, PolygonShape.ComputeCentroid_s_p3);
+        const p1: Vec2 = Vec2.SubVV(vs[0], s, PolygonShape.computeCentroid_s_p1);
+        const p2: Vec2 = Vec2.SubVV(vs[i], s, PolygonShape.computeCentroid_s_p2);
+        const p3: Vec2 = Vec2.SubVV(vs[(i + 1) % count], s, PolygonShape.computeCentroid_s_p3);
 
-        const e1: Vec2 = Vec2.SubVV(p2, p1, PolygonShape.ComputeCentroid_s_e1);
-        const e2: Vec2 = Vec2.SubVV(p3, p1, PolygonShape.ComputeCentroid_s_e2);
+        const e1: Vec2 = Vec2.SubVV(p2, p1, PolygonShape.computeCentroid_s_e1);
+        const e2: Vec2 = Vec2.SubVV(p3, p1, PolygonShape.computeCentroid_s_e2);
 
         const D: number = Vec2.CrossVV(e1, e2);
 

@@ -47,11 +47,11 @@ namespace b2 {
     /// filtering always wins against the mask bits.
     public groupIndex: number = 0;
 
-    public Clone(): Filter {
-      return new Filter().Copy(this);
+    public clone(): Filter {
+      return new Filter().copy(this);
     }
 
-    public Copy(other: IFilter): this {
+    public copy(other: IFilter): this {
       // DEBUG: Assert(this !== other);
       this.categoryBits = other.categoryBits;
       this.maskBits = other.maskBits;
@@ -131,32 +131,32 @@ namespace b2 {
     constructor(fixture: Fixture, childIndex: number) {
       this.fixture = fixture;
       this.childIndex = childIndex;
-      this.fixture.shape.ComputeAABB(this.aabb, this.fixture.body.GetTransform(), childIndex);
-      this.treeNode = this.fixture.body.world.contactManager.broadPhase.CreateProxy(this.aabb, this);
+      this.fixture.shape.computeAABB(this.aabb, this.fixture.body.getTransform(), childIndex);
+      this.treeNode = this.fixture.body.world.contactManager.broadPhase.createProxy(this.aabb, this);
     }
-    public Reset(): void {
-      this.fixture.body.world.contactManager.broadPhase.DestroyProxy(this.treeNode);
+    public reset(): void {
+      this.fixture.body.world.contactManager.broadPhase.destroyProxy(this.treeNode);
     }
-    public Touch(): void {
-      this.fixture.body.world.contactManager.broadPhase.TouchProxy(this.treeNode);
+    public touch(): void {
+      this.fixture.body.world.contactManager.broadPhase.touchProxy(this.treeNode);
     }
-    private static Synchronize_s_aabb1 = new AABB();
-    private static Synchronize_s_aab = new AABB();
-    private static Synchronize_s_displacement = new Vec2();
-    public Synchronize(transform1: Transform, transform2: Transform): void {
+    private static synchronize_s_aabb1 = new AABB();
+    private static synchronize_s_aab = new AABB();
+    private static synchronize_s_displacement = new Vec2();
+    public synchronize(transform1: Transform, transform2: Transform): void {
       if (transform1 === transform2) {
-        this.fixture.shape.ComputeAABB(this.aabb, transform1, this.childIndex);
-        this.fixture.body.world.contactManager.broadPhase.MoveProxy(this.treeNode, this.aabb, Vec2.ZERO);
+        this.fixture.shape.computeAABB(this.aabb, transform1, this.childIndex);
+        this.fixture.body.world.contactManager.broadPhase.moveProxy(this.treeNode, this.aabb, Vec2.ZERO);
       } else {
         // Compute an AABB that covers the swept shape (may miss some rotation effect).
-        const aabb1: AABB = FixtureProxy.Synchronize_s_aabb1;
-        const aab: AABB = FixtureProxy.Synchronize_s_aab;
-        this.fixture.shape.ComputeAABB(aabb1, transform1, this.childIndex);
-        this.fixture.shape.ComputeAABB(aab, transform2, this.childIndex);
-        this.aabb.Combine2(aabb1, aab);
-        const displacement: Vec2 = FixtureProxy.Synchronize_s_displacement;
-        displacement.Copy(aab.GetCenter()).SelfSub(aabb1.GetCenter());
-        this.fixture.body.world.contactManager.broadPhase.MoveProxy(this.treeNode, this.aabb, displacement);
+        const aabb1: AABB = FixtureProxy.synchronize_s_aabb1;
+        const aab: AABB = FixtureProxy.synchronize_s_aab;
+        this.fixture.shape.computeAABB(aabb1, transform1, this.childIndex);
+        this.fixture.shape.computeAABB(aab, transform2, this.childIndex);
+        this.aabb.combine2(aabb1, aab);
+        const displacement: Vec2 = FixtureProxy.synchronize_s_displacement;
+        displacement.copy(aab.getCenter()).selfSub(aabb1.getCenter());
+        this.fixture.body.world.contactManager.broadPhase.moveProxy(this.treeNode, this.aabb, displacement);
       }
     }
   }
@@ -169,7 +169,7 @@ namespace b2 {
   export class Fixture {
     public density: number = 0;
 
-    public next: Fixture | null = null;
+    public next: Fixture = null;
     public readonly body: Body;
 
     public readonly shape: Shape;
@@ -189,187 +189,164 @@ namespace b2 {
 
     constructor(body: Body, def: IFixtureDef) {
       this.body = body;
-      this.shape = def.shape.Clone();
-      this.userData = Maybe(def.userData, null);
-      this.friction = Maybe(def.friction, 0.2);
-      this.restitution = Maybe(def.restitution, 0);
-      this.restitutionThreshold = Maybe(def.restitutionThreshold, 0);
-      this.filter.Copy(Maybe(def.filter, Filter.DEFAULT));
-      this.isSensor = Maybe(def.isSensor, false);
-      this.density = Maybe(def.density, 0);
+      this.shape = def.shape.clone();
+      this.userData = maybe(def.userData, null);
+      this.friction = maybe(def.friction, 0.2);
+      this.restitution = maybe(def.restitution, 0);
+      this.restitutionThreshold = maybe(def.restitutionThreshold, 0);
+      this.filter.copy(maybe(def.filter, Filter.DEFAULT));
+      this.isSensor = maybe(def.isSensor, false);
+      this.density = maybe(def.density, 0);
     }
 
-    public Reset(): void {
+    public reset(): void {
       // The proxies must be destroyed before calling this.
       // DEBUG: Assert(this.proxyCount === 0);
     }
 
     /// Get the type of the child shape. You can use this to down cast to the concrete shape.
     /// @return the shape type.
-    public GetType(): ShapeType {
-      return this.shape.GetType();
+    public getType(): ShapeType {
+      return this.shape.getType();
     }
 
     /// Get the child shape. You can modify the child shape, however you should not change the
     /// number of vertices because this will crash some collision caching mechanisms.
     /// Manipulating the shape may lead to non-physical behavior.
-    public GetShape(): Shape {
+    public getShape(): Shape {
       return this.shape;
     }
 
     /// Set if this fixture is a sensor.
-    public SetSensor(sensor: boolean): void {
+    public setSensor(sensor: boolean): void {
       if (sensor !== this.isSensor) {
-        this.body.SetAwake(true);
+        this.body.setAwake(true);
         this.isSensor = sensor;
       }
-    }
-
-    /// Is this fixture a sensor (non-solid)?
-    /// @return the true if the shape is a sensor.
-    public IsSensor(): boolean {
-      return this.isSensor;
     }
 
     /// Set the contact filtering data. This will not update contacts until the next time
     /// step when either parent body is active and awake.
     /// This automatically calls Refilter.
-    public SetFilterData(filter: Filter): void {
-      this.filter.Copy(filter);
+    public setFilterData(filter: Filter): void {
+      this.filter.copy(filter);
 
-      this.Refilter();
+      this.refilter();
     }
 
     /// Get the contact filtering data.
-    public GetFilterData(): Filter {
+    public getFilterData(): Filter {
       return this.filter;
     }
 
     /// Call this if you want to establish collision that was previously disabled by ContactFilter::ShouldCollide.
-    public Refilter(): void {
+    public refilter(): void {
       // Flag associated contacts for filtering.
-      let edge = this.body.GetContactList();
+      let edge = this.body.getContactList();
 
       while (edge) {
         const contact = edge.contact;
-        const fixtureA = contact.GetFixtureA();
-        const fixtureB = contact.GetFixtureB();
+        const fixtureA = contact.getFixtureA();
+        const fixtureB = contact.getFixtureB();
         if (fixtureA === this || fixtureB === this) {
-          contact.FlagForFiltering();
+          contact.glagForFiltering();
         }
 
         edge = edge.next;
       }
 
       // Touch each proxy so that new pairs may be created
-      this.TouchProxies();
+      this.touchProxies();
     }
 
     /// Get the parent body of this fixture. This is NULL if the fixture is not attached.
     /// @return the parent body.
-    public GetBody(): Body {
+    public getBody(): Body {
       return this.body;
-    }
-
-    /// Get the next fixture in the parent body's fixture list.
-    /// @return the next shape.
-    public GetNext(): Fixture | null {
-      return this.next;
-    }
-
-    /// Get the user data that was assigned in the fixture definition. Use this to
-    /// store your application specific data.
-    public GetUserData(): any {
-      return this.userData;
-    }
-
-    /// Set the user data. Use this to store your application specific data.
-    public SetUserData(data: any): void {
-      this.userData = data;
     }
 
     /// Test a point for containment in this fixture.
     /// @param p a point in world coordinates.
-    public TestPoint(p: XY): boolean {
-      return this.shape.TestPoint(this.body.GetTransform(), p);
+    public testPoint(p: XY): boolean {
+      return this.shape.testPoint(this.body.getTransform(), p);
     }
 
     // #if ENABLE_PARTICLE
-    public ComputeDistance(p: Vec2, normal: Vec2, childIndex: number): number {
-      return this.shape.ComputeDistance(this.body.GetTransform(), p, normal, childIndex);
+    public computeDistance(p: Vec2, normal: Vec2, childIndex: number): number {
+      return this.shape.computeDistance(this.body.getTransform(), p, normal, childIndex);
     }
     // #endif
 
     /// Cast a ray against this shape.
     /// @param output the ray-cast results.
     /// @param input the ray-cast input parameters.
-    public RayCast(output: RayCastOutput, input: RayCastInput, childIndex: number): boolean {
-      return this.shape.RayCast(output, input, this.body.GetTransform(), childIndex);
+    public rayCast(output: RayCastOutput, input: RayCastInput, childIndex: number): boolean {
+      return this.shape.rayCast(output, input, this.body.getTransform(), childIndex);
     }
 
     /// Get the mass data for this fixture. The mass data is based on the density and
     /// the shape. The rotational inertia is about the shape's origin. This operation
     /// may be expensive.
-    public GetMassData(massData: MassData = new MassData()): MassData {
-      this.shape.ComputeMass(massData, this.density);
+    public getMassData(massData: MassData = new MassData()): MassData {
+      this.shape.computeMass(massData, this.density);
 
       return massData;
     }
 
     /// Set the density of this fixture. This will _not_ automatically adjust the mass
     /// of the body. You must call Body::ResetMassData to update the body's mass.
-    public SetDensity(density: number): void {
+    public setDensity(density: number): void {
       this.density = density;
     }
 
     /// Get the density of this fixture.
-    public GetDensity(): number {
+    public getDensity(): number {
       return this.density;
     }
 
     /// Get the coefficient of friction.
-    public GetFriction(): number {
+    public getFriction(): number {
       return this.friction;
     }
 
     /// Set the coefficient of friction. This will _not_ change the friction of
     /// existing contacts.
-    public SetFriction(friction: number): void {
+    public setFriction(friction: number): void {
       this.friction = friction;
     }
 
     /// Get the coefficient of restitution.
-    public GetRestitution(): number {
+    public getRestitution(): number {
       return this.restitution;
     }
 
     /// Set the coefficient of restitution. This will _not_ change the restitution of
     /// existing contacts.
-    public SetRestitution(restitution: number): void {
+    public setRestitution(restitution: number): void {
       this.restitution = restitution;
     }
 
     /// Get the restitution velocity threshold.
-    public GetRestitutionThreshold(): number {
+    public getRestitutionThreshold(): number {
       return this.restitutionThreshold;
     }
 
     /// Set the restitution threshold. This will _not_ change the restitution threshold of
     /// existing contacts.
-    public SetRestitutionThreshold(threshold: number): void {
+    public setRestitutionThreshold(threshold: number): void {
       this.restitutionThreshold = threshold;
     }
 
     /// Get the fixture's AABB. This AABB may be enlarge and/or stale.
     /// If you need a more accurate AABB, compute it using the shape and
     /// the body transform.
-    public GetAABB(childIndex: number): AABB {
+    public getAABB(childIndex: number): AABB {
       // DEBUG: Assert(0 <= childIndex && childIndex < this.proxyCount);
       return this.proxies[childIndex].aabb;
     }
 
     /// Dump this fixture to the log file.
-    public Dump(log: (format: string, ...args: any[]) => void, bodyIndex: number): void {
+    public dump(log: (format: string, ...args: any[]) => void, bodyIndex: number): void {
       log("    const fd: FixtureDef = new FixtureDef();\n");
       log("    fd.friction = %.15f;\n", this.friction);
       log("    fd.restitution = %.15f;\n", this.restitution);
@@ -380,7 +357,7 @@ namespace b2 {
       log("    fd.filter.maskBits = %d;\n", this.filter.maskBits);
       log("    fd.filter.groupIndex = %d;\n", this.filter.groupIndex);
 
-      this.shape.Dump(log);
+      this.shape.dump(log);
 
       log("\n");
       log("    fd.shape = shape;\n");
@@ -389,31 +366,31 @@ namespace b2 {
     }
 
     // These support body activation/deactivation.
-    public CreateProxies(): void {
+    public createProxies(): void {
       if (this.proxies.length !== 0) { throw new Error(); }
       // Create proxies in the broad-phase.
-      for (let i: number = 0; i < this.shape.GetChildCount(); ++i) {
+      for (let i: number = 0; i < this.shape.getChildCount(); ++i) {
         this.proxies[i] = new FixtureProxy(this, i);
       }
     }
 
-    public DestroyProxies(): void {
+    public destroyProxies(): void {
       // Destroy proxies in the broad-phase.
       for (const proxy of this.proxies) {
-        proxy.Reset();
+        proxy.reset();
       }
       this.proxies.length = 0;
     }
 
-    public TouchProxies(): void {
+    public touchProxies(): void {
       for (const proxy of this.proxies) {
-        proxy.Touch();
+        proxy.touch();
       }
     }
 
-    public SynchronizeProxies(transform1: Transform, transform2: Transform): void {
+    public synchronizeProxies(transform1: Transform, transform2: Transform): void {
       for (const proxy of this.proxies) {
-        proxy.Synchronize(transform1, transform2);
+        proxy.synchronize(transform1, transform2);
       }
     }
   }

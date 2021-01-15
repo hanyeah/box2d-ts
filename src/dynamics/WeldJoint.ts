@@ -43,15 +43,15 @@ namespace b2 {
     public damping: number = 0;
 
     constructor() {
-      super(JointType.e_weldJoint);
+      super(JointType.WeldJoint);
     }
 
-    public Initialize(bA: Body, bB: Body, anchor: Vec2): void {
+    public initialize(bA: Body, bB: Body, anchor: Vec2): void {
       this.bodyA = bA;
       this.bodyB = bB;
-      this.bodyA.GetLocalPoint(anchor, this.localAnchorA);
-      this.bodyB.GetLocalPoint(anchor, this.localAnchorB);
-      this.referenceAngle = this.bodyB.GetAngle() - this.bodyA.GetAngle();
+      this.bodyA.getLocalPoint(anchor, this.localAnchorA);
+      this.bodyB.getLocalPoint(anchor, this.localAnchorB);
+      this.referenceAngle = this.bodyB.getAngle() - this.bodyA.getAngle();
     }
   }
 
@@ -89,21 +89,21 @@ namespace b2 {
     constructor(def: IWeldJointDef) {
       super(def);
 
-      this.stiffness = Maybe(def.stiffness, 0);
-      this.damping = Maybe(def.damping, 0);
+      this.stiffness = maybe(def.stiffness, 0);
+      this.damping = maybe(def.damping, 0);
 
-      this.localAnchorA.Copy(Maybe(def.localAnchorA, Vec2.ZERO));
-      this.localAnchorB.Copy(Maybe(def.localAnchorB, Vec2.ZERO));
-      this.referenceAngle = Maybe(def.referenceAngle, 0);
-      this.impulse.SetZero();
+      this.localAnchorA.copy(maybe(def.localAnchorA, Vec2.ZERO));
+      this.localAnchorB.copy(maybe(def.localAnchorB, Vec2.ZERO));
+      this.referenceAngle = maybe(def.referenceAngle, 0);
+      this.impulse.setZero();
     }
 
-    private static InitVelocityConstraints_s_P = new Vec2();
-    public InitVelocityConstraints(data: SolverData): void {
+    private static initVelocityConstraints_s_P = new Vec2();
+    public initVelocityConstraints(data: SolverData): void {
       this.indexA = this.bodyA.islandIndex;
       this.indexB = this.bodyB.islandIndex;
-      this.localCenterA.Copy(this.bodyA.sweep.localCenter);
-      this.localCenterB.Copy(this.bodyB.sweep.localCenter);
+      this.localCenterA.copy(this.bodyA.sweep.localCenter);
+      this.localCenterB.copy(this.bodyB.sweep.localCenter);
       this.invMassA = this.bodyA.invMass;
       this.invMassB = this.bodyB.invMass;
       this.invIA = this.bodyA.invI;
@@ -117,14 +117,14 @@ namespace b2 {
       const vB: Vec2 = data.velocities[this.indexB].v;
       let wB: number = data.velocities[this.indexB].w;
 
-      const qA: Rot = this.qA.SetAngle(aA), qB: Rot = this.qB.SetAngle(aB);
+      const qA: Rot = this.qA.setAngle(aA), qB: Rot = this.qB.setAngle(aB);
 
       // rA = Mul(qA, localAnchorA - localCenterA);
       Vec2.SubVV(this.localAnchorA, this.localCenterA, this.lalcA);
-      Rot.MulRV(qA, this.lalcA, this.rA);
+      Rot.mulRV(qA, this.lalcA, this.rA);
       // rB = Mul(qB, localAnchorB - localCenterB);
       Vec2.SubVV(this.localAnchorB, this.localCenterB, this.lalcB);
-      Rot.MulRV(qB, this.lalcB, this.rB);
+      Rot.mulRV(qB, this.lalcB, this.rB);
 
       // J = [-I -r1_skew I r2_skew]
       //     [ 0       -1 0       1]
@@ -150,7 +150,7 @@ namespace b2 {
       K.ez.z = iA + iB;
 
       if (this.stiffness > 0) {
-        K.GetInverse22(this.mass);
+        K.getInverse22(this.mass);
 
         let invM: number = iA + iB;
 
@@ -171,27 +171,27 @@ namespace b2 {
         invM += this.gamma;
         this.mass.ez.z = invM !== 0 ? 1 / invM : 0;
       } else {
-        K.GetSymInverse33(this.mass);
+        K.getSymInverse33(this.mass);
         this.gamma = 0;
         this.bias = 0;
       }
 
       if (data.step.warmStarting) {
         // Scale impulses to support a variable time step.
-        this.impulse.SelfMul(data.step.dtRatio);
+        this.impulse.selfMul(data.step.dtRatio);
 
         // Vec2 P(impulse.x, impulse.y);
-        const P: Vec2 = WeldJoint.InitVelocityConstraints_s_P.Set(this.impulse.x, this.impulse.y);
+        const P: Vec2 = WeldJoint.initVelocityConstraints_s_P.set(this.impulse.x, this.impulse.y);
 
         // vA -= mA * P;
-        vA.SelfMulSub(mA, P);
+        vA.selfMulSub(mA, P);
         wA -= iA * (Vec2.CrossVV(this.rA, P) + this.impulse.z);
 
         // vB += mB * P;
-        vB.SelfMulAdd(mB, P);
+        vB.selfMulAdd(mB, P);
         wB += iB * (Vec2.CrossVV(this.rB, P) + this.impulse.z);
       } else {
-        this.impulse.SetZero();
+        this.impulse.setZero();
       }
 
       // data.velocities[this.indexA].v = vA;
@@ -200,11 +200,11 @@ namespace b2 {
       data.velocities[this.indexB].w = wB;
     }
 
-    private static SolveVelocityConstraints_s_Cdot1 = new Vec2();
-    private static SolveVelocityConstraints_s_impulse1 = new Vec2();
-    private static SolveVelocityConstraints_s_impulse = new Vec3();
-    private static SolveVelocityConstraints_s_P = new Vec2();
-    public SolveVelocityConstraints(data: SolverData): void {
+    private static solveVelocityConstraints_s_Cdot1 = new Vec2();
+    private static solveVelocityConstraints_s_impulse1 = new Vec2();
+    private static solveVelocityConstraints_s_impulse = new Vec3();
+    private static solveVelocityConstraints_s_P = new Vec2();
+    public solveVelocityConstraints(data: SolverData): void {
       const vA: Vec2 = data.velocities[this.indexA].v;
       let wA: number = data.velocities[this.indexA].w;
       const vB: Vec2 = data.velocities[this.indexB].v;
@@ -226,10 +226,10 @@ namespace b2 {
         const Cdot1: Vec2 = Vec2.SubVV(
           Vec2.AddVCrossSV(vB, wB, this.rB, Vec2.s_t0),
           Vec2.AddVCrossSV(vA, wA, this.rA, Vec2.s_t1),
-          WeldJoint.SolveVelocityConstraints_s_Cdot1);
+          WeldJoint.solveVelocityConstraints_s_Cdot1);
 
         // Vec2 impulse1 = -Mul22(mass, Cdot1);
-        const impulse1: Vec2 = Mat33.MulM33XY(this.mass, Cdot1.x, Cdot1.y, WeldJoint.SolveVelocityConstraints_s_impulse1).SelfNeg();
+        const impulse1: Vec2 = Mat33.mulM33XY(this.mass, Cdot1.x, Cdot1.y, WeldJoint.solveVelocityConstraints_s_impulse1).selfNeg();
         this.impulse.x += impulse1.x;
         this.impulse.y += impulse1.y;
 
@@ -237,12 +237,12 @@ namespace b2 {
         const P: Vec2 = impulse1;
 
         // vA -= mA * P;
-        vA.SelfMulSub(mA, P);
+        vA.selfMulSub(mA, P);
         // wA -= iA * Cross(rA, P);
         wA -= iA * Vec2.CrossVV(this.rA, P);
 
         // vB += mB * P;
-        vB.SelfMulAdd(mB, P);
+        vB.selfMulAdd(mB, P);
         // wB += iB * Cross(rB, P);
         wB += iB * Vec2.CrossVV(this.rB, P);
       } else {
@@ -250,23 +250,23 @@ namespace b2 {
         const Cdot1: Vec2 = Vec2.SubVV(
           Vec2.AddVCrossSV(vB, wB, this.rB, Vec2.s_t0),
           Vec2.AddVCrossSV(vA, wA, this.rA, Vec2.s_t1),
-          WeldJoint.SolveVelocityConstraints_s_Cdot1);
+          WeldJoint.solveVelocityConstraints_s_Cdot1);
         const Cdot2: number = wB - wA;
         // Vec3 const Cdot(Cdot1.x, Cdot1.y, Cdot2);
 
         // Vec3 impulse = -Mul(mass, Cdot);
-        const impulse: Vec3 = Mat33.MulM33XYZ(this.mass, Cdot1.x, Cdot1.y, Cdot2, WeldJoint.SolveVelocityConstraints_s_impulse).SelfNeg();
-        this.impulse.SelfAdd(impulse);
+        const impulse: Vec3 = Mat33.mulM33XYZ(this.mass, Cdot1.x, Cdot1.y, Cdot2, WeldJoint.solveVelocityConstraints_s_impulse).selfNeg();
+        this.impulse.selfAdd(impulse);
 
         // Vec2 P(impulse.x, impulse.y);
-        const P: Vec2 = WeldJoint.SolveVelocityConstraints_s_P.Set(impulse.x, impulse.y);
+        const P: Vec2 = WeldJoint.solveVelocityConstraints_s_P.set(impulse.x, impulse.y);
 
         // vA -= mA * P;
-        vA.SelfMulSub(mA, P);
+        vA.selfMulSub(mA, P);
         wA -= iA * (Vec2.CrossVV(this.rA, P) + impulse.z);
 
         // vB += mB * P;
-        vB.SelfMulAdd(mB, P);
+        vB.selfMulAdd(mB, P);
         wB += iB * (Vec2.CrossVV(this.rB, P) + impulse.z);
       }
 
@@ -276,26 +276,26 @@ namespace b2 {
       data.velocities[this.indexB].w = wB;
     }
 
-    private static SolvePositionConstraints_s_C1 = new Vec2();
-    private static SolvePositionConstraints_s_P = new Vec2();
-    private static SolvePositionConstraints_s_impulse = new Vec3();
-    public SolvePositionConstraints(data: SolverData): boolean {
+    private static solvePositionConstraints_s_C1 = new Vec2();
+    private static solvePositionConstraints_s_P = new Vec2();
+    private static solvePositionConstraints_s_impulse = new Vec3();
+    public solvePositionConstraints(data: SolverData): boolean {
       const cA: Vec2 = data.positions[this.indexA].c;
       let aA: number = data.positions[this.indexA].a;
       const cB: Vec2 = data.positions[this.indexB].c;
       let aB: number = data.positions[this.indexB].a;
 
-      const qA: Rot = this.qA.SetAngle(aA), qB: Rot = this.qB.SetAngle(aB);
+      const qA: Rot = this.qA.setAngle(aA), qB: Rot = this.qB.setAngle(aB);
 
       const mA: number = this.invMassA, mB: number = this.invMassB;
       const iA: number = this.invIA, iB: number = this.invIB;
 
       // Vec2 rA = Mul(qA, localAnchorA - localCenterA);
       Vec2.SubVV(this.localAnchorA, this.localCenterA, this.lalcA);
-      const rA: Vec2 = Rot.MulRV(qA, this.lalcA, this.rA);
+      const rA: Vec2 = Rot.mulRV(qA, this.lalcA, this.rA);
       // Vec2 rB = Mul(qB, localAnchorB - localCenterB);
       Vec2.SubVV(this.localAnchorB, this.localCenterB, this.lalcB);
-      const rB: Vec2 = Rot.MulRV(qB, this.lalcB, this.rB);
+      const rB: Vec2 = Rot.mulRV(qB, this.lalcB, this.rB);
 
       let positionError: number, angularError: number;
 
@@ -316,19 +316,19 @@ namespace b2 {
           Vec2.SubVV(
             Vec2.AddVV(cB, rB, Vec2.s_t0),
             Vec2.AddVV(cA, rA, Vec2.s_t1),
-            WeldJoint.SolvePositionConstraints_s_C1);
-        positionError = C1.Length();
+            WeldJoint.solvePositionConstraints_s_C1);
+        positionError = C1.length();
         angularError = 0;
 
         // Vec2 P = -K.Solve22(C1);
-        const P: Vec2 = K.Solve22(C1.x, C1.y, WeldJoint.SolvePositionConstraints_s_P).SelfNeg();
+        const P: Vec2 = K.solve22(C1.x, C1.y, WeldJoint.solvePositionConstraints_s_P).selfNeg();
 
         // cA -= mA * P;
-        cA.SelfMulSub(mA, P);
+        cA.selfMulSub(mA, P);
         aA -= iA * Vec2.CrossVV(rA, P);
 
         // cB += mB * P;
-        cB.SelfMulAdd(mB, P);
+        cB.selfMulAdd(mB, P);
         aB += iB * Vec2.CrossVV(rB, P);
       } else {
         // Vec2 C1 =  cB + rB - cA - rA;
@@ -336,26 +336,26 @@ namespace b2 {
           Vec2.SubVV(
             Vec2.AddVV(cB, rB, Vec2.s_t0),
             Vec2.AddVV(cA, rA, Vec2.s_t1),
-            WeldJoint.SolvePositionConstraints_s_C1);
+            WeldJoint.solvePositionConstraints_s_C1);
         const C2: number = aB - aA - this.referenceAngle;
 
-        positionError = C1.Length();
+        positionError = C1.length();
         angularError = Abs(C2);
 
         // Vec3 C(C1.x, C1.y, C2);
 
         // Vec3 impulse = -K.Solve33(C);
-        const impulse: Vec3 = K.Solve33(C1.x, C1.y, C2, WeldJoint.SolvePositionConstraints_s_impulse).SelfNeg();
+        const impulse: Vec3 = K.solve33(C1.x, C1.y, C2, WeldJoint.solvePositionConstraints_s_impulse).selfNeg();
 
         // Vec2 P(impulse.x, impulse.y);
-        const P: Vec2 = WeldJoint.SolvePositionConstraints_s_P.Set(impulse.x, impulse.y);
+        const P: Vec2 = WeldJoint.solvePositionConstraints_s_P.set(impulse.x, impulse.y);
 
         // cA -= mA * P;
-        cA.SelfMulSub(mA, P);
+        cA.selfMulSub(mA, P);
         aA -= iA * (Vec2.CrossVV(this.rA, P) + impulse.z);
 
         // cB += mB * P;
-        cB.SelfMulAdd(mB, P);
+        cB.selfMulAdd(mB, P);
         aB += iB * (Vec2.CrossVV(this.rB, P) + impulse.z);
       }
 
@@ -367,15 +367,15 @@ namespace b2 {
       return positionError <= linearSlop && angularError <= angularSlop;
     }
 
-    public GetAnchorA<T extends XY>(out: T): T {
-      return this.bodyA.GetWorldPoint(this.localAnchorA, out);
+    public getAnchorA<T extends XY>(out: T): T {
+      return this.bodyA.getWorldPoint(this.localAnchorA, out);
     }
 
-    public GetAnchorB<T extends XY>(out: T): T {
-      return this.bodyB.GetWorldPoint(this.localAnchorB, out);
+    public getAnchorB<T extends XY>(out: T): T {
+      return this.bodyB.getWorldPoint(this.localAnchorB, out);
     }
 
-    public GetReactionForce<T extends XY>(inv_dt: number, out: T): T {
+    public getReactionForce<T extends XY>(inv_dt: number, out: T): T {
       // Vec2 P(this.impulse.x, this.impulse.y);
       // return inv_dt * P;
       out.x = inv_dt * this.impulse.x;
@@ -383,23 +383,17 @@ namespace b2 {
       return out;
     }
 
-    public GetReactionTorque(inv_dt: number): number {
+    public getReactionTorque(inv_dt: number): number {
       return inv_dt * this.impulse.z;
     }
 
-    public GetLocalAnchorA(): Vec2 { return this.localAnchorA; }
+    public setStiffness(stiffness: number): void { this.stiffness = stiffness; }
+    public getStiffness(): number { return this.stiffness; }
 
-    public GetLocalAnchorB(): Vec2 { return this.localAnchorB; }
+    public setDamping(damping: number) { this.damping = damping; }
+    public getDamping() { return this.damping; }
 
-    public GetReferenceAngle(): number { return this.referenceAngle; }
-
-    public SetStiffness(stiffness: number): void { this.stiffness = stiffness; }
-    public GetStiffness(): number { return this.stiffness; }
-
-    public SetDamping(damping: number) { this.damping = damping; }
-    public GetDamping() { return this.damping; }
-
-    public Dump(log: (format: string, ...args: any[]) => void) {
+    public dump(log: (format: string, ...args: any[]) => void) {
       const indexA = this.bodyA.islandIndex;
       const indexB = this.bodyB.islandIndex;
 

@@ -17,18 +17,18 @@
 */
 namespace b2 {
   export class PolygonContact extends Contact<PolygonShape, PolygonShape> {
-    public static Create(): Contact {
+    public static create(): Contact {
       return new PolygonContact();
     }
 
-    public static Destroy(contact: Contact): void {
+    public static destroy(contact: Contact): void {
     }
 
-    public Evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void {
-      CollidePolygons(
+    public evaluate(manifold: Manifold, xfA: Transform, xfB: Transform): void {
+      collidePolygons(
         manifold,
-        this.GetShapeA(), xfA,
-        this.GetShapeB(), xfB);
+        this.getShapeA(), xfA,
+        this.getShapeB(), xfB);
     }
   }
 }

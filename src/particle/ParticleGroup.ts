@@ -18,17 +18,17 @@
 namespace b2 {
   export enum ParticleGroupFlag {
     /// Prevents overlapping or leaking.
-    solidParticleGroup = 1 << 0,
+    SolidParticleGroup = 1 << 0,
     /// Keeps its shape.
-    rigidParticleGroup = 1 << 1,
+    RigidParticleGroup = 1 << 1,
     /// Won't be destroyed if it gets empty.
-    particleGroupCanBeEmpty = 1 << 2,
+    ParticleGroupCanBeEmpty = 1 << 2,
     /// Will be destroyed on next simulation step.
-    particleGroupWillBeDestroyed = 1 << 3,
+    ParticleGroupWillBeDestroyed = 1 << 3,
     /// Updates depth data on next simulation step.
-    particleGroupNeedsUpdateDepth = 1 << 4,
+    ParticleGroupNeedsUpdateDepth = 1 << 4,
 
-    particleGroupInternalMask = particleGroupWillBeDestroyed | particleGroupNeedsUpdateDepth,
+    ParticleGroupInternalMask = ParticleGroupWillBeDestroyed | ParticleGroupNeedsUpdateDepth,
   }
 
   export interface IParticleGroupDef {
@@ -48,7 +48,7 @@ namespace b2 {
     positionData?: XY[];
     lifetime?: number;
     userData?: any;
-    group?: ParticleGroup | null;
+    group?: ParticleGroup;
   }
 
   export class ParticleGroupDef implements IParticleGroupDef {
@@ -68,7 +68,7 @@ namespace b2 {
     public positionData?: Vec2[];
     public lifetime: number = 0;
     public userData: any = null;
-    public group: ParticleGroup | null = null;
+    public group: ParticleGroup = null;
   }
 
   export class ParticleGroup {
@@ -78,8 +78,8 @@ namespace b2 {
     public lastIndex: number = 0;
     public groupFlags: ParticleGroupFlag = 0;
     public strength: number = 1.0;
-    public prev: ParticleGroup | null = null;
-    public next: ParticleGroup | null = null;
+    public prev: ParticleGroup = null;
+    public next: ParticleGroup = null;
     public timestamp: number = -1;
     public mass: number = 0.0;
     public inertia: number = 0.0;
@@ -94,27 +94,27 @@ namespace b2 {
       this.system = system;
     }
 
-    public GetNext(): ParticleGroup | null {
+    public getNext(): ParticleGroup {
       return this.next;
     }
 
-    public GetParticleSystem(): ParticleSystem {
+    public getParticleSystem(): ParticleSystem {
       return this.system;
     }
 
-    public GetParticleCount(): number {
+    public getParticleCount(): number {
       return this.lastIndex - this.firstIndex;
     }
 
-    public GetBufferIndex(): number {
+    public getBufferIndex(): number {
       return this.firstIndex;
     }
 
-    public ContainsParticle(index: number): boolean {
+    public containsParticle(index: number): boolean {
       return this.firstIndex <= index && index < this.lastIndex;
     }
 
-    public GetAllParticleFlags(): ParticleFlag {
+    public getAllParticleFlags(): ParticleFlag {
       if (!this.system.flagsBuffer.data) { throw new Error(); }
       let flags = 0;
       for (let i = this.firstIndex; i < this.lastIndex; i++) {
@@ -123,109 +123,109 @@ namespace b2 {
       return flags;
     }
 
-    public GetGroupFlags(): ParticleGroupFlag {
+    public getGroupFlags(): ParticleGroupFlag {
       return this.groupFlags;
     }
 
-    public SetGroupFlags(flags: number): void {
+    public setGroupFlags(flags: number): void {
       // DEBUG: Assert((flags & ParticleGroupFlag.particleGroupInternalMask) === 0);
-      flags |= this.groupFlags & ParticleGroupFlag.particleGroupInternalMask;
-      this.system.SetGroupFlags(this, flags);
+      flags |= this.groupFlags & ParticleGroupFlag.ParticleGroupInternalMask;
+      this.system.setGroupFlags(this, flags);
     }
 
-    public GetMass(): number {
-      this.UpdateStatistics();
+    public getMass(): number {
+      this.updateStatistics();
       return this.mass;
     }
 
-    public GetInertia(): number {
-      this.UpdateStatistics();
+    public getInertia(): number {
+      this.updateStatistics();
       return this.inertia;
     }
 
-    public GetCenter(): Vec2 {
-      this.UpdateStatistics();
+    public getCenter(): Vec2 {
+      this.updateStatistics();
       return this.center;
     }
 
-    public GetLinearVelocity(): Vec2 {
-      this.UpdateStatistics();
+    public getLinearVelocity(): Vec2 {
+      this.updateStatistics();
       return this.linearVelocity;
     }
 
-    public GetAngularVelocity(): number {
-      this.UpdateStatistics();
+    public getAngularVelocity(): number {
+      this.updateStatistics();
       return this.angularVelocity;
     }
 
-    public GetTransform(): Transform {
+    public getTransform(): Transform {
       return this.transform;
     }
 
-    public GetPosition(): Vec2 {
+    public getPosition(): Vec2 {
       return this.transform.p;
     }
 
-    public GetAngle(): number {
-      return this.transform.q.GetAngle();
+    public getAngle(): number {
+      return this.transform.q.getAngle();
     }
 
-    public GetLinearVelocityFromWorldPoint<T extends XY>(worldPoint: XY, out: T): T {
+    public getLinearVelocityFromWorldPoint<T extends XY>(worldPoint: XY, out: T): T {
       const s_t0 = ParticleGroup.GetLinearVelocityFromWorldPoint_s_t0;
-      this.UpdateStatistics();
+      this.updateStatistics();
       ///  return linearVelocity + Cross(angularVelocity, worldPoint - center);
       return Vec2.AddVCrossSV(this.linearVelocity, this.angularVelocity, Vec2.SubVV(worldPoint, this.center, s_t0), out);
     }
     public static readonly GetLinearVelocityFromWorldPoint_s_t0 = new Vec2();
 
-    public GetUserData(): void {
+    public getUserData(): void {
       return this.userData;
     }
 
-    public SetUserData(data: any): void {
+    public setUserData(data: any): void {
       this.userData = data;
     }
 
-    public ApplyForce(force: XY): void {
-      this.system.ApplyForce(this.firstIndex, this.lastIndex, force);
+    public applyForce(force: XY): void {
+      this.system.applyForce(this.firstIndex, this.lastIndex, force);
     }
 
-    public ApplyLinearImpulse(impulse: XY): void {
-      this.system.ApplyLinearImpulse(this.firstIndex, this.lastIndex, impulse);
+    public applyLinearImpulse(impulse: XY): void {
+      this.system.applyLinearImpulse(this.firstIndex, this.lastIndex, impulse);
     }
 
-    public DestroyParticles(callDestructionListener: boolean): void {
-      if (this.system.world.IsLocked()) { throw new Error(); }
+    public destroyParticles(callDestructionListener: boolean): void {
+      if (this.system.world.isLocked()) { throw new Error(); }
 
       for (let i = this.firstIndex; i < this.lastIndex; i++) {
-        this.system.DestroyParticle(i, callDestructionListener);
+        this.system.destroyParticle(i, callDestructionListener);
       }
     }
 
-    public UpdateStatistics(): void {
+    public updateStatistics(): void {
       if (!this.system.positionBuffer.data) { throw new Error(); }
       if (!this.system.velocityBuffer.data) { throw new Error(); }
       const p = new Vec2();
       const v = new Vec2();
       if (this.timestamp !== this.system.timestamp) {
-        const m = this.system.GetParticleMass();
+        const m = this.system.getParticleMass();
         ///  this.mass = 0;
         this.mass = m * (this.lastIndex - this.firstIndex);
-        this.center.SetZero();
-        this.linearVelocity.SetZero();
+        this.center.setZero();
+        this.linearVelocity.setZero();
         for (let i = this.firstIndex; i < this.lastIndex; i++) {
           ///  this.mass += m;
           ///  this.center += m * this.system.positionBuffer.data[i];
-          this.center.SelfMulAdd(m, this.system.positionBuffer.data[i]);
+          this.center.selfMulAdd(m, this.system.positionBuffer.data[i]);
           ///  this.linearVelocity += m * this.system.velocityBuffer.data[i];
-          this.linearVelocity.SelfMulAdd(m, this.system.velocityBuffer.data[i]);
+          this.linearVelocity.selfMulAdd(m, this.system.velocityBuffer.data[i]);
         }
         if (this.mass > 0) {
           const inv_mass = 1 / this.mass;
           ///this.center *= 1 / this.mass;
-          this.center.SelfMul(inv_mass);
+          this.center.selfMul(inv_mass);
           ///this.linearVelocity *= 1 / this.mass;
-          this.linearVelocity.SelfMul(inv_mass);
+          this.linearVelocity.selfMul(inv_mass);
         }
         this.inertia = 0;
         this.angularVelocity = 0;

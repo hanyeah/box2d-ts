@@ -34,7 +34,7 @@ namespace b2 {
     public ratio: number = 1;
 
     constructor() {
-      super(JointType.e_gearJoint);
+      super(JointType.GearJoint);
     }
   }
 
@@ -42,8 +42,8 @@ namespace b2 {
     public joint1: RevoluteJoint | PrismaticJoint;
     public joint2: RevoluteJoint | PrismaticJoint;
 
-    public typeA: JointType = JointType.e_unknownJoint;
-    public typeB: JointType = JointType.e_unknownJoint;
+    public typeA: JointType = JointType.UnknownJoint;
+    public typeB: JointType = JointType.UnknownJoint;
 
     // Body A is connected to body C
     // Body B is connected to body D
@@ -107,8 +107,8 @@ namespace b2 {
       this.joint1 = def.joint1;
       this.joint2 = def.joint2;
 
-      this.typeA = this.joint1.GetType();
-      this.typeB = this.joint2.GetType();
+      this.typeA = this.joint1.getType();
+      this.typeB = this.joint2.getType();
 
       // DEBUG: Assert(this.typeA === JointType.e_revoluteJoint || this.typeA === JointType.e_prismaticJoint);
       // DEBUG: Assert(this.typeB === JointType.e_revoluteJoint || this.typeB === JointType.e_prismaticJoint);
@@ -117,8 +117,8 @@ namespace b2 {
 
       // TODO_ERIN there might be some problem with the joint edges in Joint.
 
-      this.bodyC = this.joint1.GetBodyA();
-      this.bodyA = this.joint1.GetBodyB();
+      this.bodyC = this.joint1.getBodyA();
+      this.bodyA = this.joint1.getBodyB();
 
       // Body B on joint1 must be dynamic
       // Assert(this.bodyA.type === dynamicBody);
@@ -129,28 +129,28 @@ namespace b2 {
       const xfC: Transform = this.bodyC.xf;
       const aC: number = this.bodyC.sweep.a;
 
-      if (this.typeA === JointType.e_revoluteJoint) {
+      if (this.typeA === JointType.RevoluteJoint) {
         const revolute: RevoluteJoint = def.joint1 as RevoluteJoint;
-        this.localAnchorC.Copy(revolute.localAnchorA);
-        this.localAnchorA.Copy(revolute.localAnchorB);
+        this.localAnchorC.copy(revolute.localAnchorA);
+        this.localAnchorA.copy(revolute.localAnchorB);
         this.referenceAngleA = revolute.referenceAngle;
-        this.localAxisC.SetZero();
+        this.localAxisC.setZero();
 
         coordinateA = aA - aC - this.referenceAngleA;
       } else {
         const prismatic: PrismaticJoint = def.joint1 as PrismaticJoint;
-        this.localAnchorC.Copy(prismatic.localAnchorA);
-        this.localAnchorA.Copy(prismatic.localAnchorB);
+        this.localAnchorC.copy(prismatic.localAnchorA);
+        this.localAnchorA.copy(prismatic.localAnchorB);
         this.referenceAngleA = prismatic.referenceAngle;
-        this.localAxisC.Copy(prismatic.localXAxisA);
+        this.localAxisC.copy(prismatic.localXAxisA);
 
         // Vec2 pC = localAnchorC;
         const pC = this.localAnchorC;
         // Vec2 pA = MulT(xfC.q, Mul(xfA.q, localAnchorA) + (xfA.p - xfC.p));
-        const pA: Vec2 = Rot.MulTRV(
+        const pA: Vec2 = Rot.mulTRV(
           xfC.q,
           Vec2.AddVV(
-            Rot.MulRV(xfA.q, this.localAnchorA, Vec2.s_t0),
+            Rot.mulRV(xfA.q, this.localAnchorA, Vec2.s_t0),
             Vec2.SubVV(xfA.p, xfC.p, Vec2.s_t1),
             Vec2.s_t0),
           Vec2.s_t0); // pA uses s_t0
@@ -158,8 +158,8 @@ namespace b2 {
         coordinateA = Vec2.DotVV(Vec2.SubVV(pA, pC, Vec2.s_t0), this.localAxisC);
       }
 
-      this.bodyD = this.joint2.GetBodyA();
-      this.bodyB = this.joint2.GetBodyB();
+      this.bodyD = this.joint2.getBodyA();
+      this.bodyB = this.joint2.getBodyB();
 
       // Body B on joint2 must be dynamic
       // Assert(this.bodyB.type === dynamicBody);
@@ -170,28 +170,28 @@ namespace b2 {
       const xfD: Transform = this.bodyD.xf;
       const aD: number = this.bodyD.sweep.a;
 
-      if (this.typeB === JointType.e_revoluteJoint) {
+      if (this.typeB === JointType.RevoluteJoint) {
         const revolute: RevoluteJoint = def.joint2 as RevoluteJoint;
-        this.localAnchorD.Copy(revolute.localAnchorA);
-        this.localAnchorB.Copy(revolute.localAnchorB);
+        this.localAnchorD.copy(revolute.localAnchorA);
+        this.localAnchorB.copy(revolute.localAnchorB);
         this.referenceAngleB = revolute.referenceAngle;
-        this.localAxisD.SetZero();
+        this.localAxisD.setZero();
 
         coordinateB = aB - aD - this.referenceAngleB;
       } else {
         const prismatic: PrismaticJoint = def.joint2 as PrismaticJoint;
-        this.localAnchorD.Copy(prismatic.localAnchorA);
-        this.localAnchorB.Copy(prismatic.localAnchorB);
+        this.localAnchorD.copy(prismatic.localAnchorA);
+        this.localAnchorB.copy(prismatic.localAnchorB);
         this.referenceAngleB = prismatic.referenceAngle;
-        this.localAxisD.Copy(prismatic.localXAxisA);
+        this.localAxisD.copy(prismatic.localXAxisA);
 
         // Vec2 pD = localAnchorD;
         const pD = this.localAnchorD;
         // Vec2 pB = MulT(xfD.q, Mul(xfB.q, localAnchorB) + (xfB.p - xfD.p));
-        const pB: Vec2 = Rot.MulTRV(
+        const pB: Vec2 = Rot.mulTRV(
           xfD.q,
           Vec2.AddVV(
-            Rot.MulRV(xfB.q, this.localAnchorB, Vec2.s_t0),
+            Rot.mulRV(xfB.q, this.localAnchorB, Vec2.s_t0),
             Vec2.SubVV(xfB.p, xfD.p, Vec2.s_t1),
             Vec2.s_t0),
           Vec2.s_t0); // pB uses s_t0
@@ -199,27 +199,27 @@ namespace b2 {
         coordinateB = Vec2.DotVV(Vec2.SubVV(pB, pD, Vec2.s_t0), this.localAxisD);
       }
 
-      this.ratio = Maybe(def.ratio, 1);
+      this.ratio = maybe(def.ratio, 1);
 
       this.constant = coordinateA + this.ratio * coordinateB;
 
       this.impulse = 0;
     }
 
-    private static InitVelocityConstraints_s_u = new Vec2();
-    private static InitVelocityConstraints_s_rA = new Vec2();
-    private static InitVelocityConstraints_s_rB = new Vec2();
-    private static InitVelocityConstraints_s_rC = new Vec2();
-    private static InitVelocityConstraints_s_rD = new Vec2();
-    public InitVelocityConstraints(data: SolverData): void {
+    private static initVelocityConstraints_s_u = new Vec2();
+    private static initVelocityConstraints_s_rA = new Vec2();
+    private static initVelocityConstraints_s_rB = new Vec2();
+    private static initVelocityConstraints_s_rC = new Vec2();
+    private static initVelocityConstraints_s_rD = new Vec2();
+    public initVelocityConstraints(data: SolverData): void {
       this.indexA = this.bodyA.islandIndex;
       this.indexB = this.bodyB.islandIndex;
       this.indexC = this.bodyC.islandIndex;
       this.indexD = this.bodyD.islandIndex;
-      this.lcA.Copy(this.bodyA.sweep.localCenter);
-      this.lcB.Copy(this.bodyB.sweep.localCenter);
-      this.lcC.Copy(this.bodyC.sweep.localCenter);
-      this.lcD.Copy(this.bodyD.sweep.localCenter);
+      this.lcA.copy(this.bodyA.sweep.localCenter);
+      this.lcB.copy(this.bodyB.sweep.localCenter);
+      this.lcC.copy(this.bodyC.sweep.localCenter);
+      this.lcD.copy(this.bodyD.sweep.localCenter);
       this.mA = this.bodyA.invMass;
       this.mB = this.bodyB.invMass;
       this.mC = this.bodyC.invMass;
@@ -246,29 +246,29 @@ namespace b2 {
       let wD: number = data.velocities[this.indexD].w;
 
       // Rot qA(aA), qB(aB), qC(aC), qD(aD);
-      const qA: Rot = this.qA.SetAngle(aA),
-        qB: Rot = this.qB.SetAngle(aB),
-        qC: Rot = this.qC.SetAngle(aC),
-        qD: Rot = this.qD.SetAngle(aD);
+      const qA: Rot = this.qA.setAngle(aA),
+        qB: Rot = this.qB.setAngle(aB),
+        qC: Rot = this.qC.setAngle(aC),
+        qD: Rot = this.qD.setAngle(aD);
 
       this.mass = 0;
 
-      if (this.typeA === JointType.e_revoluteJoint) {
-        this.JvAC.SetZero();
+      if (this.typeA === JointType.RevoluteJoint) {
+        this.JvAC.setZero();
         this.JwA = 1;
         this.JwC = 1;
         this.mass += this.iA + this.iC;
       } else {
         // Vec2 u = Mul(qC, localAxisC);
-        const u: Vec2 = Rot.MulRV(qC, this.localAxisC, GearJoint.InitVelocityConstraints_s_u);
+        const u: Vec2 = Rot.mulRV(qC, this.localAxisC, GearJoint.initVelocityConstraints_s_u);
         // Vec2 rC = Mul(qC, localAnchorC - lcC);
         Vec2.SubVV(this.localAnchorC, this.lcC, this.lalcC);
-        const rC: Vec2 = Rot.MulRV(qC, this.lalcC, GearJoint.InitVelocityConstraints_s_rC);
+        const rC: Vec2 = Rot.mulRV(qC, this.lalcC, GearJoint.initVelocityConstraints_s_rC);
         // Vec2 rA = Mul(qA, localAnchorA - lcA);
         Vec2.SubVV(this.localAnchorA, this.lcA, this.lalcA);
-        const rA: Vec2 = Rot.MulRV(qA, this.lalcA, GearJoint.InitVelocityConstraints_s_rA);
+        const rA: Vec2 = Rot.mulRV(qA, this.lalcA, GearJoint.initVelocityConstraints_s_rA);
         // JvAC = u;
-        this.JvAC.Copy(u);
+        this.JvAC.copy(u);
         // JwC = Cross(rC, u);
         this.JwC = Vec2.CrossVV(rC, u);
         // JwA = Cross(rA, u);
@@ -276,20 +276,20 @@ namespace b2 {
         this.mass += this.mC + this.mA + this.iC * this.JwC * this.JwC + this.iA * this.JwA * this.JwA;
       }
 
-      if (this.typeB === JointType.e_revoluteJoint) {
-        this.JvBD.SetZero();
+      if (this.typeB === JointType.RevoluteJoint) {
+        this.JvBD.setZero();
         this.JwB = this.ratio;
         this.JwD = this.ratio;
         this.mass += this.ratio * this.ratio * (this.iB + this.iD);
       } else {
         // Vec2 u = Mul(qD, localAxisD);
-        const u: Vec2 = Rot.MulRV(qD, this.localAxisD, GearJoint.InitVelocityConstraints_s_u);
+        const u: Vec2 = Rot.mulRV(qD, this.localAxisD, GearJoint.initVelocityConstraints_s_u);
         // Vec2 rD = Mul(qD, localAnchorD - lcD);
         Vec2.SubVV(this.localAnchorD, this.lcD, this.lalcD);
-        const rD: Vec2 = Rot.MulRV(qD, this.lalcD, GearJoint.InitVelocityConstraints_s_rD);
+        const rD: Vec2 = Rot.mulRV(qD, this.lalcD, GearJoint.initVelocityConstraints_s_rD);
         // Vec2 rB = Mul(qB, localAnchorB - lcB);
         Vec2.SubVV(this.localAnchorB, this.lcB, this.lalcB);
-        const rB: Vec2 = Rot.MulRV(qB, this.lalcB, GearJoint.InitVelocityConstraints_s_rB);
+        const rB: Vec2 = Rot.mulRV(qB, this.lalcB, GearJoint.initVelocityConstraints_s_rB);
         // JvBD = ratio * u;
         Vec2.MulSV(this.ratio, u, this.JvBD);
         // JwD = ratio * Cross(rD, u);
@@ -304,16 +304,16 @@ namespace b2 {
 
       if (data.step.warmStarting) {
         // vA += (mA * impulse) * JvAC;
-        vA.SelfMulAdd(this.mA * this.impulse, this.JvAC);
+        vA.selfMulAdd(this.mA * this.impulse, this.JvAC);
         wA += this.iA * this.impulse * this.JwA;
         // vB += (mB * impulse) * JvBD;
-        vB.SelfMulAdd(this.mB * this.impulse, this.JvBD);
+        vB.selfMulAdd(this.mB * this.impulse, this.JvBD);
         wB += this.iB * this.impulse * this.JwB;
         // vC -= (mC * impulse) * JvAC;
-        vC.SelfMulSub(this.mC * this.impulse, this.JvAC);
+        vC.selfMulSub(this.mC * this.impulse, this.JvAC);
         wC -= this.iC * this.impulse * this.JwC;
         // vD -= (mD * impulse) * JvBD;
-        vD.SelfMulSub(this.mD * this.impulse, this.JvBD);
+        vD.selfMulSub(this.mD * this.impulse, this.JvBD);
         wD -= this.iD * this.impulse * this.JwD;
       } else {
         this.impulse = 0;
@@ -329,7 +329,7 @@ namespace b2 {
       data.velocities[this.indexD].w = wD;
     }
 
-    public SolveVelocityConstraints(data: SolverData): void {
+    public solveVelocityConstraints(data: SolverData): void {
       const vA: Vec2 = data.velocities[this.indexA].v;
       let wA: number = data.velocities[this.indexA].w;
       const vB: Vec2 = data.velocities[this.indexB].v;
@@ -349,16 +349,16 @@ namespace b2 {
       this.impulse += impulse;
 
       // vA += (mA * impulse) * JvAC;
-      vA.SelfMulAdd((this.mA * impulse), this.JvAC);
+      vA.selfMulAdd((this.mA * impulse), this.JvAC);
       wA += this.iA * impulse * this.JwA;
       // vB += (mB * impulse) * JvBD;
-      vB.SelfMulAdd((this.mB * impulse), this.JvBD);
+      vB.selfMulAdd((this.mB * impulse), this.JvBD);
       wB += this.iB * impulse * this.JwB;
       // vC -= (mC * impulse) * JvAC;
-      vC.SelfMulSub((this.mC * impulse), this.JvAC);
+      vC.selfMulSub((this.mC * impulse), this.JvAC);
       wC -= this.iC * impulse * this.JwC;
       // vD -= (mD * impulse) * JvBD;
-      vD.SelfMulSub((this.mD * impulse), this.JvBD);
+      vD.selfMulSub((this.mD * impulse), this.JvBD);
       wD -= this.iD * impulse * this.JwD;
 
       // data.velocities[this.indexA].v = vA;
@@ -371,12 +371,12 @@ namespace b2 {
       data.velocities[this.indexD].w = wD;
     }
 
-    private static SolvePositionConstraints_s_u = new Vec2();
-    private static SolvePositionConstraints_s_rA = new Vec2();
-    private static SolvePositionConstraints_s_rB = new Vec2();
-    private static SolvePositionConstraints_s_rC = new Vec2();
-    private static SolvePositionConstraints_s_rD = new Vec2();
-    public SolvePositionConstraints(data: SolverData): boolean {
+    private static solvePositionConstraints_s_u = new Vec2();
+    private static solvePositionConstraints_s_rA = new Vec2();
+    private static solvePositionConstraints_s_rB = new Vec2();
+    private static solvePositionConstraints_s_rC = new Vec2();
+    private static solvePositionConstraints_s_rD = new Vec2();
+    public solvePositionConstraints(data: SolverData): boolean {
       const cA: Vec2 = data.positions[this.indexA].c;
       let aA: number = data.positions[this.indexA].a;
       const cB: Vec2 = data.positions[this.indexB].c;
@@ -387,10 +387,10 @@ namespace b2 {
       let aD: number = data.positions[this.indexD].a;
 
       // Rot qA(aA), qB(aB), qC(aC), qD(aD);
-      const qA: Rot = this.qA.SetAngle(aA),
-        qB: Rot = this.qB.SetAngle(aB),
-        qC: Rot = this.qC.SetAngle(aC),
-        qD: Rot = this.qD.SetAngle(aD);
+      const qA: Rot = this.qA.setAngle(aA),
+        qB: Rot = this.qB.setAngle(aB),
+        qC: Rot = this.qC.setAngle(aC),
+        qD: Rot = this.qD.setAngle(aD);
 
       const linearError: number = 0;
 
@@ -400,8 +400,8 @@ namespace b2 {
       let JwA: number, JwB: number, JwC: number, JwD: number;
       let mass: number = 0;
 
-      if (this.typeA === JointType.e_revoluteJoint) {
-        JvAC.SetZero();
+      if (this.typeA === JointType.RevoluteJoint) {
+        JvAC.setZero();
         JwA = 1;
         JwC = 1;
         mass += this.iA + this.iC;
@@ -409,13 +409,13 @@ namespace b2 {
         coordinateA = aA - aC - this.referenceAngleA;
       } else {
         // Vec2 u = Mul(qC, localAxisC);
-        const u: Vec2 = Rot.MulRV(qC, this.localAxisC, GearJoint.SolvePositionConstraints_s_u);
+        const u: Vec2 = Rot.mulRV(qC, this.localAxisC, GearJoint.solvePositionConstraints_s_u);
         // Vec2 rC = Mul(qC, localAnchorC - lcC);
-        const rC: Vec2 = Rot.MulRV(qC, this.lalcC, GearJoint.SolvePositionConstraints_s_rC);
+        const rC: Vec2 = Rot.mulRV(qC, this.lalcC, GearJoint.solvePositionConstraints_s_rC);
         // Vec2 rA = Mul(qA, localAnchorA - lcA);
-        const rA: Vec2 = Rot.MulRV(qA, this.lalcA, GearJoint.SolvePositionConstraints_s_rA);
+        const rA: Vec2 = Rot.mulRV(qA, this.lalcA, GearJoint.solvePositionConstraints_s_rA);
         // JvAC = u;
-        JvAC.Copy(u);
+        JvAC.copy(u);
         // JwC = Cross(rC, u);
         JwC = Vec2.CrossVV(rC, u);
         // JwA = Cross(rA, u);
@@ -425,7 +425,7 @@ namespace b2 {
         // Vec2 pC = localAnchorC - lcC;
         const pC = this.lalcC;
         // Vec2 pA = MulT(qC, rA + (cA - cC));
-        const pA: Vec2 = Rot.MulTRV(
+        const pA: Vec2 = Rot.mulTRV(
           qC,
           Vec2.AddVV(
             rA,
@@ -436,8 +436,8 @@ namespace b2 {
         coordinateA = Vec2.DotVV(Vec2.SubVV(pA, pC, Vec2.s_t0), this.localAxisC);
       }
 
-      if (this.typeB === JointType.e_revoluteJoint) {
-        JvBD.SetZero();
+      if (this.typeB === JointType.RevoluteJoint) {
+        JvBD.setZero();
         JwB = this.ratio;
         JwD = this.ratio;
         mass += this.ratio * this.ratio * (this.iB + this.iD);
@@ -445,11 +445,11 @@ namespace b2 {
         coordinateB = aB - aD - this.referenceAngleB;
       } else {
         // Vec2 u = Mul(qD, localAxisD);
-        const u: Vec2 = Rot.MulRV(qD, this.localAxisD, GearJoint.SolvePositionConstraints_s_u);
+        const u: Vec2 = Rot.mulRV(qD, this.localAxisD, GearJoint.solvePositionConstraints_s_u);
         // Vec2 rD = Mul(qD, localAnchorD - lcD);
-        const rD: Vec2 = Rot.MulRV(qD, this.lalcD, GearJoint.SolvePositionConstraints_s_rD);
+        const rD: Vec2 = Rot.mulRV(qD, this.lalcD, GearJoint.solvePositionConstraints_s_rD);
         // Vec2 rB = Mul(qB, localAnchorB - lcB);
-        const rB: Vec2 = Rot.MulRV(qB, this.lalcB, GearJoint.SolvePositionConstraints_s_rB);
+        const rB: Vec2 = Rot.mulRV(qB, this.lalcB, GearJoint.solvePositionConstraints_s_rB);
         // JvBD = ratio * u;
         Vec2.MulSV(this.ratio, u, JvBD);
         // JwD = ratio * Cross(rD, u);
@@ -461,7 +461,7 @@ namespace b2 {
         // Vec2 pD = localAnchorD - lcD;
         const pD = this.lalcD;
         // Vec2 pB = MulT(qD, rB + (cB - cD));
-        const pB: Vec2 = Rot.MulTRV(
+        const pB: Vec2 = Rot.mulTRV(
           qD,
           Vec2.AddVV(
             rB,
@@ -480,16 +480,16 @@ namespace b2 {
       }
 
       // cA += mA * impulse * JvAC;
-      cA.SelfMulAdd(this.mA * impulse, JvAC);
+      cA.selfMulAdd(this.mA * impulse, JvAC);
       aA += this.iA * impulse * JwA;
       // cB += mB * impulse * JvBD;
-      cB.SelfMulAdd(this.mB * impulse, JvBD);
+      cB.selfMulAdd(this.mB * impulse, JvBD);
       aB += this.iB * impulse * JwB;
       // cC -= mC * impulse * JvAC;
-      cC.SelfMulSub(this.mC * impulse, JvAC);
+      cC.selfMulSub(this.mC * impulse, JvAC);
       aC -= this.iC * impulse * JwC;
       // cD -= mD * impulse * JvBD;
-      cD.SelfMulSub(this.mD * impulse, JvBD);
+      cD.selfMulSub(this.mD * impulse, JvBD);
       aD -= this.iD * impulse * JwD;
 
       // data.positions[this.indexA].c = cA;
@@ -505,40 +505,27 @@ namespace b2 {
       return linearError < linearSlop;
     }
 
-    public GetAnchorA<T extends XY>(out: T): T {
-      return this.bodyA.GetWorldPoint(this.localAnchorA, out);
+    public getAnchorA<T extends XY>(out: T): T {
+      return this.bodyA.getWorldPoint(this.localAnchorA, out);
     }
 
-    public GetAnchorB<T extends XY>(out: T): T {
-      return this.bodyB.GetWorldPoint(this.localAnchorB, out);
+    public getAnchorB<T extends XY>(out: T): T {
+      return this.bodyB.getWorldPoint(this.localAnchorB, out);
     }
 
-    public GetReactionForce<T extends XY>(inv_dt: number, out: T): T {
+    public getReactionForce<T extends XY>(inv_dt: number, out: T): T {
       // Vec2 P = impulse * JvAC;
       // return inv_dt * P;
       return Vec2.MulSV(inv_dt * this.impulse, this.JvAC, out);
     }
 
-    public GetReactionTorque(inv_dt: number): number {
+    public getReactionTorque(inv_dt: number): number {
       // float32 L = impulse * JwA;
       // return inv_dt * L;
       return inv_dt * this.impulse * this.JwA;
     }
 
-    public GetJoint1() { return this.joint1; }
-
-    public GetJoint2() { return this.joint2; }
-
-    public GetRatio() {
-      return this.ratio;
-    }
-
-    public SetRatio(ratio: number): void {
-      // DEBUG: Assert(IsValid(ratio));
-      this.ratio = ratio;
-    }
-
-    public Dump(log: (format: string, ...args: any[]) => void) {
+    public dump(log: (format: string, ...args: any[]) => void) {
       const indexA = this.bodyA.islandIndex;
       const indexB = this.bodyB.islandIndex;
 

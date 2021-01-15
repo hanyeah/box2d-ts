@@ -46,11 +46,11 @@ namespace b2 {
       this.id = id;
     }
 
-    public Reset(): void {
+    public reset(): void {
       this._userData = null;
     }
 
-    public IsLeaf(): boolean {
+    public isLeaf(): boolean {
       return this.child1 === null;
     }
   }
@@ -67,13 +67,13 @@ namespace b2 {
     public insertionCount: number = 0;
 
     public readonly stack = new GrowableStack<TreeNode<T>>(256);
-    public static readonly s_r = new Vec2();
-    public static readonly s_v = new Vec2();
-    public static readonly s_abs_v = new Vec2();
-    public static readonly s_segmentAABB = new AABB();
-    public static readonly s_subInput = new RayCastInput();
-    public static readonly s_combinedAABB = new AABB();
-    public static readonly s_aabb = new AABB();
+    public static readonly sR = new Vec2();
+    public static readonly sV = new Vec2();
+    public static readonly absV = new Vec2();
+    public static readonly segmentAABB = new AABB();
+    public static readonly subInput = new RayCastInput();
+    public static readonly combinedAABB = new AABB();
+    public static readonly sAabb = new AABB();
 
     // public GetUserData(node: TreeNode<T>): T {
     //   // DEBUG: Assert(node !== null);
@@ -93,64 +93,64 @@ namespace b2 {
     //   return node.aabb;
     // }
 
-    public Query(aabb: AABB, callback: (node: TreeNode<T>) => boolean): void {
-      const stack: GrowableStack<TreeNode<T>> = this.stack.Reset();
-      stack.Push(this.root);
+    public query(aabb: AABB, callback: (node: TreeNode<T>) => boolean): void {
+      const stack: GrowableStack<TreeNode<T>> = this.stack.reset();
+      stack.push(this.root);
 
-      while (stack.GetCount() > 0) {
-        const node: TreeNode<T> = stack.Pop();
+      while (stack.getCount() > 0) {
+        const node: TreeNode<T> = stack.pop();
         if (node === null) {
           continue;
         }
 
-        if (node.aabb.TestOverlap(aabb)) {
-          if (node.IsLeaf()) {
+        if (node.aabb.testOverlap(aabb)) {
+          if (node.isLeaf()) {
             const proceed: boolean = callback(node);
             if (!proceed) {
               return;
             }
           } else {
-            stack.Push(node.child1);
-            stack.Push(node.child2);
+            stack.push(node.child1);
+            stack.push(node.child2);
           }
         }
       }
     }
 
-    public QueryPoint(point: XY, callback: (node: TreeNode<T>) => boolean): void {
-      const stack: GrowableStack<TreeNode<T>> = this.stack.Reset();
-      stack.Push(this.root);
+    public queryPoint(point: XY, callback: (node: TreeNode<T>) => boolean): void {
+      const stack: GrowableStack<TreeNode<T>> = this.stack.reset();
+      stack.push(this.root);
 
-      while (stack.GetCount() > 0) {
-        const node: TreeNode<T> = stack.Pop();
+      while (stack.getCount() > 0) {
+        const node: TreeNode<T> = stack.pop();
         if (node === null) {
           continue;
         }
 
-        if (node.aabb.TestContain(point)) {
-          if (node.IsLeaf()) {
+        if (node.aabb.testContain(point)) {
+          if (node.isLeaf()) {
             const proceed: boolean = callback(node);
             if (!proceed) {
               return;
             }
           } else {
-            stack.Push(node.child1);
-            stack.Push(node.child2);
+            stack.push(node.child1);
+            stack.push(node.child2);
           }
         }
       }
     }
 
-    public RayCast(input: RayCastInput, callback: (input: RayCastInput, node: TreeNode<T>) => number): void {
+    public rayCast(input: RayCastInput, callback: (input: RayCastInput, node: TreeNode<T>) => number): void {
       const p1: Vec2 = input.p1;
       const p2: Vec2 = input.p2;
-      const r: Vec2 = Vec2.SubVV(p2, p1, DynamicTree.s_r);
+      const r: Vec2 = Vec2.SubVV(p2, p1, DynamicTree.sR);
       // DEBUG: Assert(r.LengthSquared() > 0);
-      r.Normalize();
+      r.normalize();
 
       // v is perpendicular to the segment.
-      const v: Vec2 = Vec2.CrossOneV(r, DynamicTree.s_v);
-      const abs_v: Vec2 = Vec2.AbsV(v, DynamicTree.s_abs_v);
+      const v: Vec2 = Vec2.CrossOneV(r, DynamicTree.sV);
+      const abs_v: Vec2 = Vec2.AbsV(v, DynamicTree.absV);
 
       // Separating axis for segment (Gino, p80).
       // |dot(v, p1 - c)| > dot(|v|, h)
@@ -158,7 +158,7 @@ namespace b2 {
       let maxFraction: number = input.maxFraction;
 
       // Build a bounding box for the segment.
-      const segmentAABB: AABB = DynamicTree.s_segmentAABB;
+      const segmentAABB: AABB = DynamicTree.segmentAABB;
       let t_x: number = p1.x + maxFraction * (p2.x - p1.x);
       let t_y: number = p1.y + maxFraction * (p2.y - p1.y);
       segmentAABB.lowerBound.x = Min(p1.x, t_x);
@@ -166,32 +166,32 @@ namespace b2 {
       segmentAABB.upperBound.x = Max(p1.x, t_x);
       segmentAABB.upperBound.y = Max(p1.y, t_y);
 
-      const stack: GrowableStack<TreeNode<T> | null> = this.stack.Reset();
-      stack.Push(this.root);
+      const stack: GrowableStack<TreeNode<T>> = this.stack.reset();
+      stack.push(this.root);
 
-      while (stack.GetCount() > 0) {
-        const node: TreeNode<T> | null = stack.Pop();
+      while (stack.getCount() > 0) {
+        const node: TreeNode<T> = stack.pop();
         if (node === null) {
           continue;
         }
 
-        if (!TestOverlapAABB(node.aabb, segmentAABB)) {
+        if (!testOverlapAABB(node.aabb, segmentAABB)) {
           continue;
         }
 
         // Separating axis for segment (Gino, p80).
         // |dot(v, p1 - c)| > dot(|v|, h)
-        const c: Vec2 = node.aabb.GetCenter();
-        const h: Vec2 = node.aabb.GetExtents();
+        const c: Vec2 = node.aabb.getCenter();
+        const h: Vec2 = node.aabb.getExtents();
         const separation: number = Abs(Vec2.DotVV(v, Vec2.SubVV(p1, c, Vec2.s_t0))) - Vec2.DotVV(abs_v, h);
         if (separation > 0) {
           continue;
         }
 
-        if (node.IsLeaf()) {
-          const subInput: RayCastInput = DynamicTree.s_subInput;
-          subInput.p1.Copy(input.p1);
-          subInput.p2.Copy(input.p2);
+        if (node.isLeaf()) {
+          const subInput: RayCastInput = DynamicTree.subInput;
+          subInput.p1.copy(input.p1);
+          subInput.p2.copy(input.p2);
           subInput.maxFraction = maxFraction;
 
           const value: number = callback(subInput, node);
@@ -212,15 +212,15 @@ namespace b2 {
             segmentAABB.upperBound.y = Max(p1.y, t_y);
           }
         } else {
-          stack.Push(node.child1);
-          stack.Push(node.child2);
+          stack.push(node.child1);
+          stack.push(node.child2);
         }
       }
     }
 
-    public static s_node_id: number = 0;
+    public static sNodeId: number = 0;
 
-    public AllocateNode(): TreeNode<T> {
+    public allocateNode(): TreeNode<T> {
       // Expand the node pool as needed.
       if (this.freeList !== null) {
         const node: TreeNode<T> = this.freeList;
@@ -233,20 +233,20 @@ namespace b2 {
         return node;
       }
 
-      return new TreeNode<T>(DynamicTree.s_node_id++);
+      return new TreeNode<T>(DynamicTree.sNodeId++);
     }
 
-    public FreeNode(node: TreeNode<T>): void {
+    public freeNode(node: TreeNode<T>): void {
       node.parent = this.freeList; // node.next = this.freeList;
       node.child1 = null;
       node.child2 = null;
       node.height = -1;
-      node.Reset();
+      node.reset();
       this.freeList = node;
     }
 
-    public CreateProxy(aabb: AABB, userData: T): TreeNode<T> {
-      const node: TreeNode<T> = this.AllocateNode();
+    public createProxy(aabb: AABB, userData: T): TreeNode<T> {
+      const node: TreeNode<T> = this.allocateNode();
 
       // Fatten the aabb.
       const r_x: number = aabbExtension;
@@ -259,25 +259,25 @@ namespace b2 {
       node.height = 0;
       node.moved = true;
 
-      this.InsertLeaf(node);
+      this.insertLeaf(node);
 
       return node;
     }
 
-    public DestroyProxy(node: TreeNode<T>): void {
+    public destroyProxy(node: TreeNode<T>): void {
       // DEBUG: Assert(node.IsLeaf());
 
-      this.RemoveLeaf(node);
-      this.FreeNode(node);
+      this.removeLeaf(node);
+      this.freeNode(node);
     }
 
-    private static MoveProxy_s_fatAABB = new AABB();
-    private static MoveProxy_s_hugeAABB = new AABB();
-    public MoveProxy(node: TreeNode<T>, aabb: AABB, displacement: Vec2): boolean {
+    private static moveProxy_s_fatAABB = new AABB();
+    private static moveProxy_s_hugeAABB = new AABB();
+    public moveProxy(node: TreeNode<T>, aabb: AABB, displacement: Vec2): boolean {
       // DEBUG: Assert(node.IsLeaf());
 
       // Extend AABB
-      const fatAABB: AABB = DynamicTree.MoveProxy_s_fatAABB;
+      const fatAABB: AABB = DynamicTree.moveProxy_s_fatAABB;
       const r_x: number = aabbExtension;
       const r_y: number = aabbExtension;
       fatAABB.lowerBound.x = aabb.lowerBound.x - r_x;
@@ -302,17 +302,17 @@ namespace b2 {
       }
 
       const treeAABB = node.aabb; // nodes[proxyId].aabb;
-      if (treeAABB.Contains(aabb)) {
+      if (treeAABB.contains(aabb)) {
         // The tree AABB still contains the object, but it might be too large.
         // Perhaps the object was moving fast but has since gone to sleep.
         // The huge AABB is larger than the new fat AABB.
-        const hugeAABB: AABB = DynamicTree.MoveProxy_s_hugeAABB;
+        const hugeAABB: AABB = DynamicTree.moveProxy_s_hugeAABB;
         hugeAABB.lowerBound.x = fatAABB.lowerBound.x - 4.0 * r_x;
         hugeAABB.lowerBound.y = fatAABB.lowerBound.y - 4.0 * r_y;
         hugeAABB.upperBound.x = fatAABB.upperBound.x + 4.0 * r_x;
         hugeAABB.upperBound.y = fatAABB.upperBound.y + 4.0 * r_y;
 
-        if (hugeAABB.Contains(treeAABB)) {
+        if (hugeAABB.contains(treeAABB)) {
           // The tree AABB contains the object AABB and the tree AABB is
           // not too large. No tree update needed.
           return false;
@@ -321,18 +321,18 @@ namespace b2 {
         // Otherwise the tree AABB is huge and needs to be shrunk
       }
 
-      this.RemoveLeaf(node);
+      this.removeLeaf(node);
 
-      node.aabb.Copy(fatAABB); // nodes[proxyId].aabb = fatAABB;
+      node.aabb.copy(fatAABB); // nodes[proxyId].aabb = fatAABB;
 
-      this.InsertLeaf(node);
+      this.insertLeaf(node);
 
       node.moved = true;
 
       return true;
     }
 
-    public InsertLeaf(leaf: TreeNode<T>): void {
+    public insertLeaf(leaf: TreeNode<T>): void {
       ++this.insertionCount;
 
       if (this.root === null) {
@@ -344,15 +344,15 @@ namespace b2 {
       // Find the best sibling for this node
       const leafAABB: AABB = leaf.aabb;
       let sibling: TreeNode<T> = this.root;
-      while (!sibling.IsLeaf()) {
+      while (!sibling.isLeaf()) {
         const child1: TreeNode<T> = verify(sibling.child1);
         const child2: TreeNode<T> = verify(sibling.child2);
 
-        const area: number = sibling.aabb.GetPerimeter();
+        const area: number = sibling.aabb.getPerimeter();
 
-        const combinedAABB: AABB = DynamicTree.s_combinedAABB;
-        combinedAABB.Combine2(sibling.aabb, leafAABB);
-        const combinedArea: number = combinedAABB.GetPerimeter();
+        const combinedAABB: AABB = DynamicTree.combinedAABB;
+        combinedAABB.combine2(sibling.aabb, leafAABB);
+        const combinedArea: number = combinedAABB.getPerimeter();
 
         // Cost of creating a new parent for this node and the new leaf
         const cost: number = 2 * combinedArea;
@@ -362,28 +362,28 @@ namespace b2 {
 
         // Cost of descending into child1
         let cost1: number;
-        const aabb: AABB = DynamicTree.s_aabb;
+        const aabb: AABB = DynamicTree.sAabb;
         let oldArea: number;
         let newArea: number;
-        if (child1.IsLeaf()) {
-          aabb.Combine2(leafAABB, child1.aabb);
-          cost1 = aabb.GetPerimeter() + inheritanceCost;
+        if (child1.isLeaf()) {
+          aabb.combine2(leafAABB, child1.aabb);
+          cost1 = aabb.getPerimeter() + inheritanceCost;
         } else {
-          aabb.Combine2(leafAABB, child1.aabb);
-          oldArea = child1.aabb.GetPerimeter();
-          newArea = aabb.GetPerimeter();
+          aabb.combine2(leafAABB, child1.aabb);
+          oldArea = child1.aabb.getPerimeter();
+          newArea = aabb.getPerimeter();
           cost1 = (newArea - oldArea) + inheritanceCost;
         }
 
         // Cost of descending into child2
         let cost2: number;
-        if (child2.IsLeaf()) {
-          aabb.Combine2(leafAABB, child2.aabb);
-          cost2 = aabb.GetPerimeter() + inheritanceCost;
+        if (child2.isLeaf()) {
+          aabb.combine2(leafAABB, child2.aabb);
+          cost2 = aabb.getPerimeter() + inheritanceCost;
         } else {
-          aabb.Combine2(leafAABB, child2.aabb);
-          oldArea = child2.aabb.GetPerimeter();
-          newArea = aabb.GetPerimeter();
+          aabb.combine2(leafAABB, child2.aabb);
+          oldArea = child2.aabb.getPerimeter();
+          newArea = aabb.getPerimeter();
           cost2 = newArea - oldArea + inheritanceCost;
         }
 
@@ -401,10 +401,10 @@ namespace b2 {
       }
 
       // Create a parent for the siblings.
-      const oldParent: TreeNode<T> | null = sibling.parent;
-      const newParent: TreeNode<T> = this.AllocateNode();
+      const oldParent: TreeNode<T> = sibling.parent;
+      const newParent: TreeNode<T> = this.allocateNode();
       newParent.parent = oldParent;
-      newParent.aabb.Combine2(leafAABB, sibling.aabb);
+      newParent.aabb.combine2(leafAABB, sibling.aabb);
       newParent.height = sibling.height + 1;
 
       if (oldParent !== null) {
@@ -429,15 +429,15 @@ namespace b2 {
       }
 
       // Walk back up the tree fixing heights and AABBs
-      let node: TreeNode<T> | null = leaf.parent;
+      let node: TreeNode<T> = leaf.parent;
       while (node !== null) {
-        node = this.Balance(node);
+        node = this.balance(node);
 
         const child1: TreeNode<T> = verify(node.child1);
         const child2: TreeNode<T> = verify(node.child2);
 
         node.height = 1 + Max(child1.height, child2.height);
-        node.aabb.Combine2(child1.aabb, child2.aabb);
+        node.aabb.combine2(child1.aabb, child2.aabb);
 
         node = node.parent;
       }
@@ -445,14 +445,14 @@ namespace b2 {
       // this.Validate();
     }
 
-    public RemoveLeaf(leaf: TreeNode<T>): void {
+    public removeLeaf(leaf: TreeNode<T>): void {
       if (leaf === this.root) {
         this.root = null;
         return;
       }
 
       const parent: TreeNode<T> = verify(leaf.parent);
-      const grandParent: TreeNode<T> | null = parent && parent.parent;
+      const grandParent: TreeNode<T> = parent && parent.parent;
       const sibling: TreeNode<T> = verify(parent.child1 === leaf ? parent.child2 : parent.child1);
 
       if (grandParent !== null) {
@@ -463,17 +463,17 @@ namespace b2 {
           grandParent.child2 = sibling;
         }
         sibling.parent = grandParent;
-        this.FreeNode(parent);
+        this.freeNode(parent);
 
         // Adjust ancestor bounds.
-        let index: TreeNode<T> | null = grandParent;
+        let index: TreeNode<T> = grandParent;
         while (index !== null) {
-          index = this.Balance(index);
+          index = this.balance(index);
 
           const child1: TreeNode<T> = verify(index.child1);
           const child2: TreeNode<T> = verify(index.child2);
 
-          index.aabb.Combine2(child1.aabb, child2.aabb);
+          index.aabb.combine2(child1.aabb, child2.aabb);
           index.height = 1 + Max(child1.height, child2.height);
 
           index = index.parent;
@@ -481,16 +481,16 @@ namespace b2 {
       } else {
         this.root = sibling;
         sibling.parent = null;
-        this.FreeNode(parent);
+        this.freeNode(parent);
       }
 
       // this.Validate();
     }
 
-    public Balance(A: TreeNode<T>): TreeNode<T> {
+    public balance(A: TreeNode<T>): TreeNode<T> {
       // DEBUG: Assert(A !== null);
 
-      if (A.IsLeaf() || A.height < 2) {
+      if (A.isLeaf() || A.height < 2) {
         return A;
       }
 
@@ -526,8 +526,8 @@ namespace b2 {
           C.child2 = F;
           A.child2 = G;
           G.parent = A;
-          A.aabb.Combine2(B.aabb, G.aabb);
-          C.aabb.Combine2(A.aabb, F.aabb);
+          A.aabb.combine2(B.aabb, G.aabb);
+          C.aabb.combine2(A.aabb, F.aabb);
 
           A.height = 1 + Max(B.height, G.height);
           C.height = 1 + Max(A.height, F.height);
@@ -535,8 +535,8 @@ namespace b2 {
           C.child2 = G;
           A.child2 = F;
           F.parent = A;
-          A.aabb.Combine2(B.aabb, F.aabb);
-          C.aabb.Combine2(A.aabb, G.aabb);
+          A.aabb.combine2(B.aabb, F.aabb);
+          C.aabb.combine2(A.aabb, G.aabb);
 
           A.height = 1 + Max(B.height, F.height);
           C.height = 1 + Max(A.height, G.height);
@@ -572,8 +572,8 @@ namespace b2 {
           B.child2 = D;
           A.child1 = E;
           E.parent = A;
-          A.aabb.Combine2(C.aabb, E.aabb);
-          B.aabb.Combine2(A.aabb, D.aabb);
+          A.aabb.combine2(C.aabb, E.aabb);
+          B.aabb.combine2(A.aabb, D.aabb);
 
           A.height = 1 + Max(C.height, E.height);
           B.height = 1 + Max(A.height, D.height);
@@ -581,8 +581,8 @@ namespace b2 {
           B.child2 = E;
           A.child1 = D;
           D.parent = A;
-          A.aabb.Combine2(C.aabb, D.aabb);
-          B.aabb.Combine2(A.aabb, E.aabb);
+          A.aabb.combine2(C.aabb, D.aabb);
+          B.aabb.combine2(A.aabb, E.aabb);
 
           A.height = 1 + Max(C.height, D.height);
           B.height = 1 + Max(A.height, E.height);
@@ -594,7 +594,7 @@ namespace b2 {
       return A;
     }
 
-    public GetHeight(): number {
+    public getHeight(): number {
       if (this.root === null) {
         return 0;
       }
@@ -602,30 +602,30 @@ namespace b2 {
       return this.root.height;
     }
 
-    private static GetAreaNode<T>(node: TreeNode<T> | null): number {
+    private static getAreaNode<T>(node: TreeNode<T>): number {
       if (node === null) {
         return 0;
       }
 
-      if (node.IsLeaf()) {
+      if (node.isLeaf()) {
         return 0;
       }
 
-      let area: number = node.aabb.GetPerimeter();
-      area += DynamicTree.GetAreaNode(node.child1);
-      area += DynamicTree.GetAreaNode(node.child2);
+      let area: number = node.aabb.getPerimeter();
+      area += DynamicTree.getAreaNode(node.child1);
+      area += DynamicTree.getAreaNode(node.child2);
       return area;
     }
 
-    public GetAreaRatio(): number {
+    public getAreaRatio(): number {
       if (this.root === null) {
         return 0;
       }
 
       const root: TreeNode<T> = this.root;
-      const rootArea: number = root.aabb.GetPerimeter();
+      const rootArea: number = root.aabb.getPerimeter();
 
-      const totalArea: number = DynamicTree.GetAreaNode(this.root);
+      const totalArea: number = DynamicTree.getAreaNode(this.root);
 
       /*
       float32 totalArea = 0.0;
@@ -643,26 +643,26 @@ namespace b2 {
       return totalArea / rootArea;
     }
 
-    public static ComputeHeightNode<T>(node: TreeNode<T> | null): number {
+    public static computeHeightNode<T>(node: TreeNode<T>): number {
       if (node === null) {
         return 0;
       }
 
-      if (node.IsLeaf()) {
+      if (node.isLeaf()) {
         return 0;
       }
 
-      const height1: number = DynamicTree.ComputeHeightNode(node.child1);
-      const height2: number = DynamicTree.ComputeHeightNode(node.child2);
+      const height1: number = DynamicTree.computeHeightNode(node.child1);
+      const height2: number = DynamicTree.computeHeightNode(node.child2);
       return 1 + Max(height1, height2);
     }
 
-    public ComputeHeight(): number {
-      const height: number = DynamicTree.ComputeHeightNode(this.root);
+    public computeHeight(): number {
+      const height: number = DynamicTree.computeHeightNode(this.root);
       return height;
     }
 
-    public ValidateStructure(node: TreeNode<T> | null): void {
+    public validateStructure(node: TreeNode<T>): void {
       if (node === null) {
         return;
       }
@@ -671,7 +671,7 @@ namespace b2 {
         // DEBUG: Assert(node.parent === null);
       }
 
-      if (node.IsLeaf()) {
+      if (node.isLeaf()) {
         // DEBUG: Assert(node.child1 === null);
         // DEBUG: Assert(node.child2 === null);
         // DEBUG: Assert(node.height === 0);
@@ -684,16 +684,16 @@ namespace b2 {
       // DEBUG: Assert(child1.parent === index);
       // DEBUG: Assert(child2.parent === index);
 
-      this.ValidateStructure(child1);
-      this.ValidateStructure(child2);
+      this.validateStructure(child1);
+      this.validateStructure(child2);
     }
 
-    public ValidateMetrics(node: TreeNode<T> | null): void {
+    public validateMetrics(node: TreeNode<T>): void {
       if (node === null) {
         return;
       }
 
-      if (node.IsLeaf()) {
+      if (node.isLeaf()) {
         // DEBUG: Assert(node.child1 === null);
         // DEBUG: Assert(node.child2 === null);
         // DEBUG: Assert(node.height === 0);
@@ -708,22 +708,22 @@ namespace b2 {
       // DEBUG: const height: number = 1 + Max(height1, height2);
       // DEBUG: Assert(node.height === height);
 
-      const aabb: AABB = DynamicTree.s_aabb;
-      aabb.Combine2(child1.aabb, child2.aabb);
+      const aabb: AABB = DynamicTree.sAabb;
+      aabb.combine2(child1.aabb, child2.aabb);
 
       // DEBUG: Assert(aabb.lowerBound === node.aabb.lowerBound);
       // DEBUG: Assert(aabb.upperBound === node.aabb.upperBound);
 
-      this.ValidateMetrics(child1);
-      this.ValidateMetrics(child2);
+      this.validateMetrics(child1);
+      this.validateMetrics(child2);
     }
 
-    public Validate(): void {
+    public validate(): void {
       // DEBUG: this.ValidateStructure(this.root);
       // DEBUG: this.ValidateMetrics(this.root);
 
       // let freeCount: number = 0;
-      // let freeIndex: TreeNode<T> | null = this.freeList;
+      // let freeIndex: TreeNode<T> = this.freeList;
       // while (freeIndex !== null) {
       //   freeIndex = freeIndex.parent; // freeIndex = freeIndex.next;
       //   ++freeCount;
@@ -734,7 +734,7 @@ namespace b2 {
       // Assert(this.nodeCount + freeCount === this.nodeCapacity);
     }
 
-    private static GetMaxBalanceNode<T>(node: TreeNode<T> | null, maxBalance: number): number {
+    private static getMaxBalanceNode<T>(node: TreeNode<T>, maxBalance: number): number {
       if (node === null) {
         return maxBalance;
       }
@@ -751,8 +751,8 @@ namespace b2 {
       return Max(maxBalance, balance);
     }
 
-    public GetMaxBalance(): number {
-      const maxBalance: number = DynamicTree.GetMaxBalanceNode(this.root, 0);
+    public getMaxBalance(): number {
+      const maxBalance: number = DynamicTree.getMaxBalanceNode(this.root, 0);
 
       /*
       int32 maxBalance = 0;
@@ -774,7 +774,7 @@ namespace b2 {
       return maxBalance;
     }
 
-    public RebuildBottomUp(): void {
+    public rebuildBottomUp(): void {
       /*
       int32* nodes = (int32*)Alloc(nodeCount * sizeof(int32));
       int32 count = 0;
@@ -839,10 +839,10 @@ namespace b2 {
       Free(nodes);
       */
 
-      this.Validate();
+      this.validate();
     }
 
-    private static ShiftOriginNode<T>(node: TreeNode<T> | null, newOrigin: XY): void {
+    private static shiftOriginNode<T>(node: TreeNode<T>, newOrigin: XY): void {
       if (node === null) {
         return;
       }
@@ -853,18 +853,18 @@ namespace b2 {
 
       // DEBUG: Assert(!node.IsLeaf());
 
-      const child1: TreeNode<T> | null = node.child1;
-      const child2: TreeNode<T> | null = node.child2;
-      DynamicTree.ShiftOriginNode(child1, newOrigin);
-      DynamicTree.ShiftOriginNode(child2, newOrigin);
+      const child1: TreeNode<T> = node.child1;
+      const child2: TreeNode<T> = node.child2;
+      DynamicTree.shiftOriginNode(child1, newOrigin);
+      DynamicTree.shiftOriginNode(child2, newOrigin);
 
-      node.aabb.lowerBound.SelfSub(newOrigin);
-      node.aabb.upperBound.SelfSub(newOrigin);
+      node.aabb.lowerBound.selfSub(newOrigin);
+      node.aabb.upperBound.selfSub(newOrigin);
     }
 
-    public ShiftOrigin(newOrigin: XY): void {
+    public shiftOrigin(newOrigin: XY): void {
 
-      DynamicTree.ShiftOriginNode(this.root, newOrigin);
+      DynamicTree.shiftOriginNode(this.root, newOrigin);
 
       /*
       // Build array of leaves. Free the rest.

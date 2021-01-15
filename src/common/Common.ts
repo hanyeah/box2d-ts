@@ -18,21 +18,21 @@
 
 namespace b2 {
 
-  export function Assert(condition: boolean, ...args: any[]): void {
+  export function assert(condition: boolean, ...args: any[]): void {
     if (!condition) {
       // debugger;
       throw new Error(args.join("\n"));
     }
   }
 
-  export function Maybe<T>(value: T | undefined, def: T): T {
+  export function maybe<T>(value: T, def: T): T {
     return value !== undefined ? value : def;
   }
 
   export const maxFloat: number = 1E+37; // FLT_MAX instead of Number.MAX_VALUE;
   export const epsilon: number = 1E-5; // FLT_EPSILON instead of Number.EPSILON;
-  export const epsilon_sq: number = (epsilon * epsilon);
-  export const pi: number = 3.14159265359; // Math.PI;
+  export const epsilonSq: number = (epsilon * epsilon);
+  export const pi: number = Math.PI;
 
 /// @file
 /// Global tuning constants based on meters-kilograms-seconds (MKS) units.

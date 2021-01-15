@@ -2,8 +2,8 @@ namespace b2 {
 
   export class ContactRegister {
     public pool: Contact[] = [];
-    public createFcn: (() => Contact) | null = null;
-    public destroyFcn: ((contact: Contact) => void) | null = null;
+    public createFcn: (() => Contact) = null;
+    public destroyFcn: ((contact: Contact) => void) = null;
     public primary: boolean = false;
   }
 
@@ -11,10 +11,10 @@ namespace b2 {
     public readonly registers: ContactRegister[][] = [];
 
     constructor() {
-      this.InitializeRegisters();
+      this.initializeRegisters();
     }
 
-    private AddType(createFcn: () => Contact, destroyFcn: (contact: Contact) => void, typeA: ShapeType, typeB: ShapeType): void {
+    private addType(createFcn: () => Contact, destroyFcn: (contact: Contact) => void, typeA: ShapeType, typeB: ShapeType): void {
       const pool: Contact[] = [];
 
       function poolCreateFcn(): Contact {
@@ -38,26 +38,26 @@ namespace b2 {
       }
     }
 
-    private InitializeRegisters(): void {
-      for (let i: number = 0; i < ShapeType.e_shapeTypeCount; i++) {
+    private initializeRegisters(): void {
+      for (let i: number = 0; i < ShapeType.ShapeTypeCount; i++) {
         this.registers[i] = [];
-        for (let j: number = 0; j < ShapeType.e_shapeTypeCount; j++) {
+        for (let j: number = 0; j < ShapeType.ShapeTypeCount; j++) {
           this.registers[i][j] = new ContactRegister();
         }
       }
 
-      this.AddType(          CircleContact.Create,           CircleContact.Destroy, ShapeType.e_circleShape,  ShapeType.e_circleShape);
-      this.AddType(PolygonAndCircleContact.Create, PolygonAndCircleContact.Destroy, ShapeType.e_polygonShape, ShapeType.e_circleShape);
-      this.AddType(         PolygonContact.Create,          PolygonContact.Destroy, ShapeType.e_polygonShape, ShapeType.e_polygonShape);
-      this.AddType(   EdgeAndCircleContact.Create,    EdgeAndCircleContact.Destroy, ShapeType.e_edgeShape,    ShapeType.e_circleShape);
-      this.AddType(  EdgeAndPolygonContact.Create,   EdgeAndPolygonContact.Destroy, ShapeType.e_edgeShape,    ShapeType.e_polygonShape);
-      this.AddType(  ChainAndCircleContact.Create,   ChainAndCircleContact.Destroy, ShapeType.e_chainShape,   ShapeType.e_circleShape);
-      this.AddType( ChainAndPolygonContact.Create,  ChainAndPolygonContact.Destroy, ShapeType.e_chainShape,   ShapeType.e_polygonShape);
+      this.addType(          CircleContact.create,           CircleContact.destroy, ShapeType.CircleShape,  ShapeType.CircleShape);
+      this.addType(PolygonAndCircleContact.create, PolygonAndCircleContact.destroy, ShapeType.PolygonShape, ShapeType.CircleShape);
+      this.addType(         PolygonContact.create,          PolygonContact.destroy, ShapeType.PolygonShape, ShapeType.PolygonShape);
+      this.addType(   EdgeAndCircleContact.create,    EdgeAndCircleContact.destroy, ShapeType.EdgeShape,    ShapeType.CircleShape);
+      this.addType(  EdgeAndPolygonContact.create,   EdgeAndPolygonContact.destroy, ShapeType.EdgeShape,    ShapeType.PolygonShape);
+      this.addType(  ChainAndCircleContact.create,   ChainAndCircleContact.destroy, ShapeType.ChainShape,   ShapeType.CircleShape);
+      this.addType( ChainAndPolygonContact.create,  ChainAndPolygonContact.destroy, ShapeType.ChainShape,   ShapeType.PolygonShape);
     }
 
-    public Create(fixtureA: Fixture, indexA: number, fixtureB: Fixture, indexB: number): Contact | null {
-      const typeA: ShapeType = fixtureA.GetType();
-      const typeB: ShapeType = fixtureB.GetType();
+    public create(fixtureA: Fixture, indexA: number, fixtureB: Fixture, indexB: number): Contact {
+      const typeA: ShapeType = fixtureA.getType();
+      const typeB: ShapeType = fixtureB.getType();
 
       // DEBUG: Assert(0 <= typeA && typeA < ShapeType.e_shapeTypeCount);
       // DEBUG: Assert(0 <= typeB && typeB < ShapeType.e_shapeTypeCount);
@@ -66,9 +66,9 @@ namespace b2 {
       if (reg.createFcn) {
         const c: Contact = reg.createFcn();
         if (reg.primary) {
-          c.Reset(fixtureA, indexA, fixtureB, indexB);
+          c.reset(fixtureA, indexA, fixtureB, indexB);
         } else {
-          c.Reset(fixtureB, indexB, fixtureA, indexA);
+          c.reset(fixtureB, indexB, fixtureA, indexA);
         }
         return c;
       } else {
@@ -76,9 +76,9 @@ namespace b2 {
       }
     }
 
-    public Destroy(contact: Contact): void {
-      const typeA: ShapeType = contact.fixtureA.GetType();
-      const typeB: ShapeType = contact.fixtureB.GetType();
+    public destroy(contact: Contact): void {
+      const typeA: ShapeType = contact.fixtureA.getType();
+      const typeB: ShapeType = contact.fixtureB.getType();
 
       // DEBUG: Assert(0 <= typeA && typeB < ShapeType.e_shapeTypeCount);
       // DEBUG: Assert(0 <= typeA && typeB < ShapeType.e_shapeTypeCount);

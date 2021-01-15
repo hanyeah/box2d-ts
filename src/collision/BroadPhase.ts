@@ -37,32 +37,32 @@ namespace b2 {
 
     /// Create a proxy with an initial AABB. Pairs are not reported until
     /// UpdatePairs is called.
-    public CreateProxy(aabb: AABB, userData: T): TreeNode<T> {
-      const proxy: TreeNode<T> = this.tree.CreateProxy(aabb, userData);
+    public createProxy(aabb: AABB, userData: T): TreeNode<T> {
+      const proxy: TreeNode<T> = this.tree.createProxy(aabb, userData);
       ++this.proxyCount;
-      this.BufferMove(proxy);
+      this.bufferMove(proxy);
       return proxy;
     }
 
     /// Destroy a proxy. It is up to the client to remove any pairs.
-    public DestroyProxy(proxy: TreeNode<T>): void {
-      this.UnBufferMove(proxy);
+    public destroyProxy(proxy: TreeNode<T>): void {
+      this.unBufferMove(proxy);
       --this.proxyCount;
-      this.tree.DestroyProxy(proxy);
+      this.tree.destroyProxy(proxy);
     }
 
     /// Call MoveProxy as many times as you like, then when you are done
     /// call UpdatePairs to finalized the proxy pairs (for your time step).
-    public MoveProxy(proxy: TreeNode<T>, aabb: AABB, displacement: Vec2): void {
-      const buffer: boolean = this.tree.MoveProxy(proxy, aabb, displacement);
+    public moveProxy(proxy: TreeNode<T>, aabb: AABB, displacement: Vec2): void {
+      const buffer: boolean = this.tree.moveProxy(proxy, aabb, displacement);
       if (buffer) {
-        this.BufferMove(proxy);
+        this.bufferMove(proxy);
       }
     }
 
     /// Call to trigger a re-processing of it's pairs on the next call to UpdatePairs.
-    public TouchProxy(proxy: TreeNode<T>): void {
-      this.BufferMove(proxy);
+    public touchProxy(proxy: TreeNode<T>): void {
+      this.bufferMove(proxy);
     }
 
     /// Get the fat AABB for a proxy.
@@ -83,12 +83,12 @@ namespace b2 {
     // }
 
     /// Get the number of proxies.
-    public GetProxyCount(): number {
+    public getProxyCount(): number {
       return this.proxyCount;
     }
 
     /// Update the pairs. This results in pair callbacks. This can only add pairs.
-    public UpdatePairs(callback: (a: T, b: T) => void): void {
+    public updatePairs(callback: (a: T, b: T) => void): void {
       // Reset pair buffer
       this.pairCount = 0;
 
@@ -107,7 +107,7 @@ namespace b2 {
         const fatAABB: AABB = queryProxy.aabb; // this.tree.GetFatAABB(queryProxy);
 
         // Query tree, create pairs and add them pair buffer.
-        this.tree.Query(fatAABB, (proxy: TreeNode<T>): boolean => {
+        this.tree.query(fatAABB, (proxy: TreeNode<T>): boolean => {
           // A proxy cannot form a pair with itself.
           if (proxy.id === queryProxy.id) {
             return true;
@@ -171,12 +171,12 @@ namespace b2 {
 
     /// Query an AABB for overlapping proxies. The callback class
     /// is called for each proxy that overlaps the supplied AABB.
-    public Query(aabb: AABB, callback: (node: TreeNode<T>) => boolean): void {
-      this.tree.Query(aabb, callback);
+    public query(aabb: AABB, callback: (node: TreeNode<T>) => boolean): void {
+      this.tree.query(aabb, callback);
     }
 
-    public QueryPoint(point: XY, callback: (node: TreeNode<T>) => boolean): void {
-      this.tree.QueryPoint(point, callback);
+    public queryPoint(point: XY, callback: (node: TreeNode<T>) => boolean): void {
+      this.tree.queryPoint(point, callback);
     }
 
     /// Ray-cast against the proxies in the tree. This relies on the callback
@@ -186,38 +186,38 @@ namespace b2 {
     /// number of proxies in the tree.
     /// @param input the ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).
     /// @param callback a callback class that is called for each proxy that is hit by the ray.
-    public RayCast(input: RayCastInput, callback: (input: RayCastInput, node: TreeNode<T>) => number): void {
-      this.tree.RayCast(input, callback);
+    public rayCast(input: RayCastInput, callback: (input: RayCastInput, node: TreeNode<T>) => number): void {
+      this.tree.rayCast(input, callback);
     }
 
     /// Get the height of the embedded tree.
-    public GetTreeHeight(): number {
-      return this.tree.GetHeight();
+    public getTreeHeight(): number {
+      return this.tree.getHeight();
     }
 
     /// Get the balance of the embedded tree.
-    public GetTreeBalance(): number {
-      return this.tree.GetMaxBalance();
+    public getTreeBalance(): number {
+      return this.tree.getMaxBalance();
     }
 
     /// Get the quality metric of the embedded tree.
-    public GetTreeQuality(): number {
-      return this.tree.GetAreaRatio();
+    public getTreeQuality(): number {
+      return this.tree.getAreaRatio();
     }
 
     /// Shift the world origin. Useful for large worlds.
     /// The shift formula is: position -= newOrigin
     /// @param newOrigin the new origin with respect to the old origin
-    public ShiftOrigin(newOrigin: XY): void {
-      this.tree.ShiftOrigin(newOrigin);
+    public shiftOrigin(newOrigin: XY): void {
+      this.tree.shiftOrigin(newOrigin);
     }
 
-    public BufferMove(proxy: TreeNode<T>): void {
+    public bufferMove(proxy: TreeNode<T>): void {
       this.moveBuffer[this.moveCount] = proxy;
       ++this.moveCount;
     }
 
-    public UnBufferMove(proxy: TreeNode<T>): void {
+    public unBufferMove(proxy: TreeNode<T>): void {
       const i: number = this.moveBuffer.indexOf(proxy);
       this.moveBuffer[i] = null;
     }

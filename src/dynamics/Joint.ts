@@ -17,19 +17,19 @@
 */
 namespace b2 {
   export enum JointType {
-    e_unknownJoint = 0,
-    e_revoluteJoint = 1,
-    e_prismaticJoint = 2,
-    e_distanceJoint = 3,
-    e_pulleyJoint = 4,
-    e_mouseJoint = 5,
-    e_gearJoint = 6,
-    e_wheelJoint = 7,
-    e_weldJoint = 8,
-    e_frictionJoint = 9,
-    e_ropeJoint = 10,
-    e_motorJoint = 11,
-    e_areaJoint = 12,
+    UnknownJoint = 0,
+    RevoluteJoint = 1,
+    PrismaticJoint = 2,
+    DistanceJoint = 3,
+    PulleyJoint = 4,
+    MouseJoint = 5,
+    GearJoint = 6,
+    WheelJoint = 7,
+    WeldJoint = 8,
+    FrictionJoint = 9,
+    RopeJoint = 10,
+    MotorJoint = 11,
+    AreaJoint = 12,
   }
 
   export class Jacobian {
@@ -37,15 +37,15 @@ namespace b2 {
     public angularA: number = 0;
     public angularB: number = 0;
 
-    public SetZero(): Jacobian {
-      this.linear.SetZero();
+    public setZero(): Jacobian {
+      this.linear.setZero();
       this.angularA = 0;
       this.angularB = 0;
       return this;
     }
 
-    public Set(x: XY, a1: number, a2: number): Jacobian {
-      this.linear.Copy(x);
+    public set(x: XY, a1: number, a2: number): Jacobian {
+      this.linear.copy(x);
       this.angularA = a1;
       this.angularB = a2;
       return this;
@@ -58,7 +58,7 @@ namespace b2 {
 /// maintained in each attached body. Each joint has two joint
 /// nodes, one for each attached body.
   export class JointEdge {
-    private _other: Body | null = null; ///< provides quick access to the other body attached.
+    private _other: Body = null; ///< provides quick access to the other body attached.
     public get other(): Body {
       if (this._other === null) { throw new Error(); }
       return this._other;
@@ -68,12 +68,12 @@ namespace b2 {
       this._other = value;
     }
     public readonly joint: Joint;    ///< the joint
-    public prev: JointEdge | null = null;  ///< the previous joint edge in the body's joint list
-    public next: JointEdge | null = null;  ///< the next joint edge in the body's joint list
+    public prev: JointEdge = null;  ///< the previous joint edge in the body's joint list
+    public next: JointEdge = null;  ///< the next joint edge in the body's joint list
     constructor(joint: Joint) {
       this.joint = joint;
     }
-    public Reset(): void {
+    public reset(): void {
       this._other = null;
       this.prev = null;
       this.next = null;
@@ -101,7 +101,7 @@ namespace b2 {
 /// Joint definitions are used to construct joints.
   export abstract class JointDef implements IJointDef {
     /// The joint type is set automatically for concrete joint types.
-    public readonly type: JointType = JointType.e_unknownJoint;
+    public readonly type: JointType = JointType.UnknownJoint;
 
     /// Use this to attach application specific data to your joints.
     public userData: any = null;
@@ -124,9 +124,9 @@ namespace b2 {
 // void LinearStiffness(float& stiffness, float& damping,
 // 	float frequencyHertz, float dampingRatio,
 // 	const Body* bodyA, const Body* bodyB);
-  export function LinearStiffness(def: { stiffness: number, damping: number }, frequencyHertz: number, dampingRatio: number, bodyA: Body, bodyB: Body): void {
-    const massA: number = bodyA.GetMass();
-    const massB: number = bodyB.GetMass();
+  export function linearStiffness(def: { stiffness: number, damping: number }, frequencyHertz: number, dampingRatio: number, bodyA: Body, bodyB: Body): void {
+    const massA: number = bodyA.getMass();
+    const massB: number = bodyB.getMass();
     let mass: number;
     if (massA > 0.0 && massB > 0.0) {
       mass = massA * massB / (massA + massB);
@@ -145,9 +145,9 @@ namespace b2 {
 // void AngularStiffness(float& stiffness, float& damping,
 // 	float frequencyHertz, float dampingRatio,
 // 	const Body* bodyA, const Body* bodyB);
-  export function AngularStiffness(def: { stiffness: number, damping: number }, frequencyHertz: number, dampingRatio: number, bodyA: Body, bodyB: Body): void {
-    const IA: number = bodyA.GetInertia();
-    const IB: number = bodyB.GetInertia();
+  export function angularStiffness(def: { stiffness: number, damping: number }, frequencyHertz: number, dampingRatio: number, bodyA: Body, bodyB: Body): void {
+    const IA: number = bodyA.getInertia();
+    const IB: number = bodyB.getInertia();
     let I: number;
     if (IA > 0.0 && IB > 0.0) {
       I = IA * IB / (IA + IB);
@@ -165,9 +165,9 @@ namespace b2 {
 /// The base joint class. Joints are used to constraint two bodies together in
 /// various fashions. Some joints also feature limits and motors.
   export abstract class Joint {
-    public readonly type: JointType = JointType.e_unknownJoint;
-    public prev: Joint | null = null;
-    public next: Joint | null = null;
+    public readonly type: JointType = JointType.UnknownJoint;
+    public prev: Joint = null;
+    public next: Joint = null;
     public readonly edgeA: JointEdge = new JointEdge(this);
     public readonly edgeB: JointEdge = new JointEdge(this);
     public bodyA: Body;
@@ -189,129 +189,114 @@ namespace b2 {
       this.bodyA = def.bodyA;
       this.bodyB = def.bodyB;
 
-      this.collideConnected = Maybe(def.collideConnected, false);
+      this.collideConnected = maybe(def.collideConnected, false);
 
-      this.userData = Maybe(def.userData, null);
+      this.userData = maybe(def.userData, null);
     }
 
     /// Get the type of the concrete joint.
-    public GetType(): JointType {
+    public getType(): JointType {
       return this.type;
     }
 
     /// Get the first body attached to this joint.
-    public GetBodyA(): Body {
+    public getBodyA(): Body {
       return this.bodyA;
     }
 
     /// Get the second body attached to this joint.
-    public GetBodyB(): Body {
+    public getBodyB(): Body {
       return this.bodyB;
     }
 
     /// Get the anchor point on bodyA in world coordinates.
-    public abstract GetAnchorA<T extends XY>(out: T): T;
+    public abstract getAnchorA<T extends XY>(out: T): T;
 
     /// Get the anchor point on bodyB in world coordinates.
-    public abstract GetAnchorB<T extends XY>(out: T): T;
+    public abstract getAnchorB<T extends XY>(out: T): T;
 
     /// Get the reaction force on bodyB at the joint anchor in Newtons.
-    public abstract GetReactionForce<T extends XY>(inv_dt: number, out: T): T;
+    public abstract getReactionForce<T extends XY>(inv_dt: number, out: T): T;
 
     /// Get the reaction torque on bodyB in N*m.
-    public abstract GetReactionTorque(inv_dt: number): number;
-
-    /// Get the next joint the world joint list.
-    public GetNext(): Joint | null {
-      return this.next;
-    }
-
-    /// Get the user data pointer.
-    public GetUserData(): any {
-      return this.userData;
-    }
-
-    /// Set the user data pointer.
-    public SetUserData(data: any): void {
-      this.userData = data;
-    }
+    public abstract getReactionTorque(inv_dt: number): number;
 
     /// Short-cut function to determine if either body is inactive.
-    public IsEnabled(): boolean {
-      return this.bodyA.IsEnabled() && this.bodyB.IsEnabled();
+    public isEnabled(): boolean {
+      return this.bodyA.isEnabled() && this.bodyB.isEnabled();
     }
 
     /// Get collide connected.
     /// Note: modifying the collide connect flag won't work correctly because
     /// the flag is only checked when fixture AABBs begin to overlap.
-    public GetCollideConnected(): boolean {
+    public getCollideConnected(): boolean {
       return this.collideConnected;
     }
 
     /// Dump this joint to the log file.
-    public Dump(log: (format: string, ...args: any[]) => void): void {
+    public dump(log: (format: string, ...args: any[]) => void): void {
       log("// Dump is not supported for this joint type.\n");
     }
 
     /// Shift the origin for any points stored in world coordinates.
-    public ShiftOrigin(newOrigin: XY): void { }
+    public shiftOrigin(newOrigin: XY): void { }
 
     /// Debug draw this joint
-    private static Draw_s_p1: Vec2 = new Vec2();
-    private static Draw_s_p2: Vec2 = new Vec2();
-    private static Draw_s_color: Color = new Color(0.5, 0.8, 0.8);
-    private static Draw_s_c: Color = new Color();
-    public Draw(draw: Draw): void {
-      const xf1: Transform = this.bodyA.GetTransform();
-      const xf2: Transform = this.bodyB.GetTransform();
+    private static draw_s_p1: Vec2 = new Vec2();
+    private static draw_s_p2: Vec2 = new Vec2();
+    private static draw_s_color: Color = new Color(0.5, 0.8, 0.8);
+    private static draw_s_c: Color = new Color();
+    public draw(draw: Draw): void {
+      const xf1: Transform = this.bodyA.getTransform();
+      const xf2: Transform = this.bodyB.getTransform();
       const x1: Vec2 = xf1.p;
       const x2: Vec2 = xf2.p;
-      const p1: Vec2 = this.GetAnchorA(Joint.Draw_s_p1);
-      const p2: Vec2 = this.GetAnchorB(Joint.Draw_s_p2);
+      const p1: Vec2 = this.getAnchorA(Joint.draw_s_p1);
+      const p2: Vec2 = this.getAnchorB(Joint.draw_s_p2);
 
-      const color: Color = Joint.Draw_s_color.SetRGB(0.5, 0.8, 0.8);
+      const color: Color = Joint.draw_s_color.setRGB(0.5, 0.8, 0.8);
 
       switch (this.type) {
-        case JointType.e_distanceJoint:
-          draw.DrawSegment(p1, p2, color);
+        case JointType.DistanceJoint:
+          draw.drawSegment(p1, p2, color);
           break;
 
-        case JointType.e_pulleyJoint:
+        case JointType.PulleyJoint:
         {
           const pulley: PulleyJoint = this as unknown as PulleyJoint;
-          const s1: Vec2 = pulley.GetGroundAnchorA();
-          const s2: Vec2 = pulley.GetGroundAnchorB();
-          draw.DrawSegment(s1, p1, color);
-          draw.DrawSegment(s2, p2, color);
-          draw.DrawSegment(s1, s2, color);
+          const s1: Vec2 = pulley.getGroundAnchorA();
+          const s2: Vec2 = pulley.getGroundAnchorB();
+          draw.drawSegment(s1, p1, color);
+          draw.drawSegment(s2, p2, color);
+          draw.drawSegment(s1, s2, color);
         }
           break;
 
-        case JointType.e_mouseJoint:
+        case JointType.MouseJoint:
         {
-          const c = Joint.Draw_s_c;
-          c.Set(0.0, 1.0, 0.0);
-          draw.DrawPoint(p1, 4.0, c);
-          draw.DrawPoint(p2, 4.0, c);
+          const c = Joint.draw_s_c;
+          c.set(0.0, 1.0, 0.0);
+          draw.drawPoint(p1, 4.0, c);
+          draw.drawPoint(p2, 4.0, c);
 
-          c.Set(0.8, 0.8, 0.8);
-          draw.DrawSegment(p1, p2, c);
+          c.set(0.8, 0.8, 0.8);
+          draw.drawSegment(p1, p2, c);
         }
           break;
 
         default:
-          draw.DrawSegment(x1, p1, color);
-          draw.DrawSegment(p1, p2, color);
-          draw.DrawSegment(x2, p2, color);
+          draw.drawSegment(x1, p1, color);
+          draw.drawSegment(p1, p2, color);
+          draw.drawSegment(x2, p2, color);
       }
     }
 
-    public abstract InitVelocityConstraints(data: SolverData): void;
+    public abstract initVelocityConstraints(data: SolverData): void;
 
-    public abstract SolveVelocityConstraints(data: SolverData): void;
+    public abstract solveVelocityConstraints(data: SolverData): void;
 
     // This returns true if the position errors are within tolerance.
-    public abstract SolvePositionConstraints(data: SolverData): boolean;
+    public abstract solvePositionConstraints(data: SolverData): boolean;
   }
 
 }

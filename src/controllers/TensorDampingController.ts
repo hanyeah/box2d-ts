@@ -40,7 +40,7 @@ namespace b2 {
     /**
      * @see Controller::Step
      */
-    public Step(step: TimeStep) {
+    public step(step: TimeStep) {
       let timestep = step.dt;
       if (timestep <= epsilon) {
         return;
@@ -50,29 +50,29 @@ namespace b2 {
       }
       for (let i = this.bodyList; i; i = i.nextBody) {
         const body = i.body;
-        if (!body.IsAwake()) {
+        if (!body.isAwake()) {
           continue;
         }
-        const damping = body.GetWorldVector(
-          Mat22.MulMV(
+        const damping = body.getWorldVector(
+          Mat22.mulMV(
             this.T,
-            body.GetLocalVector(
-              body.GetLinearVelocity(),
+            body.getLocalVector(
+              body.getLinearVelocity(),
               Vec2.s_t0),
             Vec2.s_t1),
-          TensorDampingController.Step_s_damping);
+          TensorDampingController.step_s_damping);
         //    body->SetLinearVelocity(body->GetLinearVelocity() + timestep * damping);
-        body.SetLinearVelocity(Vec2.AddVV(body.GetLinearVelocity(), Vec2.MulSV(timestep, damping, Vec2.s_t0), Vec2.s_t1));
+        body.setLinearVelocity(Vec2.AddVV(body.getLinearVelocity(), Vec2.MulSV(timestep, damping, Vec2.s_t0), Vec2.s_t1));
       }
     }
-    private static Step_s_damping = new Vec2();
+    private static step_s_damping = new Vec2();
 
-    public Draw(draw: Draw) {}
+    public draw(draw: Draw) {}
 
     /**
      * Sets damping independantly along the x and y axes
      */
-    public SetAxisAligned(xDamping: number, yDamping: number) {
+    public setAxisAligned(xDamping: number, yDamping: number) {
       this.T.ex.x = (-xDamping);
       this.T.ex.y = 0;
       this.T.ey.x = 0;

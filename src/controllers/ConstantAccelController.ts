@@ -27,19 +27,19 @@ namespace b2 {
      */
     public readonly A = new Vec2(0, 0);
 
-    public Step(step: TimeStep) {
-      const dtA = Vec2.MulSV(step.dt, this.A, ConstantAccelController.Step_s_dtA);
+    public step(step: TimeStep) {
+      const dtA = Vec2.MulSV(step.dt, this.A, ConstantAccelController.step_s_dtA);
       for (let i = this.bodyList; i; i = i.nextBody) {
         const body = i.body;
-        if (!body.IsAwake()) {
+        if (!body.isAwake()) {
           continue;
         }
-        body.SetLinearVelocity(Vec2.AddVV(body.GetLinearVelocity(), dtA, Vec2.s_t0));
+        body.setLinearVelocity(Vec2.AddVV(body.getLinearVelocity(), dtA, Vec2.s_t0));
       }
     }
-    private static Step_s_dtA = new Vec2();
+    private static step_s_dtA = new Vec2();
 
-    public Draw(draw: Draw) {}
+    public draw(draw: Draw) {}
   }
 }
 

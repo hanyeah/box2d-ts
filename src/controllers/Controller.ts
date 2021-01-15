@@ -39,55 +39,28 @@ namespace b2 {
    */
   export abstract class Controller {
     // world: World;
-    public bodyList: ControllerEdge | null = null;
+    public bodyList: ControllerEdge = null;
     public bodyCount: number = 0;
-    public prev: Controller | null = null;
-    public next: Controller | null = null;
+    public prev: Controller = null;
+    public next: Controller = null;
 
     /**
      * Controllers override this to implement per-step functionality.
      */
-    public abstract Step(step: TimeStep): void;
+    public abstract step(step: TimeStep): void;
 
     /**
      * Controllers override this to provide debug drawing.
      */
-    public abstract Draw(debugDraw: Draw): void;
+    public draw(debugDraw: Draw): void{
 
-    /**
-     * Get the next controller in the world's body list.
-     */
-    public GetNext(): Controller | null {
-      return this.next;
-    }
-
-    /**
-     * Get the previous controller in the world's body list.
-     */
-    public GetPrev(): Controller | null {
-      return this.prev;
-    }
-
-    /**
-     * Get the parent world of this body.
-     */
-    // GetWorld() {
-    //   return this.world;
-    // }
-
-    /**
-     * Get the attached body list
-     */
-    public GetBodyList(): ControllerEdge | null {
-      return this.bodyList;
     }
 
     /**
      * Adds a body to the controller list.
      */
-    public AddBody(body: Body): void {
+    public addBody(body: Body): void {
       const edge = new ControllerEdge(this, body);
-
       //Add edge to controller list
       edge.nextBody = this.bodyList;
       edge.prevBody = null;
@@ -110,7 +83,7 @@ namespace b2 {
     /**
      * Removes a body from the controller list.
      */
-    public RemoveBody(body: Body): void {
+    public removeBody(body: Body): void {
       //Assert that the controller is not empty
       if (this.bodyCount <= 0) { throw new Error(); }
 
@@ -152,9 +125,9 @@ namespace b2 {
     /**
      * Removes all bodies from the controller list.
      */
-    public Clear(): void {
+    public clear(): void {
       while (this.bodyList) {
-        this.RemoveBody(this.bodyList.body);
+        this.removeBody(this.bodyList.body);
       }
 
       this.bodyCount = 0;

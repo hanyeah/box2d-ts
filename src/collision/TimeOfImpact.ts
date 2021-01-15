@@ -25,7 +25,7 @@ namespace b2 {
   export let toiMaxIters: number = 0;
   export let toiRootIters: number = 0;
   export let toiMaxRootIters: number = 0;
-  export function toi_reset(): void {
+  export function toiReset(): void {
     toiTime = 0;
     toiMaxTime = 0;
     toiCalls = 0;
@@ -35,13 +35,13 @@ namespace b2 {
     toiMaxRootIters = 0;
   }
 
-  const TimeOfImpact_s_xfA: Transform = new Transform();
-  const TimeOfImpact_s_xfB: Transform = new Transform();
-  const TimeOfImpact_s_pointA: Vec2 = new Vec2();
-  const TimeOfImpact_s_pointB: Vec2 = new Vec2();
-  const TimeOfImpact_s_normal: Vec2 = new Vec2();
-  const TimeOfImpact_s_axisA: Vec2 = new Vec2();
-  const TimeOfImpact_s_axisB: Vec2 = new Vec2();
+  const timeOfImpact_s_xfA: Transform = new Transform();
+  const timeOfImpact_s_xfB: Transform = new Transform();
+  const timeOfImpact_s_pointA: Vec2 = new Vec2();
+  const timeOfImpact_s_pointB: Vec2 = new Vec2();
+  const timeOfImpact_s_normal: Vec2 = new Vec2();
+  const timeOfImpact_s_axisA: Vec2 = new Vec2();
+  const timeOfImpact_s_axisB: Vec2 = new Vec2();
 
 /// Input parameters for TimeOfImpact
   export class TOIInput {
@@ -54,23 +54,23 @@ namespace b2 {
 
 /// Output parameters for TimeOfImpact.
   export enum TOIOutputState {
-    e_unknown = 0,
-    e_failed = 1,
-    e_overlapped = 2,
-    e_touching = 3,
-    e_separated = 4,
+    Unknown = 0,
+    Failed = 1,
+    Overlapped = 2,
+    Touching = 3,
+    Separated = 4,
   }
 
   export class TOIOutput {
-    public state = TOIOutputState.e_unknown;
+    public state = TOIOutputState.Unknown;
     public t: number = 0;
   }
 
   export enum SeparationFunctionType {
-    e_unknown = -1,
-    e_points = 0,
-    e_faceA = 1,
-    e_faceB = 2,
+    Unknown = -1,
+    Points = 0,
+    FaceA = 1,
+    FaceB = 2,
   }
 
   export class SeparationFunction {
@@ -78,132 +78,132 @@ namespace b2 {
     public proxyB!: DistanceProxy;
     public readonly sweepA: Sweep = new Sweep();
     public readonly sweepB: Sweep = new Sweep();
-    public type: SeparationFunctionType = SeparationFunctionType.e_unknown;
+    public type: SeparationFunctionType = SeparationFunctionType.Unknown;
     public readonly localPoint: Vec2 = new Vec2();
     public readonly axis: Vec2 = new Vec2();
 
-    public Initialize(cache: SimplexCache, proxyA: DistanceProxy, sweepA: Sweep, proxyB: DistanceProxy, sweepB: Sweep, t1: number): number {
+    public initialize(cache: SimplexCache, proxyA: DistanceProxy, sweepA: Sweep, proxyB: DistanceProxy, sweepB: Sweep, t1: number): number {
       this.proxyA = proxyA;
       this.proxyB = proxyB;
       const count: number = cache.count;
       // DEBUG: Assert(0 < count && count < 3);
 
-      this.sweepA.Copy(sweepA);
-      this.sweepB.Copy(sweepB);
+      this.sweepA.copy(sweepA);
+      this.sweepB.copy(sweepB);
 
-      const xfA: Transform = TimeOfImpact_s_xfA;
-      const xfB: Transform = TimeOfImpact_s_xfB;
-      this.sweepA.GetTransform(xfA, t1);
-      this.sweepB.GetTransform(xfB, t1);
+      const xfA: Transform = timeOfImpact_s_xfA;
+      const xfB: Transform = timeOfImpact_s_xfB;
+      this.sweepA.getTransform(xfA, t1);
+      this.sweepB.getTransform(xfB, t1);
 
       if (count === 1) {
-        this.type = SeparationFunctionType.e_points;
-        const localPointA: Vec2 = this.proxyA.GetVertex(cache.indexA[0]);
-        const localPointB: Vec2 = this.proxyB.GetVertex(cache.indexB[0]);
-        const pointA: Vec2 = Transform.MulXV(xfA, localPointA, TimeOfImpact_s_pointA);
-        const pointB: Vec2 = Transform.MulXV(xfB, localPointB, TimeOfImpact_s_pointB);
+        this.type = SeparationFunctionType.Points;
+        const localPointA: Vec2 = this.proxyA.getVertex(cache.indexA[0]);
+        const localPointB: Vec2 = this.proxyB.getVertex(cache.indexB[0]);
+        const pointA: Vec2 = Transform.mulXV(xfA, localPointA, timeOfImpact_s_pointA);
+        const pointB: Vec2 = Transform.mulXV(xfB, localPointB, timeOfImpact_s_pointB);
         Vec2.SubVV(pointB, pointA, this.axis);
-        const s: number = this.axis.Normalize();
+        const s: number = this.axis.normalize();
         // #if ENABLE_PARTICLE
-        this.localPoint.SetZero();
+        this.localPoint.setZero();
         // #endif
         return s;
       } else if (cache.indexA[0] === cache.indexA[1]) {
         // Two points on B and one on A.
-        this.type = SeparationFunctionType.e_faceB;
-        const localPointB1: Vec2 = this.proxyB.GetVertex(cache.indexB[0]);
-        const localPoint: Vec2 = this.proxyB.GetVertex(cache.indexB[1]);
+        this.type = SeparationFunctionType.FaceB;
+        const localPointB1: Vec2 = this.proxyB.getVertex(cache.indexB[0]);
+        const localPoint: Vec2 = this.proxyB.getVertex(cache.indexB[1]);
 
-        Vec2.CrossVOne(Vec2.SubVV(localPoint, localPointB1, Vec2.s_t0), this.axis).SelfNormalize();
-        const normal: Vec2 = Rot.MulRV(xfB.q, this.axis, TimeOfImpact_s_normal);
+        Vec2.CrossVOne(Vec2.SubVV(localPoint, localPointB1, Vec2.s_t0), this.axis).selfNormalize();
+        const normal: Vec2 = Rot.mulRV(xfB.q, this.axis, timeOfImpact_s_normal);
 
         Vec2.MidVV(localPointB1, localPoint, this.localPoint);
-        const pointB: Vec2 = Transform.MulXV(xfB, this.localPoint, TimeOfImpact_s_pointB);
+        const pointB: Vec2 = Transform.mulXV(xfB, this.localPoint, timeOfImpact_s_pointB);
 
-        const localPointA: Vec2 = this.proxyA.GetVertex(cache.indexA[0]);
-        const pointA: Vec2 = Transform.MulXV(xfA, localPointA, TimeOfImpact_s_pointA);
+        const localPointA: Vec2 = this.proxyA.getVertex(cache.indexA[0]);
+        const pointA: Vec2 = Transform.mulXV(xfA, localPointA, timeOfImpact_s_pointA);
 
         let s: number = Vec2.DotVV(Vec2.SubVV(pointA, pointB, Vec2.s_t0), normal);
         if (s < 0) {
-          this.axis.SelfNeg();
+          this.axis.selfNeg();
           s = -s;
         }
         return s;
       } else {
         // Two points on A and one or two points on B.
-        this.type = SeparationFunctionType.e_faceA;
-        const localPointA1: Vec2 = this.proxyA.GetVertex(cache.indexA[0]);
-        const localPointA2: Vec2 = this.proxyA.GetVertex(cache.indexA[1]);
+        this.type = SeparationFunctionType.FaceA;
+        const localPointA1: Vec2 = this.proxyA.getVertex(cache.indexA[0]);
+        const localPointA2: Vec2 = this.proxyA.getVertex(cache.indexA[1]);
 
-        Vec2.CrossVOne(Vec2.SubVV(localPointA2, localPointA1, Vec2.s_t0), this.axis).SelfNormalize();
-        const normal: Vec2 = Rot.MulRV(xfA.q, this.axis, TimeOfImpact_s_normal);
+        Vec2.CrossVOne(Vec2.SubVV(localPointA2, localPointA1, Vec2.s_t0), this.axis).selfNormalize();
+        const normal: Vec2 = Rot.mulRV(xfA.q, this.axis, timeOfImpact_s_normal);
 
         Vec2.MidVV(localPointA1, localPointA2, this.localPoint);
-        const pointA: Vec2 = Transform.MulXV(xfA, this.localPoint, TimeOfImpact_s_pointA);
+        const pointA: Vec2 = Transform.mulXV(xfA, this.localPoint, timeOfImpact_s_pointA);
 
-        const localPointB: Vec2 = this.proxyB.GetVertex(cache.indexB[0]);
-        const pointB: Vec2 = Transform.MulXV(xfB, localPointB, TimeOfImpact_s_pointB);
+        const localPointB: Vec2 = this.proxyB.getVertex(cache.indexB[0]);
+        const pointB: Vec2 = Transform.mulXV(xfB, localPointB, timeOfImpact_s_pointB);
 
         let s: number = Vec2.DotVV(Vec2.SubVV(pointB, pointA, Vec2.s_t0), normal);
         if (s < 0) {
-          this.axis.SelfNeg();
+          this.axis.selfNeg();
           s = -s;
         }
         return s;
       }
     }
 
-    public FindMinSeparation(indexA: [number], indexB: [number], t: number): number {
-      const xfA: Transform = TimeOfImpact_s_xfA;
-      const xfB: Transform = TimeOfImpact_s_xfB;
-      this.sweepA.GetTransform(xfA, t);
-      this.sweepB.GetTransform(xfB, t);
+    public findMinSeparation(indexA: [number], indexB: [number], t: number): number {
+      const xfA: Transform = timeOfImpact_s_xfA;
+      const xfB: Transform = timeOfImpact_s_xfB;
+      this.sweepA.getTransform(xfA, t);
+      this.sweepB.getTransform(xfB, t);
 
       switch (this.type) {
-        case SeparationFunctionType.e_points: {
-          const axisA: Vec2 = Rot.MulTRV(xfA.q, this.axis, TimeOfImpact_s_axisA);
-          const axisB: Vec2 = Rot.MulTRV(xfB.q, Vec2.NegV(this.axis, Vec2.s_t0), TimeOfImpact_s_axisB);
+        case SeparationFunctionType.Points: {
+          const axisA: Vec2 = Rot.mulTRV(xfA.q, this.axis, timeOfImpact_s_axisA);
+          const axisB: Vec2 = Rot.mulTRV(xfB.q, Vec2.NegV(this.axis, Vec2.s_t0), timeOfImpact_s_axisB);
 
-          indexA[0] = this.proxyA.GetSupport(axisA);
-          indexB[0] = this.proxyB.GetSupport(axisB);
+          indexA[0] = this.proxyA.getSupport(axisA);
+          indexB[0] = this.proxyB.getSupport(axisB);
 
-          const localPointA: Vec2 = this.proxyA.GetVertex(indexA[0]);
-          const localPointB: Vec2 = this.proxyB.GetVertex(indexB[0]);
+          const localPointA: Vec2 = this.proxyA.getVertex(indexA[0]);
+          const localPointB: Vec2 = this.proxyB.getVertex(indexB[0]);
 
-          const pointA: Vec2 = Transform.MulXV(xfA, localPointA, TimeOfImpact_s_pointA);
-          const pointB: Vec2 = Transform.MulXV(xfB, localPointB, TimeOfImpact_s_pointB);
+          const pointA: Vec2 = Transform.mulXV(xfA, localPointA, timeOfImpact_s_pointA);
+          const pointB: Vec2 = Transform.mulXV(xfB, localPointB, timeOfImpact_s_pointB);
 
           const separation: number = Vec2.DotVV(Vec2.SubVV(pointB, pointA, Vec2.s_t0), this.axis);
           return separation;
         }
 
-        case SeparationFunctionType.e_faceA: {
-          const normal: Vec2 = Rot.MulRV(xfA.q, this.axis, TimeOfImpact_s_normal);
-          const pointA: Vec2 = Transform.MulXV(xfA, this.localPoint, TimeOfImpact_s_pointA);
+        case SeparationFunctionType.FaceA: {
+          const normal: Vec2 = Rot.mulRV(xfA.q, this.axis, timeOfImpact_s_normal);
+          const pointA: Vec2 = Transform.mulXV(xfA, this.localPoint, timeOfImpact_s_pointA);
 
-          const axisB: Vec2 = Rot.MulTRV(xfB.q, Vec2.NegV(normal, Vec2.s_t0), TimeOfImpact_s_axisB);
+          const axisB: Vec2 = Rot.mulTRV(xfB.q, Vec2.NegV(normal, Vec2.s_t0), timeOfImpact_s_axisB);
 
           indexA[0] = -1;
-          indexB[0] = this.proxyB.GetSupport(axisB);
+          indexB[0] = this.proxyB.getSupport(axisB);
 
-          const localPointB: Vec2 = this.proxyB.GetVertex(indexB[0]);
-          const pointB: Vec2 = Transform.MulXV(xfB, localPointB, TimeOfImpact_s_pointB);
+          const localPointB: Vec2 = this.proxyB.getVertex(indexB[0]);
+          const pointB: Vec2 = Transform.mulXV(xfB, localPointB, timeOfImpact_s_pointB);
 
           const separation: number = Vec2.DotVV(Vec2.SubVV(pointB, pointA, Vec2.s_t0), normal);
           return separation;
         }
 
-        case SeparationFunctionType.e_faceB: {
-          const normal: Vec2 = Rot.MulRV(xfB.q, this.axis, TimeOfImpact_s_normal);
-          const pointB: Vec2 = Transform.MulXV(xfB, this.localPoint, TimeOfImpact_s_pointB);
+        case SeparationFunctionType.FaceB: {
+          const normal: Vec2 = Rot.mulRV(xfB.q, this.axis, timeOfImpact_s_normal);
+          const pointB: Vec2 = Transform.mulXV(xfB, this.localPoint, timeOfImpact_s_pointB);
 
-          const axisA: Vec2 = Rot.MulTRV(xfA.q, Vec2.NegV(normal, Vec2.s_t0), TimeOfImpact_s_axisA);
+          const axisA: Vec2 = Rot.mulTRV(xfA.q, Vec2.NegV(normal, Vec2.s_t0), timeOfImpact_s_axisA);
 
           indexB[0] = -1;
-          indexA[0] = this.proxyA.GetSupport(axisA);
+          indexA[0] = this.proxyA.getSupport(axisA);
 
-          const localPointA: Vec2 = this.proxyA.GetVertex(indexA[0]);
-          const pointA: Vec2 = Transform.MulXV(xfA, localPointA, TimeOfImpact_s_pointA);
+          const localPointA: Vec2 = this.proxyA.getVertex(indexA[0]);
+          const pointA: Vec2 = Transform.mulXV(xfA, localPointA, timeOfImpact_s_pointA);
 
           const separation: number = Vec2.DotVV(Vec2.SubVV(pointA, pointB, Vec2.s_t0), normal);
           return separation;
@@ -217,41 +217,41 @@ namespace b2 {
       }
     }
 
-    public Evaluate(indexA: number, indexB: number, t: number): number {
-      const xfA: Transform = TimeOfImpact_s_xfA;
-      const xfB: Transform = TimeOfImpact_s_xfB;
-      this.sweepA.GetTransform(xfA, t);
-      this.sweepB.GetTransform(xfB, t);
+    public evaluate(indexA: number, indexB: number, t: number): number {
+      const xfA: Transform = timeOfImpact_s_xfA;
+      const xfB: Transform = timeOfImpact_s_xfB;
+      this.sweepA.getTransform(xfA, t);
+      this.sweepB.getTransform(xfB, t);
 
       switch (this.type) {
-        case SeparationFunctionType.e_points: {
-          const localPointA: Vec2 = this.proxyA.GetVertex(indexA);
-          const localPointB: Vec2 = this.proxyB.GetVertex(indexB);
+        case SeparationFunctionType.Points: {
+          const localPointA: Vec2 = this.proxyA.getVertex(indexA);
+          const localPointB: Vec2 = this.proxyB.getVertex(indexB);
 
-          const pointA: Vec2 = Transform.MulXV(xfA, localPointA, TimeOfImpact_s_pointA);
-          const pointB: Vec2 = Transform.MulXV(xfB, localPointB, TimeOfImpact_s_pointB);
+          const pointA: Vec2 = Transform.mulXV(xfA, localPointA, timeOfImpact_s_pointA);
+          const pointB: Vec2 = Transform.mulXV(xfB, localPointB, timeOfImpact_s_pointB);
           const separation: number = Vec2.DotVV(Vec2.SubVV(pointB, pointA, Vec2.s_t0), this.axis);
 
           return separation;
         }
 
-        case SeparationFunctionType.e_faceA: {
-          const normal: Vec2 = Rot.MulRV(xfA.q, this.axis, TimeOfImpact_s_normal);
-          const pointA: Vec2 = Transform.MulXV(xfA, this.localPoint, TimeOfImpact_s_pointA);
+        case SeparationFunctionType.FaceA: {
+          const normal: Vec2 = Rot.mulRV(xfA.q, this.axis, timeOfImpact_s_normal);
+          const pointA: Vec2 = Transform.mulXV(xfA, this.localPoint, timeOfImpact_s_pointA);
 
-          const localPointB: Vec2 = this.proxyB.GetVertex(indexB);
-          const pointB: Vec2 = Transform.MulXV(xfB, localPointB, TimeOfImpact_s_pointB);
+          const localPointB: Vec2 = this.proxyB.getVertex(indexB);
+          const pointB: Vec2 = Transform.mulXV(xfB, localPointB, timeOfImpact_s_pointB);
 
           const separation: number = Vec2.DotVV(Vec2.SubVV(pointB, pointA, Vec2.s_t0), normal);
           return separation;
         }
 
-        case SeparationFunctionType.e_faceB: {
-          const normal: Vec2 = Rot.MulRV(xfB.q, this.axis, TimeOfImpact_s_normal);
-          const pointB: Vec2 = Transform.MulXV(xfB, this.localPoint, TimeOfImpact_s_pointB);
+        case SeparationFunctionType.FaceB: {
+          const normal: Vec2 = Rot.mulRV(xfB.q, this.axis, timeOfImpact_s_normal);
+          const pointB: Vec2 = Transform.mulXV(xfB, this.localPoint, timeOfImpact_s_pointB);
 
-          const localPointA: Vec2 = this.proxyA.GetVertex(indexA);
-          const pointA: Vec2 = Transform.MulXV(xfA, localPointA, TimeOfImpact_s_pointA);
+          const localPointA: Vec2 = this.proxyA.getVertex(indexA);
+          const pointA: Vec2 = Transform.mulXV(xfA, localPointA, timeOfImpact_s_pointA);
 
           const separation: number = Vec2.DotVV(Vec2.SubVV(pointA, pointB, Vec2.s_t0), normal);
           return separation;
@@ -264,34 +264,34 @@ namespace b2 {
     }
   }
 
-  const TimeOfImpact_s_timer: Timer = new Timer();
-  const TimeOfImpact_s_cache: SimplexCache = new SimplexCache();
-  const TimeOfImpact_s_distanceInput: DistanceInput = new DistanceInput();
-  const TimeOfImpact_s_distanceOutput: DistanceOutput = new DistanceOutput();
-  const TimeOfImpact_s_fcn: SeparationFunction = new SeparationFunction();
-  const TimeOfImpact_s_indexA: [number] = [ 0 ];
-  const TimeOfImpact_s_indexB: [number] = [ 0 ];
-  const TimeOfImpact_s_sweepA: Sweep = new Sweep();
-  const TimeOfImpact_s_sweepB: Sweep = new Sweep();
-  export function TimeOfImpact(output: TOIOutput, input: TOIInput): void {
-    const timer: Timer = TimeOfImpact_s_timer.Reset();
+  const timeOfImpact_s_timer: Timer = new Timer();
+  const timeOfImpact_s_cache: SimplexCache = new SimplexCache();
+  const timeOfImpact_s_distanceInput: DistanceInput = new DistanceInput();
+  const timeOfImpact_s_distanceOutput: DistanceOutput = new DistanceOutput();
+  const timeOfImpact_s_fcn: SeparationFunction = new SeparationFunction();
+  const timeOfImpact_s_indexA: [number] = [ 0 ];
+  const timeOfImpact_s_indexB: [number] = [ 0 ];
+  const timeOfImpact_s_sweepA: Sweep = new Sweep();
+  const timeOfImpact_s_sweepB: Sweep = new Sweep();
+  export function timeOfImpact(output: TOIOutput, input: TOIInput): void {
+    const timer: Timer = timeOfImpact_s_timer.reset();
 
     ++toiCalls;
 
-    output.state = TOIOutputState.e_unknown;
+    output.state = TOIOutputState.Unknown;
     output.t = input.tMax;
 
     const proxyA: DistanceProxy = input.proxyA;
     const proxyB: DistanceProxy = input.proxyB;
     const maxVertices: number = Max(maxPolygonVertices, Max(proxyA.count, proxyB.count));
 
-    const sweepA: Sweep = TimeOfImpact_s_sweepA.Copy(input.sweepA);
-    const sweepB: Sweep = TimeOfImpact_s_sweepB.Copy(input.sweepB);
+    const sweepA: Sweep = timeOfImpact_s_sweepA.copy(input.sweepA);
+    const sweepB: Sweep = timeOfImpact_s_sweepB.copy(input.sweepB);
 
     // Large rotations can make the root finder fail, so we normalize the
     // sweep angles.
-    sweepA.Normalize();
-    sweepB.Normalize();
+    sweepA.normalize();
+    sweepB.normalize();
 
     const tMax: number = input.tMax;
 
@@ -305,46 +305,46 @@ namespace b2 {
     let iter: number = 0;
 
     // Prepare input for distance query.
-    const cache: SimplexCache = TimeOfImpact_s_cache;
+    const cache: SimplexCache = timeOfImpact_s_cache;
     cache.count = 0;
-    const distanceInput: DistanceInput = TimeOfImpact_s_distanceInput;
-    distanceInput.proxyA.Copy(input.proxyA);
-    distanceInput.proxyB.Copy(input.proxyB);
+    const distanceInput: DistanceInput = timeOfImpact_s_distanceInput;
+    distanceInput.proxyA.copy(input.proxyA);
+    distanceInput.proxyB.copy(input.proxyB);
     distanceInput.useRadii = false;
 
     // The outer loop progressively attempts to compute new separating axes.
     // This loop terminates when an axis is repeated (no progress is made).
     for (; ; ) {
-      const xfA: Transform = TimeOfImpact_s_xfA;
-      const xfB: Transform = TimeOfImpact_s_xfB;
-      sweepA.GetTransform(xfA, t1);
-      sweepB.GetTransform(xfB, t1);
+      const xfA: Transform = timeOfImpact_s_xfA;
+      const xfB: Transform = timeOfImpact_s_xfB;
+      sweepA.getTransform(xfA, t1);
+      sweepB.getTransform(xfB, t1);
 
       // Get the distance between shapes. We can also use the results
       // to get a separating axis.
-      distanceInput.transformA.Copy(xfA);
-      distanceInput.transformB.Copy(xfB);
-      const distanceOutput: DistanceOutput = TimeOfImpact_s_distanceOutput;
-      Distance(distanceOutput, cache, distanceInput);
+      distanceInput.transformA.copy(xfA);
+      distanceInput.transformB.copy(xfB);
+      const distanceOutput: DistanceOutput = timeOfImpact_s_distanceOutput;
+      distance(distanceOutput, cache, distanceInput);
 
       // If the shapes are overlapped, we give up on continuous collision.
       if (distanceOutput.distance <= 0) {
         // Failure!
-        output.state = TOIOutputState.e_overlapped;
+        output.state = TOIOutputState.Overlapped;
         output.t = 0;
         break;
       }
 
       if (distanceOutput.distance < target + tolerance) {
         // Victory!
-        output.state = TOIOutputState.e_touching;
+        output.state = TOIOutputState.Touching;
         output.t = t1;
         break;
       }
 
       // Initialize the separating axis.
-      const fcn: SeparationFunction = TimeOfImpact_s_fcn;
-      fcn.Initialize(cache, proxyA, sweepA, proxyB, sweepB, t1);
+      const fcn: SeparationFunction = timeOfImpact_s_fcn;
+      fcn.initialize(cache, proxyA, sweepA, proxyB, sweepB, t1);
       /*
       #if 0
           // Dump the curve seen by the root finder {
@@ -378,14 +378,14 @@ namespace b2 {
       let pushBackIter: number = 0;
       for (; ; ) {
         // Find the deepest point at t2. Store the witness point indices.
-        const indexA: [number] = TimeOfImpact_s_indexA;
-        const indexB: [number] = TimeOfImpact_s_indexB;
-        let s2: number = fcn.FindMinSeparation(indexA, indexB, t2);
+        const indexA: [number] = timeOfImpact_s_indexA;
+        const indexB: [number] = timeOfImpact_s_indexB;
+        let s2: number = fcn.findMinSeparation(indexA, indexB, t2);
 
         // Is the final configuration separated?
         if (s2 > (target + tolerance)) {
           // Victory!
-          output.state = TOIOutputState.e_separated;
+          output.state = TOIOutputState.Separated;
           output.t = tMax;
           done = true;
           break;
@@ -399,12 +399,12 @@ namespace b2 {
         }
 
         // Compute the initial separation of the witness points.
-        let s1: number = fcn.Evaluate(indexA[0], indexB[0], t1);
+        let s1: number = fcn.evaluate(indexA[0], indexB[0], t1);
 
         // Check for initial overlap. This might happen if the root finder
         // runs out of iterations.
         if (s1 < (target - tolerance)) {
-          output.state = TOIOutputState.e_failed;
+          output.state = TOIOutputState.Failed;
           output.t = t1;
           done = true;
           break;
@@ -413,7 +413,7 @@ namespace b2 {
         // Check for touching
         if (s1 <= (target + tolerance)) {
           // Victory! t1 should hold the TOI (could be 0.0).
-          output.state = TOIOutputState.e_touching;
+          output.state = TOIOutputState.Touching;
           output.t = t1;
           done = true;
           break;
@@ -437,7 +437,7 @@ namespace b2 {
           ++rootIterCount;
           ++toiRootIters;
 
-          const s: number = fcn.Evaluate(indexA[0], indexB[0], t);
+          const s: number = fcn.evaluate(indexA[0], indexB[0], t);
 
           if (Abs(s - target) < tolerance) {
             // t2 holds a tentative value for t1
@@ -477,7 +477,7 @@ namespace b2 {
 
       if (iter === k_maxIterations) {
         // Root finder got stuck. Semi-victory.
-        output.state = TOIOutputState.e_failed;
+        output.state = TOIOutputState.Failed;
         output.t = t1;
         break;
       }
@@ -485,7 +485,7 @@ namespace b2 {
 
     toiMaxIters = Max(toiMaxIters, iter);
 
-    const time: number = timer.GetMilliseconds();
+    const time: number = timer.getMilliseconds();
     toiMaxTime = Max(toiMaxTime, time);
     toiTime += time;
   }

@@ -17,10 +17,10 @@ namespace b2 {
     public damping: number = 0;
 
     constructor() {
-      super(JointType.e_areaJoint);
+      super(JointType.AreaJoint);
     }
 
-    public AddBody(body: Body): void {
+    public addBody(body: Body): void {
       this.bodies.push(body);
 
       if (this.bodies.length === 1) {
@@ -53,8 +53,8 @@ namespace b2 {
       // DEBUG: Assert(def.bodies.length >= 3, "You cannot create an area joint with less than three bodies.");
 
       this.bodies = def.bodies;
-      this.stiffness = Maybe(def.stiffness, 0);
-      this.damping = Maybe(def.damping, 0);
+      this.stiffness = maybe(def.stiffness, 0);
+      this.damping = maybe(def.damping, 0);
 
       this.targetLengths = MakeNumberArray(def.bodies.length);
       this.normals = Vec2.MakeArray(def.bodies.length);
@@ -71,37 +71,37 @@ namespace b2 {
         const body: Body = this.bodies[i];
         const next: Body = this.bodies[(i + 1) % this.bodies.length];
 
-        const body_c: Vec2 = body.GetWorldCenter();
-        const next_c: Vec2 = next.GetWorldCenter();
+        const body_c: Vec2 = body.getWorldCenter();
+        const next_c: Vec2 = next.getWorldCenter();
 
         this.targetLengths[i] = Vec2.DistanceVV(body_c, next_c);
 
         this.targetArea += Vec2.CrossVV(body_c, next_c);
 
         djd.Initialize(body, next, body_c, next_c);
-        this.joints[i] = body.GetWorld().CreateJoint(djd);
+        this.joints[i] = body.getWorld().createJoint(djd);
       }
 
       this.targetArea *= 0.5;
     }
 
-    public GetAnchorA<T extends XY>(out: T): T {
+    public getAnchorA<T extends XY>(out: T): T {
       return out;
     }
 
-    public GetAnchorB<T extends XY>(out: T): T {
+    public getAnchorB<T extends XY>(out: T): T {
       return out;
     }
 
-    public GetReactionForce<T extends XY>(inv_dt: number, out: T): T {
+    public getReactionForce<T extends XY>(inv_dt: number, out: T): T {
       return out;
     }
 
-    public GetReactionTorque(inv_dt: number): number {
+    public getReactionTorque(inv_dt: number): number {
       return 0;
     }
 
-    public SetStiffness(stiffness: number): void {
+    public setStiffness(stiffness: number): void {
       this.stiffness = stiffness;
 
       for (let i: number = 0; i < this.joints.length; ++i) {
@@ -109,11 +109,11 @@ namespace b2 {
       }
     }
 
-    public GetStiffness() {
+    public getStiffness() {
       return this.stiffness;
     }
 
-    public SetDamping(damping: number): void {
+    public setDamping(damping: number): void {
       this.damping = damping;
 
       for (let i: number = 0; i < this.joints.length; ++i) {
@@ -121,15 +121,15 @@ namespace b2 {
       }
     }
 
-    public GetDamping() {
+    public getDamping() {
       return this.damping;
     }
 
-    public Dump(log: (format: string, ...args: any[]) => void) {
+    public dump(log: (format: string, ...args: any[]) => void) {
       log("Area joint dumping is not supported.\n");
     }
 
-    public InitVelocityConstraints(data: SolverData): void {
+    public initVelocityConstraints(data: SolverData): void {
       for (let i: number = 0; i < this.bodies.length; ++i) {
         const prev: Body = this.bodies[(i + this.bodies.length - 1) % this.bodies.length];
         const next: Body = this.bodies[(i + 1) % this.bodies.length];
@@ -156,7 +156,7 @@ namespace b2 {
       }
     }
 
-    public SolveVelocityConstraints(data: SolverData): void {
+    public solveVelocityConstraints(data: SolverData): void {
       let dotMassSum: number = 0;
       let crossMassSum: number = 0;
 
@@ -165,7 +165,7 @@ namespace b2 {
         const body_v: Vec2 = data.velocities[body.islandIndex].v;
         const delta: Vec2 = this.deltas[i];
 
-        dotMassSum += delta.LengthSquared() / body.GetMass();
+        dotMassSum += delta.lengthSquared() / body.getMass();
         crossMassSum += Vec2.CrossVV(body_v, delta);
       }
 
@@ -184,7 +184,7 @@ namespace b2 {
       }
     }
 
-    public SolvePositionConstraints(data: SolverData): boolean {
+    public solvePositionConstraints(data: SolverData): boolean {
       let perimeter: number = 0;
       let area: number = 0;
 
@@ -196,7 +196,7 @@ namespace b2 {
 
         const delta: Vec2 = Vec2.SubVV(next_c, body_c, this.delta);
 
-        let dist: number = delta.Length();
+        let dist: number = delta.length();
         if (dist < epsilon) {
           dist = 1;
         }
@@ -221,13 +221,13 @@ namespace b2 {
         const next_i: number = (i + 1) % this.bodies.length;
 
         const delta: Vec2 = Vec2.AddVV(this.normals[i], this.normals[next_i], this.delta);
-        delta.SelfMul(toExtrude);
+        delta.selfMul(toExtrude);
 
-        const norsq: number = delta.LengthSquared();
-        if (norsq > Sq(maxLinearCorrection)) {
-          delta.SelfMul(maxLinearCorrection / Sqrt(norsq));
+        const norsq: number = delta.lengthSquared();
+        if (norsq > sqrt(maxLinearCorrection)) {
+          delta.selfMul(maxLinearCorrection / Sqrt(norsq));
         }
-        if (norsq > Sq(linearSlop)) {
+        if (norsq > sqrt(linearSlop)) {
           done = false;
         }
 

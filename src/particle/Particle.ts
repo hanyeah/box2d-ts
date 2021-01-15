@@ -22,50 +22,50 @@ namespace b2 {
    */
   export enum ParticleFlag {
     /// Water particle.
-    waterParticle = 0,
+    WaterParticle = 0,
     /// Removed after next simulation step.
-    zombieParticle = 1 << 1,
+    ZombieParticle = 1 << 1,
     /// Zero velocity.
-    wallParticle = 1 << 2,
+    WallParticle = 1 << 2,
     /// With restitution from stretching.
-    springParticle = 1 << 3,
+    SpringParticle = 1 << 3,
     /// With restitution from deformation.
-    elasticParticle = 1 << 4,
+    ElasticParticle = 1 << 4,
     /// With viscosity.
-    viscousParticle = 1 << 5,
+    ViscousParticle = 1 << 5,
     /// Without isotropic pressure.
-    powderParticle = 1 << 6,
+    PowderParticle = 1 << 6,
     /// With surface tension.
-    tensileParticle = 1 << 7,
+    TensileParticle = 1 << 7,
     /// Mix color between contacting particles.
-    colorMixingParticle = 1 << 8,
+    ColorMixingParticle = 1 << 8,
     /// Call DestructionListener on destruction.
-    destructionListenerParticle = 1 << 9,
+    DestructionListenerParticle = 1 << 9,
     /// Prevents other particles from leaking.
-    barrierParticle = 1 << 10,
+    BarrierParticle = 1 << 10,
     /// Less compressibility.
-    staticPressureParticle = 1 << 11,
+    StaticPressureParticle = 1 << 11,
     /// Makes pairs or triads with other particles.
-    reactiveParticle = 1 << 12,
+    ReactiveParticle = 1 << 12,
     /// With high repulsive force.
-    repulsiveParticle = 1 << 13,
+    RepulsiveParticle = 1 << 13,
     /// Call ContactListener when this particle is about to interact with
     /// a rigid body or stops interacting with a rigid body.
     /// This results in an expensive operation compared to using
     /// fixtureContactFilterParticle to detect collisions between
     /// particles.
-    fixtureContactListenerParticle = 1 << 14,
+    FixtureContactListenerParticle = 1 << 14,
     /// Call ContactListener when this particle is about to interact with
     /// another particle or stops interacting with another particle.
     /// This results in an expensive operation compared to using
     /// particleContactFilterParticle to detect collisions between
     /// particles.
-    particleContactListenerParticle = 1 << 15,
+    ParticleContactListenerParticle = 1 << 15,
     /// Call ContactFilter when this particle interacts with rigid bodies.
-    fixtureContactFilterParticle = 1 << 16,
+    FixtureContactFilterParticle = 1 << 16,
     /// Call ContactFilter when this particle interacts with other
     /// particles.
-    particleContactFilterParticle = 1 << 17,
+    ParticleContactFilterParticle = 1 << 17,
   }
 
   export interface IParticleDef {
@@ -75,7 +75,7 @@ namespace b2 {
     color?: RGBA;
     lifetime?: number;
     userData?: any;
-    group?: ParticleGroup | null;
+    group?: ParticleGroup;
   }
 
   export class ParticleDef implements IParticleDef {
@@ -85,7 +85,7 @@ namespace b2 {
     public readonly color: Color = new Color(0, 0, 0, 0);
     public lifetime: number = 0.0;
     public userData: any = null;
-    public group: ParticleGroup | null = null;
+    public group: ParticleGroup = null;
   }
 
   export function CalculateParticleIterations(gravity: number, radius: number, timeStep: number): number {
@@ -94,13 +94,13 @@ namespace b2 {
     const MAX_RECOMMENDED_PARTICLE_ITERATIONS = 8;
     const RADIUS_THRESHOLD = 0.01;
     const iterations = Math.ceil(Math.sqrt(gravity / (RADIUS_THRESHOLD * radius)) * timeStep);
-    return Clamp(iterations, 1, MAX_RECOMMENDED_PARTICLE_ITERATIONS);
+    return clamp(iterations, 1, MAX_RECOMMENDED_PARTICLE_ITERATIONS);
   }
 
   export class ParticleHandle {
     public index: number = invalidParticleIndex;
-    public GetIndex(): number { return this.index; }
-    public SetIndex(index: number): void { this.index = index; }
+    public getIndex(): number { return this.index; }
+    public setIndex(index: number): void { this.index = index; }
   }
 
 }

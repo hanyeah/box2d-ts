@@ -22,11 +22,11 @@ namespace b2 {
   export class World {
     public readonly contactManager: ContactManager = new ContactManager();
 
-    public bodyList: Body | null = null;
-    public jointList: Joint | null = null;
+    public bodyList: Body = null;
+    public jointList: Joint = null;
 
     // #if ENABLE_PARTICLE
-    public particleSystemList: ParticleSystem | null = null;
+    public particleSystemList: ParticleSystem = null;
     // #endif
 
     public bodyCount: number = 0;
@@ -36,7 +36,7 @@ namespace b2 {
     public allowSleep: boolean = true;
 
     public destructionListener: DestructionListener;
-    public debugDraw: Draw;
+    public debugDrawInstance: Draw;
 
     // This is used to compute the time step ratio to
     // support a variable time step.
@@ -44,7 +44,7 @@ namespace b2 {
 
     public newContacts: boolean = false;
     public locked: boolean = false;
-    public clearForces: boolean = true;
+    public clearForcesFlag: boolean = true;
 
     // These are for debugging the solver.
     public warmStarting: boolean = true;
@@ -57,50 +57,50 @@ namespace b2 {
 
     public readonly island: Island = new Island();
 
-    public readonly s_stack: Array<Body | null> = [];
+    public readonly s_stack: Array<Body> = [];
 
     // #if ENABLE_CONTROLLER
-    public controllerList: Controller | null = null;
+    public controllerList: Controller = null;
     public controllerCount: number = 0;
     // #endif
 
     /// Construct a world object.
     /// @param gravity the world gravity vector.
     constructor(gravity: XY) {
-      this.gravity.Copy(gravity);
+      this.gravity.copy(gravity);
     }
 
     /// Register a destruction listener. The listener is owned by you and must
     /// remain in scope.
-    public SetDestructionListener(listener: DestructionListener | null): void {
+    public setDestructionListener(listener: DestructionListener): void {
       this.destructionListener = listener;
     }
 
     /// Register a contact filter to provide specific control over collision.
     /// Otherwise the default filter is used (defaultFilter). The listener is
     /// owned by you and must remain in scope.
-    public SetContactFilter(filter: ContactFilter): void {
+    public setContactFilter(filter: ContactFilter): void {
       this.contactManager.contactFilter = filter;
     }
 
     /// Register a contact event listener. The listener is owned by you and must
     /// remain in scope.
-    public SetContactListener(listener: ContactListener): void {
+    public setContactListener(listener: ContactListener): void {
       this.contactManager.contactListener = listener;
     }
 
     /// Register a routine for debug drawing. The debug draw functions are called
     /// inside with World::DebugDraw method. The debug draw object is owned
     /// by you and must remain in scope.
-    public SetDebugDraw(debugDraw: Draw): void {
-      this.debugDraw = debugDraw;
+    public setDebugDraw(debugDraw: Draw): void {
+      this.debugDrawInstance = debugDraw;
     }
 
     /// Create a rigid body given a definition. No reference to the definition
     /// is retained.
     /// @warning This function is locked during callbacks.
-    public CreateBody(def: IBodyDef = {}): Body {
-      if (this.IsLocked()) { throw new Error(); }
+    public createBody(def: IBodyDef = {}): Body {
+      if (this.isLocked()) { throw new Error(); }
 
       const b: Body = new Body(def, this);
 
@@ -120,21 +120,21 @@ namespace b2 {
     /// is retained. This function is locked during callbacks.
     /// @warning This automatically deletes all associated shapes and joints.
     /// @warning This function is locked during callbacks.
-    public DestroyBody(b: Body): void {
+    public destroyBody(b: Body): void {
       // DEBUG: Assert(this.bodyCount > 0);
-      if (this.IsLocked()) { throw new Error(); }
+      if (this.isLocked()) { throw new Error(); }
 
       // Delete the attached joints.
-      let je: JointEdge | null = b.jointList;
+      let je: JointEdge = b.jointList;
       while (je) {
         const je0: JointEdge = je;
         je = je.next;
 
         if (this.destructionListener) {
-          this.destructionListener.SayGoodbyeJoint(je0.joint);
+          this.destructionListener.sayGoodbyeJoint(je0.joint);
         }
 
-        this.DestroyJoint(je0.joint);
+        this.destroyJoint(je0.joint);
 
         b.jointList = je;
       }
@@ -142,35 +142,35 @@ namespace b2 {
 
       // #if ENABLE_CONTROLLER
       // @see Controller list
-      let coe: ControllerEdge | null = b.controllerList;
+      let coe: ControllerEdge = b.controllerList;
       while (coe) {
         const coe0: ControllerEdge = coe;
         coe = coe.nextController;
-        coe0.controller.RemoveBody(b);
+        coe0.controller.removeBody(b);
       }
       // #endif
 
       // Delete the attached contacts.
-      let ce: ContactEdge | null = b.contactList;
+      let ce: ContactEdge = b.contactList;
       while (ce) {
         const ce0: ContactEdge = ce;
         ce = ce.next;
-        this.contactManager.Destroy(ce0.contact);
+        this.contactManager.destroy(ce0.contact);
       }
       b.contactList = null;
 
       // Delete the attached fixtures. This destroys broad-phase proxies.
-      let f: Fixture | null = b.fixtureList;
+      let f: Fixture = b.fixtureList;
       while (f) {
         const f0: Fixture = f;
         f = f.next;
 
         if (this.destructionListener) {
-          this.destructionListener.SayGoodbyeFixture(f0);
+          this.destructionListener.sayGoodbyeFixture(f0);
         }
 
-        f0.DestroyProxies();
-        f0.Reset();
+        f0.destroyProxies();
+        f0.reset();
 
         b.fixtureList = f;
         b.fixtureCount -= 1;
@@ -194,44 +194,44 @@ namespace b2 {
       --this.bodyCount;
     }
 
-    private static _Joint_Create(def: IJointDef): Joint {
+    private static _createJoint(def: IJointDef): Joint {
       switch (def.type) {
-        case JointType.e_distanceJoint: return new DistanceJoint(def as IDistanceJointDef);
-        case JointType.e_mouseJoint: return new MouseJoint(def as IMouseJointDef);
-        case JointType.e_prismaticJoint: return new PrismaticJoint(def as IPrismaticJointDef);
-        case JointType.e_revoluteJoint: return new RevoluteJoint(def as IRevoluteJointDef);
-        case JointType.e_pulleyJoint: return new PulleyJoint(def as IPulleyJointDef);
-        case JointType.e_gearJoint: return new GearJoint(def as IGearJointDef);
-        case JointType.e_wheelJoint: return new WheelJoint(def as IWheelJointDef);
-        case JointType.e_weldJoint: return new WeldJoint(def as IWeldJointDef);
-        case JointType.e_frictionJoint: return new FrictionJoint(def as IFrictionJointDef);
-        case JointType.e_motorJoint: return new MotorJoint(def as IMotorJointDef);
-        case JointType.e_areaJoint: return new AreaJoint(def as IAreaJointDef);
+        case JointType.DistanceJoint: return new DistanceJoint(def as IDistanceJointDef);
+        case JointType.MouseJoint: return new MouseJoint(def as IMouseJointDef);
+        case JointType.PrismaticJoint: return new PrismaticJoint(def as IPrismaticJointDef);
+        case JointType.RevoluteJoint: return new RevoluteJoint(def as IRevoluteJointDef);
+        case JointType.PulleyJoint: return new PulleyJoint(def as IPulleyJointDef);
+        case JointType.GearJoint: return new GearJoint(def as IGearJointDef);
+        case JointType.WheelJoint: return new WheelJoint(def as IWheelJointDef);
+        case JointType.WeldJoint: return new WeldJoint(def as IWeldJointDef);
+        case JointType.FrictionJoint: return new FrictionJoint(def as IFrictionJointDef);
+        case JointType.MotorJoint: return new MotorJoint(def as IMotorJointDef);
+        case JointType.AreaJoint: return new AreaJoint(def as IAreaJointDef);
       }
       throw new Error();
     }
 
-    private static _Joint_Destroy(joint: Joint): void {
+    private static _destroyJoint(joint: Joint): void {
     }
 
     /// Create a joint to constrain bodies together. No reference to the definition
     /// is retained. This may cause the connected bodies to cease colliding.
     /// @warning This function is locked during callbacks.
-    public CreateJoint(def: IAreaJointDef): AreaJoint;
-    public CreateJoint(def: IDistanceJointDef): DistanceJoint;
-    public CreateJoint(def: IFrictionJointDef): FrictionJoint;
-    public CreateJoint(def: IGearJointDef): GearJoint;
-    public CreateJoint(def: IMotorJointDef): MotorJoint;
-    public CreateJoint(def: IMouseJointDef): MouseJoint;
-    public CreateJoint(def: IPrismaticJointDef): PrismaticJoint;
-    public CreateJoint(def: IPulleyJointDef): PulleyJoint;
-    public CreateJoint(def: IRevoluteJointDef): RevoluteJoint;
-    public CreateJoint(def: IWeldJointDef): WeldJoint;
-    public CreateJoint(def: IWheelJointDef): WheelJoint;
-    public CreateJoint(def: IJointDef): Joint {
-      if (this.IsLocked()) { throw new Error(); }
+    public createJoint(def: IAreaJointDef): AreaJoint;
+    public createJoint(def: IDistanceJointDef): DistanceJoint;
+    public createJoint(def: IFrictionJointDef): FrictionJoint;
+    public createJoint(def: IGearJointDef): GearJoint;
+    public createJoint(def: IMotorJointDef): MotorJoint;
+    public createJoint(def: IMouseJointDef): MouseJoint;
+    public createJoint(def: IPrismaticJointDef): PrismaticJoint;
+    public createJoint(def: IPulleyJointDef): PulleyJoint;
+    public createJoint(def: IRevoluteJointDef): RevoluteJoint;
+    public createJoint(def: IWeldJointDef): WeldJoint;
+    public createJoint(def: IWheelJointDef): WheelJoint;
+    public createJoint(def: IJointDef): Joint {
+      if (this.isLocked()) { throw new Error(); }
 
-      const j: Joint = World._Joint_Create(def);
+      const j: Joint = World._createJoint(def);
 
       // Connect to the world list.
       j.prev = null;
@@ -261,12 +261,12 @@ namespace b2 {
 
       // If the joint prevents collisions, then flag any contacts for filtering.
       if (!collideConnected) {
-        let edge: ContactEdge | null = bodyB.GetContactList();
+        let edge: ContactEdge = bodyB.getContactList();
         while (edge) {
           if (edge.other === bodyA) {
             // Flag the contact for filtering at the next time step (where either
             // body is awake).
-            edge.contact.FlagForFiltering();
+            edge.contact.glagForFiltering();
           }
 
           edge = edge.next;
@@ -280,8 +280,8 @@ namespace b2 {
 
     /// Destroy a joint. This may cause the connected bodies to begin colliding.
     /// @warning This function is locked during callbacks.
-    public DestroyJoint(j: Joint): void {
-      if (this.IsLocked()) { throw new Error(); }
+    public destroyJoint(j: Joint): void {
+      if (this.isLocked()) { throw new Error(); }
 
       // Remove from the doubly linked list.
       if (j.prev) {
@@ -302,8 +302,8 @@ namespace b2 {
       const collideConnected: boolean = j.collideConnected;
 
       // Wake up connected bodies.
-      bodyA.SetAwake(true);
-      bodyB.SetAwake(true);
+      bodyA.setAwake(true);
+      bodyB.setAwake(true);
 
       // Remove from body 1.
       if (j.edgeA.prev) {
@@ -318,7 +318,7 @@ namespace b2 {
         bodyA.jointList = j.edgeA.next;
       }
 
-      j.edgeA.Reset();
+      j.edgeA.reset();
 
       // Remove from body 2
       if (j.edgeB.prev) {
@@ -333,21 +333,21 @@ namespace b2 {
         bodyB.jointList = j.edgeB.next;
       }
 
-      j.edgeB.Reset();
+      j.edgeB.reset();
 
-      World._Joint_Destroy(j);
+      World._destroyJoint(j);
 
       // DEBUG: Assert(this.jointCount > 0);
       --this.jointCount;
 
       // If the joint prevents collisions, then flag any contacts for filtering.
       if (!collideConnected) {
-        let edge: ContactEdge | null = bodyB.GetContactList();
+        let edge: ContactEdge = bodyB.getContactList();
         while (edge) {
           if (edge.other === bodyA) {
             // Flag the contact for filtering at the next time step (where either
             // body is awake).
-            edge.contact.FlagForFiltering();
+            edge.contact.glagForFiltering();
           }
 
           edge = edge.next;
@@ -357,8 +357,8 @@ namespace b2 {
 
     // #if ENABLE_PARTICLE
 
-    public CreateParticleSystem(def: ParticleSystemDef): ParticleSystem {
-      if (this.IsLocked()) { throw new Error(); }
+    public createParticleSystem(def: ParticleSystemDef): ParticleSystem {
+      if (this.isLocked()) { throw new Error(); }
 
       const p = new ParticleSystem(def, this);
 
@@ -373,8 +373,8 @@ namespace b2 {
       return p;
     }
 
-    public DestroyParticleSystem(p: ParticleSystem): void {
-      if (this.IsLocked()) { throw new Error(); }
+    public destroyParticleSystem(p: ParticleSystem): void {
+      if (this.isLocked()) { throw new Error(); }
 
       // Remove world particleSystem list.
       if (p.prev) {
@@ -390,21 +390,21 @@ namespace b2 {
       }
     }
 
-    public CalculateReasonableParticleIterations(timeStep: number): number {
+    public calculateReasonableParticleIterations(timeStep: number): number {
       if (this.particleSystemList === null) {
         return 1;
       }
 
       function GetSmallestRadius(world: World): number {
         let smallestRadius = maxFloat;
-        for (let system = world.GetParticleSystemList(); system !== null; system = system.next) {
-          smallestRadius = Min(smallestRadius, system.GetRadius());
+        for (let system = world.getParticleSystemList(); system !== null; system = system.next) {
+          smallestRadius = Min(smallestRadius, system.getRadius());
         }
         return smallestRadius;
       }
 
       // Use the smallest radius, since that represents the worst-case.
-      return CalculateParticleIterations(this.gravity.Length(), GetSmallestRadius(this), timeStep);
+      return CalculateParticleIterations(this.gravity.length(), GetSmallestRadius(this), timeStep);
     }
 
     // #endif
@@ -414,25 +414,25 @@ namespace b2 {
     /// @param timeStep the amount of time to simulate, this should not vary.
     /// @param velocityIterations for the velocity constraint solver.
     /// @param positionIterations for the position constraint solver.
-    private static Step_s_step = new TimeStep();
-    private static Step_s_stepTimer = new Timer();
-    private static Step_s_timer = new Timer();
+    private static step_s_step = new TimeStep();
+    private static step_s_stepTimer = new Timer();
+    private static step_s_timer = new Timer();
     // #if ENABLE_PARTICLE
-    public Step(dt: number, velocityIterations: number, positionIterations: number, particleIterations: number = this.CalculateReasonableParticleIterations(dt)): void {
+    public step(dt: number, velocityIterations: number, positionIterations: number, particleIterations: number = this.calculateReasonableParticleIterations(dt)): void {
       // #else
       // public Step(dt: number, velocityIterations: number, positionIterations: number): void {
       // #endif
-      const stepTimer: Timer = World.Step_s_stepTimer.Reset();
+      const stepTimer: Timer = World.step_s_stepTimer.reset();
 
       // If new fixtures were added, we need to find the new contacts.
       if (this.newContacts) {
-        this.contactManager.FindNewContacts();
+        this.contactManager.findNewContacts();
         this.newContacts = false;
       }
 
       this.locked = true;
 
-      const step: TimeStep = World.Step_s_step;
+      const step: TimeStep = World.step_s_step;
       step.dt = dt;
       step.velocityIterations = velocityIterations;
       step.positionIterations = positionIterations;
@@ -450,40 +450,40 @@ namespace b2 {
       step.warmStarting = this.warmStarting;
 
       // Update contacts. This is where some contacts are destroyed.
-      const timer: Timer = World.Step_s_timer.Reset();
-      this.contactManager.Collide();
-      this.profile.collide = timer.GetMilliseconds();
+      const timer: Timer = World.step_s_timer.reset();
+      this.contactManager.collide();
+      this.profile.collide = timer.getMilliseconds();
 
       // Integrate velocities, solve velocity constraints, and integrate positions.
       if (this.stepComplete && step.dt > 0) {
-        const timer: Timer = World.Step_s_timer.Reset();
+        const timer: Timer = World.step_s_timer.reset();
         // #if ENABLE_PARTICLE
         for (let p = this.particleSystemList; p; p = p.next) {
-          p.Solve(step); // Particle Simulation
+          p.solve(step); // Particle Simulation
         }
         // #endif
-        this.Solve(step);
-        this.profile.solve = timer.GetMilliseconds();
+        this.solve(step);
+        this.profile.solve = timer.getMilliseconds();
       }
 
       // Handle TOI events.
       if (this.continuousPhysics && step.dt > 0) {
-        const timer: Timer = World.Step_s_timer.Reset();
-        this.SolveTOI(step);
-        this.profile.solveTOI = timer.GetMilliseconds();
+        const timer: Timer = World.step_s_timer.reset();
+        this.solveTOI(step);
+        this.profile.solveTOI = timer.getMilliseconds();
       }
 
       if (step.dt > 0) {
         this.inv_dt0 = step.inv_dt;
       }
 
-      if (this.clearForces) {
-        this.ClearForces();
+      if (this.clearForcesFlag) {
+        this.clearForces();
       }
 
       this.locked = false;
 
-      this.profile.step = stepTimer.GetMilliseconds();
+      this.profile.step = stepTimer.getMilliseconds();
     }
 
     /// Manually clear the force buffer on all bodies. By default, forces are cleared automatically
@@ -493,28 +493,28 @@ namespace b2 {
     /// When you perform sub-stepping you will disable auto clearing of forces and instead call
     /// ClearForces after all sub-steps are complete in one pass of your game loop.
     /// @see SetAutoClearForces
-    public ClearForces(): void {
+    public clearForces(): void {
       for (let body = this.bodyList; body; body = body.next) {
-        body.force.SetZero();
+        body.force.setZero();
         body.torque = 0;
       }
     }
 
     // #if ENABLE_PARTICLE
 
-    public DrawParticleSystem(system: ParticleSystem): void {
-      if (this.debugDraw === null) {
+    public drawParticleSystem(system: ParticleSystem): void {
+      if (this.debugDrawInstance === null) {
         return;
       }
-      const particleCount = system.GetParticleCount();
+      const particleCount = system.getParticleCount();
       if (particleCount) {
-        const radius = system.GetRadius();
-        const positionBuffer = system.GetPositionBuffer();
+        const radius = system.getRadius();
+        const positionBuffer = system.getPositionBuffer();
         if (system.colorBuffer.data) {
-          const colorBuffer = system.GetColorBuffer();
-          this.debugDraw.DrawParticles(positionBuffer, radius, colorBuffer, particleCount);
+          const colorBuffer = system.getColorBuffer();
+          this.debugDrawInstance.drawParticles(positionBuffer, radius, colorBuffer, particleCount);
         } else {
-          this.debugDraw.DrawParticles(positionBuffer, radius, null, particleCount);
+          this.debugDrawInstance.drawParticles(positionBuffer, radius, null, particleCount);
         }
       }
     }
@@ -522,116 +522,116 @@ namespace b2 {
     // #endif
 
     /// Call this to draw shapes and other debug draw data.
-    private static DebugDraw_s_color = new Color(0, 0, 0);
-    private static DebugDraw_s_vs = Vec2.MakeArray(4);
-    private static DebugDraw_s_xf = new Transform();
-    public DebugDraw(): void {
-      if (this.debugDraw === null) {
+    private static debugdraw_s_color = new Color(0, 0, 0);
+    private static debugdraw_s_vs = Vec2.MakeArray(4);
+    private static debugdraw_s_xf = new Transform();
+    public debugDraw(): void {
+      if (this.debugDrawInstance === null) {
         return;
       }
 
-      const flags: number = this.debugDraw.GetFlags();
-      const color: Color = World.DebugDraw_s_color.SetRGB(0, 0, 0);
+      const flags: number = this.debugDrawInstance.getFlags();
+      const color: Color = World.debugdraw_s_color.setRGB(0, 0, 0);
 
-      if (flags & DrawFlags.e_shapeBit) {
-        for (let b: Body | null = this.bodyList; b; b = b.next) {
+      if (flags & DrawFlags.ShapeBit) {
+        for (let b: Body = this.bodyList; b; b = b.next) {
           const xf: Transform = b.xf;
 
-          this.debugDraw.PushTransform(xf);
+          this.debugDrawInstance.pushTransform(xf);
 
-          for (let f: Fixture | null = b.GetFixtureList(); f; f = f.next) {
-            if (b.GetType() === BodyType.dynamicBody && b.mass === 0.0) {
+          for (let f: Fixture = b.getFixtureList(); f; f = f.next) {
+            if (b.getType() === BodyType.DynamicBody && b.mass === 0.0) {
               // Bad body
-              this.DrawShape(f, new Color(1.0, 0.0, 0.0));
-            } else if (!b.IsEnabled()) {
-              color.SetRGB(0.5, 0.5, 0.3);
-              this.DrawShape(f, color);
-            } else if (b.GetType() === BodyType.staticBody) {
-              color.SetRGB(0.5, 0.9, 0.5);
-              this.DrawShape(f, color);
-            } else if (b.GetType() === BodyType.kinematicBody) {
-              color.SetRGB(0.5, 0.5, 0.9);
-              this.DrawShape(f, color);
-            } else if (!b.IsAwake()) {
-              color.SetRGB(0.6, 0.6, 0.6);
-              this.DrawShape(f, color);
+              this.drawShape(f, new Color(1.0, 0.0, 0.0));
+            } else if (!b.isEnabled()) {
+              color.setRGB(0.5, 0.5, 0.3);
+              this.drawShape(f, color);
+            } else if (b.getType() === BodyType.StaticBody) {
+              color.setRGB(0.5, 0.9, 0.5);
+              this.drawShape(f, color);
+            } else if (b.getType() === BodyType.KinematicBody) {
+              color.setRGB(0.5, 0.5, 0.9);
+              this.drawShape(f, color);
+            } else if (!b.isAwake()) {
+              color.setRGB(0.6, 0.6, 0.6);
+              this.drawShape(f, color);
             } else {
-              color.SetRGB(0.9, 0.7, 0.7);
-              this.DrawShape(f, color);
+              color.setRGB(0.9, 0.7, 0.7);
+              this.drawShape(f, color);
             }
           }
 
-          this.debugDraw.PopTransform(xf);
+          this.debugDrawInstance.popTransform(xf);
         }
       }
 
       // #if ENABLE_PARTICLE
-      if (flags & DrawFlags.e_particleBit) {
+      if (flags & DrawFlags.ParticleBit) {
         for (let p = this.particleSystemList; p; p = p.next) {
-          this.DrawParticleSystem(p);
+          this.drawParticleSystem(p);
         }
       }
       // #endif
 
-      if (flags & DrawFlags.e_jointBit) {
-        for (let j: Joint | null = this.jointList; j; j = j.next) {
-          j.Draw(this.debugDraw);
+      if (flags & DrawFlags.JointBit) {
+        for (let j: Joint = this.jointList; j; j = j.next) {
+          j.draw(this.debugDrawInstance);
         }
       }
 
-      if (flags & DrawFlags.e_pairBit) {
-        color.SetRGB(0.3, 0.9, 0.9);
+      if (flags & DrawFlags.PairBit) {
+        color.setRGB(0.3, 0.9, 0.9);
         for (let contact = this.contactManager.contactList; contact; contact = contact.next) {
-          const fixtureA = contact.GetFixtureA();
-          const fixtureB = contact.GetFixtureB();
-          const indexA = contact.GetChildIndexA();
-          const indexB = contact.GetChildIndexB();
-          const cA = fixtureA.GetAABB(indexA).GetCenter();
-          const cB = fixtureB.GetAABB(indexB).GetCenter();
+          const fixtureA = contact.getFixtureA();
+          const fixtureB = contact.getFixtureB();
+          const indexA = contact.getChildIndexA();
+          const indexB = contact.getChildIndexB();
+          const cA = fixtureA.getAABB(indexA).getCenter();
+          const cB = fixtureB.getAABB(indexB).getCenter();
 
-          this.debugDraw.DrawSegment(cA, cB, color);
+          this.debugDrawInstance.drawSegment(cA, cB, color);
         }
       }
 
-      if (flags & DrawFlags.e_aabbBit) {
-        color.SetRGB(0.9, 0.3, 0.9);
-        const vs: Vec2[] = World.DebugDraw_s_vs;
+      if (flags & DrawFlags.AABBBit) {
+        color.setRGB(0.9, 0.3, 0.9);
+        const vs: Vec2[] = World.debugdraw_s_vs;
 
-        for (let b: Body | null = this.bodyList; b; b = b.next) {
-          if (!b.IsEnabled()) {
+        for (let b: Body = this.bodyList; b; b = b.next) {
+          if (!b.isEnabled()) {
             continue;
           }
 
-          for (let f: Fixture | null = b.GetFixtureList(); f; f = f.next) {
+          for (let f: Fixture = b.getFixtureList(); f; f = f.next) {
             for (let i: number = 0; i < f.proxyCount; ++i) {
               const proxy: FixtureProxy = f.proxies[i];
 
               const aabb: AABB = proxy.treeNode.aabb;
-              vs[0].Set(aabb.lowerBound.x, aabb.lowerBound.y);
-              vs[1].Set(aabb.upperBound.x, aabb.lowerBound.y);
-              vs[2].Set(aabb.upperBound.x, aabb.upperBound.y);
-              vs[3].Set(aabb.lowerBound.x, aabb.upperBound.y);
+              vs[0].set(aabb.lowerBound.x, aabb.lowerBound.y);
+              vs[1].set(aabb.upperBound.x, aabb.lowerBound.y);
+              vs[2].set(aabb.upperBound.x, aabb.upperBound.y);
+              vs[3].set(aabb.lowerBound.x, aabb.upperBound.y);
 
-              this.debugDraw.DrawPolygon(vs, 4, color);
+              this.debugDrawInstance.drawPolygon(vs, 4, color);
             }
           }
         }
       }
 
-      if (flags & DrawFlags.e_centerOfMassBit) {
-        for (let b: Body | null = this.bodyList; b; b = b.next) {
-          const xf: Transform = World.DebugDraw_s_xf;
-          xf.q.Copy(b.xf.q);
-          xf.p.Copy(b.GetWorldCenter());
-          this.debugDraw.DrawTransform(xf);
+      if (flags & DrawFlags.CenterOfMassBit) {
+        for (let b: Body = this.bodyList; b; b = b.next) {
+          const xf: Transform = World.debugdraw_s_xf;
+          xf.q.copy(b.xf.q);
+          xf.p.copy(b.getWorldCenter());
+          this.debugDrawInstance.drawTransform(xf);
         }
       }
 
       // #if ENABLE_CONTROLLER
       // @see Controller list
-      if (flags & DrawFlags.e_controllerBit) {
+      if (flags & DrawFlags.ControllerBit) {
         for (let c = this.controllerList; c; c = c.next) {
-          c.Draw(this.debugDraw);
+          c.draw(this.debugDrawInstance);
         }
       }
       // #endif
@@ -641,22 +641,22 @@ namespace b2 {
     /// provided AABB.
     /// @param callback a user implemented callback class.
     /// @param aabb the query box.
-    public QueryAABB(callback: QueryCallback, aabb: AABB): void;
-    public QueryAABB(aabb: AABB, fn: QueryCallbackFunction): void;
-    public QueryAABB(...args: any[]): void {
+    public queryAABB(callback: QueryCallback, aabb: AABB): void;
+    public queryAABB(aabb: AABB, fn: QueryCallbackFunction): void;
+    public queryAABB(...args: any[]): void {
       if (args[0] instanceof QueryCallback) {
-        this._QueryAABB(args[0], args[1]);
+        this._queryAABB(args[0], args[1]);
       } else {
-        this._QueryAABB(null, args[0], args[1]);
+        this._queryAABB(null, args[0], args[1]);
       }
     }
-    private _QueryAABB(callback: QueryCallback | null, aabb: AABB, fn?: QueryCallbackFunction): void {
-      this.contactManager.broadPhase.Query(aabb, (proxy: TreeNode<FixtureProxy>): boolean => {
+    private _queryAABB(callback: QueryCallback, aabb: AABB, fn?: QueryCallbackFunction): void {
+      this.contactManager.broadPhase.query(aabb, (proxy: TreeNode<FixtureProxy>): boolean => {
         const fixture_proxy: FixtureProxy = proxy.userData;
         // DEBUG: Assert(fixture_proxy instanceof FixtureProxy);
         const fixture: Fixture = fixture_proxy.fixture;
         if (callback) {
-          return callback.ReportFixture(fixture);
+          return callback.reportFixture(fixture);
         } else if (fn) {
           return fn(fixture);
         }
@@ -665,16 +665,16 @@ namespace b2 {
       // #if ENABLE_PARTICLE
       if (callback instanceof QueryCallback) {
         for (let p = this.particleSystemList; p; p = p.next) {
-          if (callback.ShouldQueryParticleSystem(p)) {
-            p.QueryAABB(callback, aabb);
+          if (callback.shouldQueryParticleSystem(p)) {
+            p.queryAABB(callback, aabb);
           }
         }
       }
       // #endif
     }
 
-    public QueryAllAABB(aabb: AABB, out: Fixture[] = []): Fixture[] {
-      this.QueryAABB(aabb, (fixture: Fixture): boolean => { out.push(fixture); return true; });
+    public queryAllAABB(aabb: AABB, out: Fixture[] = []): Fixture[] {
+      this.queryAABB(aabb, (fixture: Fixture): boolean => { out.push(fixture); return true; });
       return out;
     }
 
@@ -682,22 +682,22 @@ namespace b2 {
     /// provided point.
     /// @param callback a user implemented callback class.
     /// @param point the query point.
-    public QueryPointAABB(callback: QueryCallback, point: XY): void;
-    public QueryPointAABB(point: XY, fn: QueryCallbackFunction): void;
-    public QueryPointAABB(...args: any[]): void {
+    public queryPointAABB(callback: QueryCallback, point: XY): void;
+    public queryPointAABB(point: XY, fn: QueryCallbackFunction): void;
+    public queryPointAABB(...args: any[]): void {
       if (args[0] instanceof QueryCallback) {
-        this._QueryPointAABB(args[0], args[1]);
+        this._queryPointAABB(args[0], args[1]);
       } else {
-        this._QueryPointAABB(null, args[0], args[1]);
+        this._queryPointAABB(null, args[0], args[1]);
       }
     }
-    private _QueryPointAABB(callback: QueryCallback | null, point: XY, fn?: QueryCallbackFunction): void {
-      this.contactManager.broadPhase.QueryPoint(point, (proxy: TreeNode<FixtureProxy>): boolean => {
+    private _queryPointAABB(callback: QueryCallback, point: XY, fn?: QueryCallbackFunction): void {
+      this.contactManager.broadPhase.queryPoint(point, (proxy: TreeNode<FixtureProxy>): boolean => {
         const fixture_proxy: FixtureProxy = proxy.userData;
         // DEBUG: Assert(fixture_proxy instanceof FixtureProxy);
         const fixture: Fixture = fixture_proxy.fixture;
         if (callback) {
-          return callback.ReportFixture(fixture);
+          return callback.reportFixture(fixture);
         } else if (fn) {
           return fn(fixture);
         }
@@ -706,39 +706,39 @@ namespace b2 {
       // #if ENABLE_PARTICLE
       if (callback instanceof QueryCallback) {
         for (let p = this.particleSystemList; p; p = p.next) {
-          if (callback.ShouldQueryParticleSystem(p)) {
-            p.QueryPointAABB(callback, point);
+          if (callback.shouldQueryParticleSystem(p)) {
+            p.queryPointAABB(callback, point);
           }
         }
       }
       // #endif
     }
 
-    public QueryAllPointAABB(point: XY, out: Fixture[] = []): Fixture[] {
-      this.QueryPointAABB(point, (fixture: Fixture): boolean => { out.push(fixture); return true; });
+    public queryAllPointAABB(point: XY, out: Fixture[] = []): Fixture[] {
+      this.queryPointAABB(point, (fixture: Fixture): boolean => { out.push(fixture); return true; });
       return out;
     }
 
-    public QueryFixtureShape(callback: QueryCallback, shape: Shape, index: number, transform: Transform): void;
-    public QueryFixtureShape(shape: Shape, index: number, transform: Transform, fn: QueryCallbackFunction): void;
-    public QueryFixtureShape(...args: any[]): void {
+    public queryFixtureShape(callback: QueryCallback, shape: Shape, index: number, transform: Transform): void;
+    public queryFixtureShape(shape: Shape, index: number, transform: Transform, fn: QueryCallbackFunction): void;
+    public queryFixtureShape(...args: any[]): void {
       if (args[0] instanceof QueryCallback) {
-        this._QueryFixtureShape(args[0], args[1], args[2], args[3]);
+        this._queryFixtureShape(args[0], args[1], args[2], args[3]);
       } else {
-        this._QueryFixtureShape(null, args[0], args[1], args[2], args[3]);
+        this._queryFixtureShape(null, args[0], args[1], args[2], args[3]);
       }
     }
-    private static QueryFixtureShape_s_aabb = new AABB();
-    private _QueryFixtureShape(callback: QueryCallback | null, shape: Shape, index: number, transform: Transform, fn?: QueryCallbackFunction): void {
-      const aabb: AABB = World.QueryFixtureShape_s_aabb;
-      shape.ComputeAABB(aabb, transform, index);
-      this.contactManager.broadPhase.Query(aabb, (proxy: TreeNode<FixtureProxy>): boolean => {
+    private static queryFixtureShape_s_aabb = new AABB();
+    private _queryFixtureShape(callback: QueryCallback, shape: Shape, index: number, transform: Transform, fn?: QueryCallbackFunction): void {
+      const aabb: AABB = World.queryFixtureShape_s_aabb;
+      shape.computeAABB(aabb, transform, index);
+      this.contactManager.broadPhase.query(aabb, (proxy: TreeNode<FixtureProxy>): boolean => {
         const fixture_proxy: FixtureProxy = proxy.userData;
         // DEBUG: Assert(fixture_proxy instanceof FixtureProxy);
         const fixture: Fixture = fixture_proxy.fixture;
-        if (TestOverlapShape(shape, index, fixture.GetShape(), fixture_proxy.childIndex, transform, fixture.GetBody().GetTransform())) {
+        if (testOverlapShape(shape, index, fixture.getShape(), fixture_proxy.childIndex, transform, fixture.getBody().getTransform())) {
           if (callback) {
-            return callback.ReportFixture(fixture);
+            return callback.reportFixture(fixture);
           } else if (fn) {
             return fn(fixture);
           }
@@ -748,36 +748,36 @@ namespace b2 {
       // #if ENABLE_PARTICLE
       if (callback instanceof QueryCallback) {
         for (let p = this.particleSystemList; p; p = p.next) {
-          if (callback.ShouldQueryParticleSystem(p)) {
-            p.QueryAABB(callback, aabb);
+          if (callback.shouldQueryParticleSystem(p)) {
+            p.queryAABB(callback, aabb);
           }
         }
       }
       // #endif
     }
 
-    public QueryAllFixtureShape(shape: Shape, index: number, transform: Transform, out: Fixture[] = []): Fixture[] {
-      this.QueryFixtureShape(shape, index, transform, (fixture: Fixture): boolean => { out.push(fixture); return true; });
+    public queryAllFixtureShape(shape: Shape, index: number, transform: Transform, out: Fixture[] = []): Fixture[] {
+      this.queryFixtureShape(shape, index, transform, (fixture: Fixture): boolean => { out.push(fixture); return true; });
       return out;
     }
 
-    public QueryFixturePoint(callback: QueryCallback, point: XY): void;
-    public QueryFixturePoint(point: XY, fn: QueryCallbackFunction): void;
-    public QueryFixturePoint(...args: any[]): void {
+    public queryFixturePoint(callback: QueryCallback, point: XY): void;
+    public queryFixturePoint(point: XY, fn: QueryCallbackFunction): void;
+    public queryFixturePoint(...args: any[]): void {
       if (args[0] instanceof QueryCallback) {
-        this._QueryFixturePoint(args[0], args[1]);
+        this._queryFixturePoint(args[0], args[1]);
       } else {
-        this._QueryFixturePoint(null, args[0], args[1]);
+        this._queryFixturePoint(null, args[0], args[1]);
       }
     }
-    private _QueryFixturePoint(callback: QueryCallback | null, point: XY, fn?: QueryCallbackFunction): void {
-      this.contactManager.broadPhase.QueryPoint(point, (proxy: TreeNode<FixtureProxy>): boolean => {
+    private _queryFixturePoint(callback: QueryCallback, point: XY, fn?: QueryCallbackFunction): void {
+      this.contactManager.broadPhase.queryPoint(point, (proxy: TreeNode<FixtureProxy>): boolean => {
         const fixture_proxy: FixtureProxy = proxy.userData;
         // DEBUG: Assert(fixture_proxy instanceof FixtureProxy);
         const fixture: Fixture = fixture_proxy.fixture;
-        if (fixture.TestPoint(point)) {
+        if (fixture.testPoint(point)) {
           if (callback) {
-            return callback.ReportFixture(fixture);
+            return callback.reportFixture(fixture);
           } else if (fn) {
             return fn(fixture);
           }
@@ -787,16 +787,16 @@ namespace b2 {
       // #if ENABLE_PARTICLE
       if (callback) {
         for (let p = this.particleSystemList; p; p = p.next) {
-          if (callback.ShouldQueryParticleSystem(p)) {
-            p.QueryPointAABB(callback, point);
+          if (callback.shouldQueryParticleSystem(p)) {
+            p.queryPointAABB(callback, point);
           }
         }
       }
       // #endif
     }
 
-    public QueryAllFixturePoint(point: XY, out: Fixture[] = []): Fixture[] {
-      this.QueryFixturePoint(point, (fixture: Fixture): boolean => { out.push(fixture); return true; });
+    public queryAllFixturePoint(point: XY, out: Fixture[] = []): Fixture[] {
+      this.queryFixturePoint(point, (fixture: Fixture): boolean => { out.push(fixture); return true; });
       return out;
     }
 
@@ -806,36 +806,36 @@ namespace b2 {
     /// @param callback a user implemented callback class.
     /// @param point1 the ray starting point
     /// @param point2 the ray ending point
-    public RayCast(callback: RayCastCallback, point1: XY, point2: XY): void;
-    public RayCast(point1: XY, point2: XY, fn: RayCastCallbackFunction): void;
-    public RayCast(...args: any[]): void {
+    public rayCast(callback: RayCastCallback, point1: XY, point2: XY): void;
+    public rayCast(point1: XY, point2: XY, fn: RayCastCallbackFunction): void;
+    public rayCast(...args: any[]): void {
       if (args[0] instanceof RayCastCallback) {
-        this._RayCast(args[0], args[1], args[2]);
+        this._rayCast(args[0], args[1], args[2]);
       } else {
-        this._RayCast(null, args[0], args[1], args[2]);
+        this._rayCast(null, args[0], args[1], args[2]);
       }
     }
-    private static RayCast_s_input = new RayCastInput();
-    private static RayCast_s_output = new RayCastOutput();
-    private static RayCast_s_point = new Vec2();
-    private _RayCast(callback: RayCastCallback | null, point1: XY, point2: XY, fn?: RayCastCallbackFunction): void {
-      const input: RayCastInput = World.RayCast_s_input;
+    private static rayCast_s_input = new RayCastInput();
+    private static rayCast_s_output = new RayCastOutput();
+    private static rayCast_s_point = new Vec2();
+    private _rayCast(callback: RayCastCallback, point1: XY, point2: XY, fn?: RayCastCallbackFunction): void {
+      const input: RayCastInput = World.rayCast_s_input;
       input.maxFraction = 1;
-      input.p1.Copy(point1);
-      input.p2.Copy(point2);
-      this.contactManager.broadPhase.RayCast(input, (input: RayCastInput, proxy: TreeNode<FixtureProxy>): number => {
+      input.p1.copy(point1);
+      input.p2.copy(point2);
+      this.contactManager.broadPhase.rayCast(input, (input: RayCastInput, proxy: TreeNode<FixtureProxy>): number => {
         const fixture_proxy: FixtureProxy = proxy.userData;
         // DEBUG: Assert(fixture_proxy instanceof FixtureProxy);
         const fixture: Fixture = fixture_proxy.fixture;
         const index: number = fixture_proxy.childIndex;
-        const output: RayCastOutput = World.RayCast_s_output;
-        const hit: boolean = fixture.RayCast(output, input, index);
+        const output: RayCastOutput = World.rayCast_s_output;
+        const hit: boolean = fixture.rayCast(output, input, index);
         if (hit) {
           const fraction: number = output.fraction;
-          const point: Vec2 = World.RayCast_s_point;
-          point.Set((1 - fraction) * point1.x + fraction * point2.x, (1 - fraction) * point1.y + fraction * point2.y);
+          const point: Vec2 = World.rayCast_s_point;
+          point.set((1 - fraction) * point1.x + fraction * point2.x, (1 - fraction) * point1.y + fraction * point2.y);
           if (callback) {
-            return callback.ReportFixture(fixture, point, output.normal, fraction);
+            return callback.reportFixture(fixture, point, output.normal, fraction);
           } else if (fn) {
             return fn(fixture, point, output.normal, fraction);
           }
@@ -845,18 +845,18 @@ namespace b2 {
       // #if ENABLE_PARTICLE
       if (callback) {
         for (let p = this.particleSystemList; p; p = p.next) {
-          if (callback.ShouldQueryParticleSystem(p)) {
-            p.RayCast(callback, point1, point2);
+          if (callback.shouldQueryParticleSystem(p)) {
+            p.rayCast(callback, point1, point2);
           }
         }
       }
       // #endif
     }
 
-    public RayCastOne(point1: XY, point2: XY): Fixture | null {
-      let result: Fixture | null = null;
+    public rayCastOne(point1: XY, point2: XY): Fixture {
+      let result: Fixture = null;
       let min_fraction: number = 1;
-      this.RayCast(point1, point2, (fixture: Fixture, point: Vec2, normal: Vec2, fraction: number): number => {
+      this.rayCast(point1, point2, (fixture: Fixture, point: Vec2, normal: Vec2, fraction: number): number => {
         if (fraction < min_fraction) {
           min_fraction = fraction;
           result = fixture;
@@ -866,30 +866,16 @@ namespace b2 {
       return result;
     }
 
-    public RayCastAll(point1: XY, point2: XY, out: Fixture[] = []): Fixture[] {
-      this.RayCast(point1, point2, (fixture: Fixture, point: Vec2, normal: Vec2, fraction: number): number => {
+    public rayCastAll(point1: XY, point2: XY, out: Fixture[] = []): Fixture[] {
+      this.rayCast(point1, point2, (fixture: Fixture, point: Vec2, normal: Vec2, fraction: number): number => {
         out.push(fixture);
         return 1;
       });
       return out;
     }
 
-    /// Get the world body list. With the returned body, use Body::GetNext to get
-    /// the next body in the world list. A NULL body indicates the end of the list.
-    /// @return the head of the world body list.
-    public GetBodyList(): Body | null {
-      return this.bodyList;
-    }
-
-    /// Get the world joint list. With the returned joint, use Joint::GetNext to get
-    /// the next joint in the world list. A NULL joint indicates the end of the list.
-    /// @return the head of the world joint list.
-    public GetJointList(): Joint | null {
-      return this.jointList;
-    }
-
     // #if ENABLE_PARTICLE
-    public GetParticleSystemList(): ParticleSystem | null {
+    public getParticleSystemList(): ParticleSystem {
       return this.particleSystemList;
     }
     // #endif
@@ -899,12 +885,12 @@ namespace b2 {
     /// @return the head of the world contact list.
     /// @warning contacts are created and destroyed in the middle of a time step.
     /// Use ContactListener to avoid missing contacts.
-    public GetContactList(): Contact | null {
+    public getContactList(): Contact {
       return this.contactManager.contactList;
     }
 
     /// Enable/disable sleep.
-    public SetAllowSleeping(flag: boolean): void {
+    public setAllowSleeping(flag: boolean): void {
       if (flag === this.allowSleep) {
         return;
       }
@@ -912,143 +898,138 @@ namespace b2 {
       this.allowSleep = flag;
       if (!this.allowSleep) {
         for (let b = this.bodyList; b; b = b.next) {
-          b.SetAwake(true);
+          b.setAwake(true);
         }
       }
     }
 
-    public GetAllowSleeping(): boolean {
+    public getAllowSleeping(): boolean {
       return this.allowSleep;
     }
 
     /// Enable/disable warm starting. For testing.
-    public SetWarmStarting(flag: boolean): void {
+    public setWarmStarting(flag: boolean): void {
       this.warmStarting = flag;
     }
 
-    public GetWarmStarting(): boolean {
+    public getWarmStarting(): boolean {
       return this.warmStarting;
     }
 
     /// Enable/disable continuous physics. For testing.
-    public SetContinuousPhysics(flag: boolean): void {
+    public setContinuousPhysics(flag: boolean): void {
       this.continuousPhysics = flag;
     }
 
-    public GetContinuousPhysics(): boolean {
+    public getContinuousPhysics(): boolean {
       return this.continuousPhysics;
     }
 
     /// Enable/disable single stepped continuous physics. For testing.
-    public SetSubStepping(flag: boolean): void {
+    public setSubStepping(flag: boolean): void {
       this.subStepping = flag;
     }
 
-    public GetSubStepping(): boolean {
+    public getSubStepping(): boolean {
       return this.subStepping;
     }
 
     /// Get the number of broad-phase proxies.
-    public GetProxyCount(): number {
-      return this.contactManager.broadPhase.GetProxyCount();
+    public getProxyCount(): number {
+      return this.contactManager.broadPhase.getProxyCount();
     }
 
     /// Get the number of bodies.
-    public GetBodyCount(): number {
+    public getBodyCount(): number {
       return this.bodyCount;
     }
 
     /// Get the number of joints.
-    public GetJointCount(): number {
+    public getJointCount(): number {
       return this.jointCount;
     }
 
     /// Get the number of contacts (each may have 0 or more contact points).
-    public GetContactCount(): number {
+    public getContactCount(): number {
       return this.contactManager.contactCount;
     }
 
     /// Get the height of the dynamic tree.
-    public GetTreeHeight(): number {
-      return this.contactManager.broadPhase.GetTreeHeight();
+    public getTreeHeight(): number {
+      return this.contactManager.broadPhase.getTreeHeight();
     }
 
     /// Get the balance of the dynamic tree.
-    public GetTreeBalance(): number {
-      return this.contactManager.broadPhase.GetTreeBalance();
+    public getTreeBalance(): number {
+      return this.contactManager.broadPhase.getTreeBalance();
     }
 
     /// Get the quality metric of the dynamic tree. The smaller the better.
     /// The minimum is 1.
-    public GetTreeQuality(): number {
-      return this.contactManager.broadPhase.GetTreeQuality();
+    public getTreeQuality(): number {
+      return this.contactManager.broadPhase.getTreeQuality();
     }
 
     /// Change the global gravity vector.
-    public SetGravity(gravity: XY, wake: boolean = true) {
+    public setGravity(gravity: XY, wake: boolean = true) {
       if (!Vec2.IsEqualToV(this.gravity, gravity)) {
-        this.gravity.Copy(gravity);
+        this.gravity.copy(gravity);
 
         if (wake) {
-          for (let b: Body | null = this.bodyList; b; b = b.next) {
-            b.SetAwake(true);
+          for (let b: Body = this.bodyList; b; b = b.next) {
+            b.setAwake(true);
           }
         }
       }
     }
 
-    /// Get the global gravity vector.
-    public GetGravity(): Vec2 {
-      return this.gravity;
-    }
-
     /// Is the world locked (in the middle of a time step).
-    public IsLocked(): boolean {
+    public isLocked(): boolean {
       return this.locked;
     }
 
     /// Set flag to control automatic clearing of forces after each time step.
-    public SetAutoClearForces(flag: boolean): void {
-      this.clearForces = flag;
+    public setAutoClearForces(flag: boolean): void {
+      this.clearForcesFlag = flag;
     }
 
     /// Get the flag that controls automatic clearing of forces after each time step.
-    public GetAutoClearForces(): boolean {
-      return this.clearForces;
+    public getAutoClearForces(): boolean {
+      return this.clearForcesFlag;
     }
 
     /// Shift the world origin. Useful for large worlds.
     /// The body shift formula is: position -= newOrigin
     /// @param newOrigin the new origin with respect to the old origin
-    public ShiftOrigin(newOrigin: XY): void {
-      if (this.IsLocked()) { throw new Error(); }
+    public shiftOrigin(newOrigin: XY): void {
+      if (this.isLocked()) { throw new Error(); }
 
-      for (let b: Body | null = this.bodyList; b; b = b.next) {
-        b.xf.p.SelfSub(newOrigin);
-        b.sweep.c0.SelfSub(newOrigin);
-        b.sweep.c.SelfSub(newOrigin);
+      for (let b: Body = this.bodyList; b; b = b.next) {
+        b.xf.p.selfSub(newOrigin);
+        b.sweep.c0.selfSub(newOrigin);
+        b.sweep.c.selfSub(newOrigin);
       }
 
-      for (let j: Joint | null = this.jointList; j; j = j.next) {
-        j.ShiftOrigin(newOrigin);
+      for (let j: Joint = this.jointList; j; j = j.next) {
+        j.shiftOrigin(newOrigin);
       }
 
-      this.contactManager.broadPhase.ShiftOrigin(newOrigin);
+      this.contactManager.broadPhase.shiftOrigin(newOrigin);
     }
 
     /// Get the contact manager for testing.
-    public GetContactManager(): ContactManager {
+    public getContactManager(): ContactManager {
       return this.contactManager;
     }
 
     /// Get the current profile.
-    public GetProfile(): Profile {
+    public getProfile(): Profile {
       return this.profile;
     }
 
     /// Dump the world into the log file.
     /// @warning this should be called outside of a time step.
-    public Dump(log: (format: string, ...args: any[]) => void): void {
+    public dump(log: (format: string, ...args: any[]) => void): void {
       if (this.locked) {
         return;
       }
@@ -1061,108 +1042,108 @@ namespace b2 {
       log("const bodies: Body[] = [];\n");
       log("const joints: Joint[] = [];\n");
       let i: number = 0;
-      for (let b: Body | null = this.bodyList; b; b = b.next) {
+      for (let b: Body = this.bodyList; b; b = b.next) {
         b.islandIndex = i;
-        b.Dump(log);
+        b.dump(log);
         ++i;
       }
 
       i = 0;
-      for (let j: Joint | null = this.jointList; j; j = j.next) {
+      for (let j: Joint = this.jointList; j; j = j.next) {
         j.index = i;
         ++i;
       }
 
       // First pass on joints, skip gear joints.
-      for (let j: Joint | null = this.jointList; j; j = j.next) {
-        if (j.type === JointType.e_gearJoint) {
+      for (let j: Joint = this.jointList; j; j = j.next) {
+        if (j.type === JointType.GearJoint) {
           continue;
         }
 
         log("{\n");
-        j.Dump(log);
+        j.dump(log);
         log("}\n");
       }
 
       // Second pass on joints, only gear joints.
-      for (let j: Joint | null = this.jointList; j; j = j.next) {
-        if (j.type !== JointType.e_gearJoint) {
+      for (let j: Joint = this.jointList; j; j = j.next) {
+        if (j.type !== JointType.GearJoint) {
           continue;
         }
 
         log("{\n");
-        j.Dump(log);
+        j.dump(log);
         log("}\n");
       }
 
       // CloseDump();
     }
 
-    public DrawShape(fixture: Fixture, color: Color): void {
-      if (this.debugDraw === null) {
+    public drawShape(fixture: Fixture, color: Color): void {
+      if (this.debugDrawInstance === null) {
         return;
       }
-      const shape: Shape = fixture.GetShape();
+      const shape: Shape = fixture.getShape();
 
       switch (shape.type) {
-        case ShapeType.e_circleShape: {
+        case ShapeType.CircleShape: {
           const circle: CircleShape = shape as CircleShape;
           const center: Vec2 = circle.p;
           const radius: number = circle.radius;
           const axis: Vec2 = Vec2.UNITX;
-          this.debugDraw.DrawSolidCircle(center, radius, axis, color);
+          this.debugDrawInstance.drawSolidCircle(center, radius, axis, color);
           break;
         }
 
-        case ShapeType.e_edgeShape: {
+        case ShapeType.EdgeShape: {
           const edge: EdgeShape = shape as EdgeShape;
           const v1: Vec2 = edge.vertex1;
           const v2: Vec2 = edge.vertex2;
-          this.debugDraw.DrawSegment(v1, v2, color);
+          this.debugDrawInstance.drawSegment(v1, v2, color);
 
           if (edge.oneSided === false) {
-            this.debugDraw.DrawPoint(v1, 4.0, color);
-            this.debugDraw.DrawPoint(v2, 4.0, color);
+            this.debugDrawInstance.drawPoint(v1, 4.0, color);
+            this.debugDrawInstance.drawPoint(v2, 4.0, color);
           }
           break;
         }
 
-        case ShapeType.e_chainShape: {
+        case ShapeType.ChainShape: {
           const chain: ChainShape = shape as ChainShape;
           const count: number = chain.count;
           const vertices: Vec2[] = chain.vertices;
           let v1: Vec2 = vertices[0];
           for (let i: number = 1; i < count; ++i) {
             const v2: Vec2 = vertices[i];
-            this.debugDraw.DrawSegment(v1, v2, color);
+            this.debugDrawInstance.drawSegment(v1, v2, color);
             v1 = v2;
           }
 
           break;
         }
 
-        case ShapeType.e_polygonShape: {
+        case ShapeType.PolygonShape: {
           const poly: PolygonShape = shape as PolygonShape;
           const vertexCount: number = poly.count;
           const vertices: Vec2[] = poly.vertices;
-          this.debugDraw.DrawSolidPolygon(vertices, vertexCount, color);
+          this.debugDrawInstance.drawSolidPolygon(vertices, vertexCount, color);
           break;
         }
       }
     }
 
-    public Solve(step: TimeStep): void {
+    public solve(step: TimeStep): void {
       // #if ENABLE_PARTICLE
       // update previous transforms
       for (let b = this.bodyList; b; b = b.next) {
-        b.xf0.Copy(b.xf);
+        b.xf0.copy(b.xf);
       }
       // #endif
 
       // #if ENABLE_CONTROLLER
       // @see Controller list
       for (let controller = this.controllerList; controller; controller = controller.next) {
-        controller.Step(step);
+        controller.step(step);
       }
       // #endif
 
@@ -1172,41 +1153,41 @@ namespace b2 {
 
       // Size the island for the worst case.
       const island: Island = this.island;
-      island.Initialize(this.bodyCount,
+      island.initialize(this.bodyCount,
         this.contactManager.contactCount,
         this.jointCount,
         this.contactManager.contactListener);
 
       // Clear all the island flags.
-      for (let b: Body | null = this.bodyList; b; b = b.next) {
+      for (let b: Body = this.bodyList; b; b = b.next) {
         b.islandFlag = false;
       }
-      for (let c: Contact | null = this.contactManager.contactList; c; c = c.next) {
+      for (let c: Contact = this.contactManager.contactList; c; c = c.next) {
         c.islandFlag = false;
       }
-      for (let j: Joint | null = this.jointList; j; j = j.next) {
+      for (let j: Joint = this.jointList; j; j = j.next) {
         j.islandFlag = false;
       }
 
       // Build and simulate all awake islands.
       // DEBUG: const stackSize: number = this.bodyCount;
-      const stack: Array<Body | null> = this.s_stack;
-      for (let seed: Body | null = this.bodyList; seed; seed = seed.next) {
+      const stack: Array<Body> = this.s_stack;
+      for (let seed: Body = this.bodyList; seed; seed = seed.next) {
         if (seed.islandFlag) {
           continue;
         }
 
-        if (!seed.IsAwake() || !seed.IsEnabled()) {
+        if (!seed.isAwake() || !seed.isEnabled()) {
           continue;
         }
 
         // The seed can be dynamic or kinematic.
-        if (seed.GetType() === BodyType.staticBody) {
+        if (seed.getType() === BodyType.StaticBody) {
           continue;
         }
 
         // Reset island and stack.
-        island.Clear();
+        island.clear();
         let stackCount: number = 0;
         stack[stackCount++] = seed;
         seed.islandFlag = true;
@@ -1214,14 +1195,14 @@ namespace b2 {
         // Perform a depth first search (DFS) on the constraint graph.
         while (stackCount > 0) {
           // Grab the next body off the stack and add it to the island.
-          const b: Body | null = stack[--stackCount];
+          const b: Body = stack[--stackCount];
           if (!b) { throw new Error(); }
           // DEBUG: Assert(b.IsEnabled());
-          island.AddBody(b);
+          island.addBody(b);
 
           // To keep islands as small as possible, we don't
           // propagate islands across static bodies.
-          if (b.GetType() === BodyType.staticBody) {
+          if (b.getType() === BodyType.StaticBody) {
             continue;
           }
 
@@ -1229,7 +1210,7 @@ namespace b2 {
           b.awakeFlag = true;
 
           // Search all contacts connected to this body.
-          for (let ce: ContactEdge | null = b.contactList; ce; ce = ce.next) {
+          for (let ce: ContactEdge = b.contactList; ce; ce = ce.next) {
             const contact: Contact = ce.contact;
 
             // Has this contact already been added to an island?
@@ -1238,7 +1219,7 @@ namespace b2 {
             }
 
             // Is this contact solid and touching?
-            if (!contact.IsEnabled() || !contact.IsTouching()) {
+            if (!contact.isEnabled() || !contact.isTouching()) {
               continue;
             }
 
@@ -1249,7 +1230,7 @@ namespace b2 {
               continue;
             }
 
-            island.AddContact(contact);
+            island.addContact(contact);
             contact.islandFlag = true;
 
             const other: Body = ce.other;
@@ -1265,7 +1246,7 @@ namespace b2 {
           }
 
           // Search all joints connect to this body.
-          for (let je: JointEdge | null = b.jointList; je; je = je.next) {
+          for (let je: JointEdge = b.jointList; je; je = je.next) {
             if (je.joint.islandFlag) {
               continue;
             }
@@ -1273,11 +1254,11 @@ namespace b2 {
             const other: Body = je.other;
 
             // Don't simulate joints connected to disabled bodies.
-            if (!other.IsEnabled()) {
+            if (!other.isEnabled()) {
               continue;
             }
 
-            island.AddJoint(je.joint);
+            island.addJoint(je.joint);
             je.joint.islandFlag = true;
 
             if (other.islandFlag) {
@@ -1291,7 +1272,7 @@ namespace b2 {
         }
 
         const profile: Profile = new Profile();
-        island.Solve(profile, step, this.gravity, this.allowSleep);
+        island.solve(profile, step, this.gravity, this.allowSleep);
         this.profile.solveInit += profile.solveInit;
         this.profile.solveVelocity += profile.solveVelocity;
         this.profile.solvePosition += profile.solvePosition;
@@ -1300,7 +1281,7 @@ namespace b2 {
         for (let i: number = 0; i < island.bodyCount; ++i) {
           // Allow static bodies to participate in other islands.
           const b: Body = island.bodies[i];
-          if (b.GetType() === BodyType.staticBody) {
+          if (b.getType() === BodyType.StaticBody) {
             b.islandFlag = false;
           }
         }
@@ -1320,36 +1301,36 @@ namespace b2 {
           continue;
         }
 
-        if (b.GetType() === BodyType.staticBody) {
+        if (b.getType() === BodyType.StaticBody) {
           continue;
         }
 
         // Update fixtures (for broad-phase).
-        b.SynchronizeFixtures();
+        b.synchronizeFixtures();
       }
 
       // Look for new contacts.
-      this.contactManager.FindNewContacts();
-      this.profile.broadphase = timer.GetMilliseconds();
+      this.contactManager.findNewContacts();
+      this.profile.broadphase = timer.getMilliseconds();
     }
 
-    private static SolveTOI_s_subStep = new TimeStep();
-    private static SolveTOI_s_backup = new Sweep();
-    private static SolveTOI_s_backup1 = new Sweep();
-    private static SolveTOI_s_backup2 = new Sweep();
-    private static SolveTOI_s_toi_input = new TOIInput();
-    private static SolveTOI_s_toi_output = new TOIOutput();
-    public SolveTOI(step: TimeStep): void {
+    private static solveTOI_s_subStep = new TimeStep();
+    private static solveTOI_s_backup = new Sweep();
+    private static solveTOI_s_backup1 = new Sweep();
+    private static solveTOI_s_backup2 = new Sweep();
+    private static solveTOI_s_toi_input = new TOIInput();
+    private static solveTOI_s_toi_output = new TOIOutput();
+    public solveTOI(step: TimeStep): void {
       const island: Island = this.island;
-      island.Initialize(2 * maxTOIContacts, maxTOIContacts, 0, this.contactManager.contactListener);
+      island.initialize(2 * maxTOIContacts, maxTOIContacts, 0, this.contactManager.contactListener);
 
       if (this.stepComplete) {
-        for (let b: Body | null = this.bodyList; b; b = b.next) {
+        for (let b: Body = this.bodyList; b; b = b.next) {
           b.islandFlag = false;
           b.sweep.alpha0 = 0;
         }
 
-        for (let c: Contact | null = this.contactManager.contactList; c; c = c.next) {
+        for (let c: Contact = this.contactManager.contactList; c; c = c.next) {
           // Invalidate TOI
           c.toiFlag = false;
           c.islandFlag = false;
@@ -1361,12 +1342,12 @@ namespace b2 {
       // Find TOI events and solve them.
       for (; ;) {
         // Find the first TOI.
-        let minContact: Contact | null = null;
+        let minContact: Contact = null;
         let minAlpha: number = 1;
 
-        for (let c: Contact | null = this.contactManager.contactList; c; c = c.next) {
+        for (let c: Contact = this.contactManager.contactList; c; c = c.next) {
           // Is this contact disabled?
-          if (!c.IsEnabled()) {
+          if (!c.isEnabled()) {
             continue;
           }
 
@@ -1380,31 +1361,31 @@ namespace b2 {
             // This contact has a valid cached TOI.
             alpha = c.toi;
           } else {
-            const fA: Fixture = c.GetFixtureA();
-            const fB: Fixture = c.GetFixtureB();
+            const fA: Fixture = c.getFixtureA();
+            const fB: Fixture = c.getFixtureB();
 
             // Is there a sensor?
-            if (fA.IsSensor() || fB.IsSensor()) {
+            if (fA.isSensor || fB.isSensor) {
               continue;
             }
 
-            const bA: Body = fA.GetBody();
-            const bB: Body = fB.GetBody();
+            const bA: Body = fA.getBody();
+            const bB: Body = fB.getBody();
 
             const typeA: BodyType = bA.type;
             const typeB: BodyType = bB.type;
             // DEBUG: Assert(typeA !== BodyType.staticBody || typeB !== BodyType.staticBody);
 
-            const activeA: boolean = bA.IsAwake() && typeA !== BodyType.staticBody;
-            const activeB: boolean = bB.IsAwake() && typeB !== BodyType.staticBody;
+            const activeA: boolean = bA.isAwake() && typeA !== BodyType.StaticBody;
+            const activeB: boolean = bB.isAwake() && typeB !== BodyType.StaticBody;
 
             // Is at least one body active (awake and dynamic or kinematic)?
             if (!activeA && !activeB) {
               continue;
             }
 
-            const collideA: boolean = bA.IsBullet() || typeA !== BodyType.dynamicBody;
-            const collideB: boolean = bB.IsBullet() || typeB !== BodyType.dynamicBody;
+            const collideA: boolean = bA.isBullet() || typeA !== BodyType.DynamicBody;
+            const collideB: boolean = bB.isBullet() || typeB !== BodyType.DynamicBody;
 
             // Are these two non-bullet dynamic bodies?
             if (!collideA && !collideB) {
@@ -1417,31 +1398,31 @@ namespace b2 {
 
             if (bA.sweep.alpha0 < bB.sweep.alpha0) {
               alpha0 = bB.sweep.alpha0;
-              bA.sweep.Advance(alpha0);
+              bA.sweep.advance(alpha0);
             } else if (bB.sweep.alpha0 < bA.sweep.alpha0) {
               alpha0 = bA.sweep.alpha0;
-              bB.sweep.Advance(alpha0);
+              bB.sweep.advance(alpha0);
             }
 
             // DEBUG: Assert(alpha0 < 1);
 
-            const indexA: number = c.GetChildIndexA();
-            const indexB: number = c.GetChildIndexB();
+            const indexA: number = c.getChildIndexA();
+            const indexB: number = c.getChildIndexB();
 
             // Compute the time of impact in interval [0, minTOI]
-            const input: TOIInput = World.SolveTOI_s_toi_input;
-            input.proxyA.SetShape(fA.GetShape(), indexA);
-            input.proxyB.SetShape(fB.GetShape(), indexB);
-            input.sweepA.Copy(bA.sweep);
-            input.sweepB.Copy(bB.sweep);
+            const input: TOIInput = World.solveTOI_s_toi_input;
+            input.proxyA.setShape(fA.getShape(), indexA);
+            input.proxyB.setShape(fB.getShape(), indexB);
+            input.sweepA.copy(bA.sweep);
+            input.sweepB.copy(bB.sweep);
             input.tMax = 1;
 
-            const output: TOIOutput = World.SolveTOI_s_toi_output;
-            TimeOfImpact(output, input);
+            const output: TOIOutput = World.solveTOI_s_toi_output;
+            timeOfImpact(output, input);
 
             // Beta is the fraction of the remaining portion of the .
             const beta: number = output.t;
-            if (output.state === TOIOutputState.e_touching) {
+            if (output.state === TOIOutputState.Touching) {
               alpha = Min(alpha0 + (1 - alpha0) * beta, 1);
             } else {
               alpha = 1;
@@ -1465,41 +1446,41 @@ namespace b2 {
         }
 
         // Advance the bodies to the TOI.
-        const fA: Fixture = minContact.GetFixtureA();
-        const fB: Fixture = minContact.GetFixtureB();
-        const bA: Body = fA.GetBody();
-        const bB: Body = fB.GetBody();
+        const fA: Fixture = minContact.getFixtureA();
+        const fB: Fixture = minContact.getFixtureB();
+        const bA: Body = fA.getBody();
+        const bB: Body = fB.getBody();
 
-        const backup1: Sweep = World.SolveTOI_s_backup1.Copy(bA.sweep);
-        const backup2: Sweep = World.SolveTOI_s_backup2.Copy(bB.sweep);
+        const backup1: Sweep = World.solveTOI_s_backup1.copy(bA.sweep);
+        const backup2: Sweep = World.solveTOI_s_backup2.copy(bB.sweep);
 
-        bA.Advance(minAlpha);
-        bB.Advance(minAlpha);
+        bA.advance(minAlpha);
+        bB.advance(minAlpha);
 
         // The TOI contact likely has some new contact points.
-        minContact.Update(this.contactManager.contactListener);
+        minContact.update(this.contactManager.contactListener);
         minContact.toiFlag = false;
         ++minContact.toiCount;
 
         // Is the contact solid?
-        if (!minContact.IsEnabled() || !minContact.IsTouching()) {
+        if (!minContact.isEnabled() || !minContact.isTouching()) {
           // Restore the sweeps.
-          minContact.SetEnabled(false);
-          bA.sweep.Copy(backup1);
-          bB.sweep.Copy(backup2);
-          bA.SynchronizeTransform();
-          bB.SynchronizeTransform();
+          minContact.setEnabled(false);
+          bA.sweep.copy(backup1);
+          bB.sweep.copy(backup2);
+          bA.synchronizeTransform();
+          bB.synchronizeTransform();
           continue;
         }
 
-        bA.SetAwake(true);
-        bB.SetAwake(true);
+        bA.setAwake(true);
+        bB.setAwake(true);
 
         // Build the island
-        island.Clear();
-        island.AddBody(bA);
-        island.AddBody(bB);
-        island.AddContact(minContact);
+        island.clear();
+        island.addBody(bA);
+        island.addBody(bB);
+        island.addContact(minContact);
 
         bA.islandFlag = true;
         bB.islandFlag = true;
@@ -1509,8 +1490,8 @@ namespace b2 {
         // const bodies: Body[] = [bA, bB];
         for (let i: number = 0; i < 2; ++i) {
           const body: Body = (i === 0) ? (bA) : (bB); // bodies[i];
-          if (body.type === BodyType.dynamicBody) {
-            for (let ce: ContactEdge | null = body.contactList; ce; ce = ce.next) {
+          if (body.type === BodyType.DynamicBody) {
+            for (let ce: ContactEdge = body.contactList; ce; ce = ce.next) {
               if (island.bodyCount === island.bodyCapacity) {
                 break;
               }
@@ -1528,8 +1509,8 @@ namespace b2 {
 
               // Only add static, kinematic, or bullet bodies.
               const other: Body = ce.other;
-              if (other.type === BodyType.dynamicBody &&
-                !body.IsBullet() && !other.IsBullet()) {
+              if (other.type === BodyType.DynamicBody &&
+                !body.isBullet() && !other.isBullet()) {
                 continue;
               }
 
@@ -1541,31 +1522,31 @@ namespace b2 {
               }
 
               // Tentatively advance the body to the TOI.
-              const backup: Sweep = World.SolveTOI_s_backup.Copy(other.sweep);
+              const backup: Sweep = World.solveTOI_s_backup.copy(other.sweep);
               if (!other.islandFlag) {
-                other.Advance(minAlpha);
+                other.advance(minAlpha);
               }
 
               // Update the contact points
-              contact.Update(this.contactManager.contactListener);
+              contact.update(this.contactManager.contactListener);
 
               // Was the contact disabled by the user?
-              if (!contact.IsEnabled()) {
-                other.sweep.Copy(backup);
-                other.SynchronizeTransform();
+              if (!contact.isEnabled()) {
+                other.sweep.copy(backup);
+                other.synchronizeTransform();
                 continue;
               }
 
               // Are there contact points?
-              if (!contact.IsTouching()) {
-                other.sweep.Copy(backup);
-                other.SynchronizeTransform();
+              if (!contact.isTouching()) {
+                other.sweep.copy(backup);
+                other.synchronizeTransform();
                 continue;
               }
 
               // Add the contact to the island
               contact.islandFlag = true;
-              island.AddContact(contact);
+              island.addContact(contact);
 
               // Has the other body already been added to the island?
               if (other.islandFlag) {
@@ -1575,16 +1556,16 @@ namespace b2 {
               // Add the other body to the island.
               other.islandFlag = true;
 
-              if (other.type !== BodyType.staticBody) {
-                other.SetAwake(true);
+              if (other.type !== BodyType.StaticBody) {
+                other.setAwake(true);
               }
 
-              island.AddBody(other);
+              island.addBody(other);
             }
           }
         }
 
-        const subStep: TimeStep = World.SolveTOI_s_subStep;
+        const subStep: TimeStep = World.solveTOI_s_subStep;
         subStep.dt = (1 - minAlpha) * step.dt;
         subStep.inv_dt = 1 / subStep.dt;
         subStep.dtRatio = 1;
@@ -1594,21 +1575,21 @@ namespace b2 {
         subStep.particleIterations = step.particleIterations;
         // #endif
         subStep.warmStarting = false;
-        island.SolveTOI(subStep, bA.islandIndex, bB.islandIndex);
+        island.solveTOI(subStep, bA.islandIndex, bB.islandIndex);
 
         // Reset island flags and synchronize broad-phase proxies.
         for (let i: number = 0; i < island.bodyCount; ++i) {
           const body: Body = island.bodies[i];
           body.islandFlag = false;
 
-          if (body.type !== BodyType.dynamicBody) {
+          if (body.type !== BodyType.DynamicBody) {
             continue;
           }
 
-          body.SynchronizeFixtures();
+          body.synchronizeFixtures();
 
           // Invalidate all contact TOIs on this displaced body.
-          for (let ce: ContactEdge | null = body.contactList; ce; ce = ce.next) {
+          for (let ce: ContactEdge = body.contactList; ce; ce = ce.next) {
             ce.contact.toiFlag = false;
             ce.contact.islandFlag = false;
           }
@@ -1616,7 +1597,7 @@ namespace b2 {
 
         // Commit fixture proxy movements to the broad-phase so that new contacts are created.
         // Also, some contacts can be destroyed.
-        this.contactManager.FindNewContacts();
+        this.contactManager.findNewContacts();
 
         if (this.subStepping) {
           this.stepComplete = false;
@@ -1626,7 +1607,7 @@ namespace b2 {
     }
 
     // #if ENABLE_CONTROLLER
-    public AddController(controller: Controller): Controller {
+    public addController(controller: Controller): Controller {
       // Assert(controller.world === null, "Controller can only be a member of one world");
       // controller.world = this;
       controller.next = this.controllerList;
@@ -1639,7 +1620,7 @@ namespace b2 {
       return controller;
     }
 
-    public RemoveController(controller: Controller): Controller {
+    public removeController(controller: Controller): Controller {
       // Assert(controller.world === this, "Controller is not a member of this world");
       if (controller.prev) {
         controller.prev.next = controller.next;

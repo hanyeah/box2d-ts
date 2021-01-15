@@ -36,11 +36,11 @@ namespace b2 {
 
     constructor(public r: number = 0.5, public g: number = 0.5, public b: number = 0.5, public a: number = 1.0) {}
 
-    public Clone(): Color {
-      return new Color().Copy(this);
+    public clone(): Color {
+      return new Color().copy(this);
     }
 
-    public Copy(other: RGBA): this {
+    public copy(other: RGBA): this {
       this.r = other.r;
       this.g = other.g;
       this.b = other.b;
@@ -48,26 +48,26 @@ namespace b2 {
       return this;
     }
 
-    public IsEqual(color: RGBA): boolean {
+    public isEqual(color: RGBA): boolean {
       return (this.r === color.r) && (this.g === color.g) && (this.b === color.b) && (this.a === color.a);
     }
 
-    public IsZero(): boolean {
+    public isZero(): boolean {
       return (this.r === 0) && (this.g === 0) && (this.b === 0) && (this.a === 0);
     }
 
-    public Set(r: number, g: number, b: number, a: number = this.a): void {
-      this.SetRGBA(r, g, b, a);
+    public set(r: number, g: number, b: number, a: number = this.a): void {
+      this.setRGBA(r, g, b, a);
     }
 
-    public SetByteRGB(r: number, g: number, b: number): this {
+    public setByteRGB(r: number, g: number, b: number): this {
       this.r = r / 0xff;
       this.g = g / 0xff;
       this.b = b / 0xff;
       return this;
     }
 
-    public SetByteRGBA(r: number, g: number, b: number, a: number): this {
+    public setByteRGBA(r: number, g: number, b: number, a: number): this {
       this.r = r / 0xff;
       this.g = g / 0xff;
       this.b = b / 0xff;
@@ -75,14 +75,14 @@ namespace b2 {
       return this;
     }
 
-    public SetRGB(rr: number, gg: number, bb: number): this {
+    public setRGB(rr: number, gg: number, bb: number): this {
       this.r = rr;
       this.g = gg;
       this.b = bb;
       return this;
     }
 
-    public SetRGBA(rr: number, gg: number, bb: number, aa: number): this {
+    public setRGBA(rr: number, gg: number, bb: number, aa: number): this {
       this.r = rr;
       this.g = gg;
       this.b = bb;
@@ -90,7 +90,7 @@ namespace b2 {
       return this;
     }
 
-    public SelfAdd(color: RGBA): this {
+    public selfAdd(color: RGBA): this {
       this.r += color.r;
       this.g += color.g;
       this.b += color.b;
@@ -98,7 +98,7 @@ namespace b2 {
       return this;
     }
 
-    public Add<T extends RGBA>(color: RGBA, out: T): T {
+    public add<T extends RGBA>(color: RGBA, out: T): T {
       out.r = this.r + color.r;
       out.g = this.g + color.g;
       out.b = this.b + color.b;
@@ -106,7 +106,7 @@ namespace b2 {
       return out;
     }
 
-    public SelfSub(color: RGBA): this {
+    public selfSub(color: RGBA): this {
       this.r -= color.r;
       this.g -= color.g;
       this.b -= color.b;
@@ -114,7 +114,7 @@ namespace b2 {
       return this;
     }
 
-    public Sub<T extends RGBA>(color: RGBA, out: T): T {
+    public sub<T extends RGBA>(color: RGBA, out: T): T {
       out.r = this.r - color.r;
       out.g = this.g - color.g;
       out.b = this.b - color.b;
@@ -122,7 +122,7 @@ namespace b2 {
       return out;
     }
 
-    public SelfMul(s: number): this {
+    public selfMul(s: number): this {
       this.r *= s;
       this.g *= s;
       this.b *= s;
@@ -130,7 +130,7 @@ namespace b2 {
       return this;
     }
 
-    public Mul<T extends RGBA>(s: number, out: T): T {
+    public mul<T extends RGBA>(s: number, out: T): T {
       out.r = this.r * s;
       out.g = this.g * s;
       out.b = this.b * s;
@@ -138,11 +138,11 @@ namespace b2 {
       return out;
     }
 
-    public Mix(mixColor: RGBA, strength: number): void {
-      Color.MixColors(this, mixColor, strength);
+    public mix(mixColor: RGBA, strength: number): void {
+      Color.mixColors(this, mixColor, strength);
     }
 
-    public static MixColors(colorA: RGBA, colorB: RGBA, strength: number): void {
+    public static mixColors(colorA: RGBA, colorB: RGBA, strength: number): void {
       const dr = (strength * (colorB.r - colorA.r));
       const dg = (strength * (colorB.g - colorA.g));
       const db = (strength * (colorB.b - colorA.b));
@@ -157,11 +157,11 @@ namespace b2 {
       colorB.a -= da;
     }
 
-    public MakeStyleString(alpha: number = this.a): string {
-      return Color.MakeStyleString(this.r, this.g, this.b, alpha);
+    public makeStyleString(alpha: number = this.a): string {
+      return Color.makeStyleString(this.r, this.g, this.b, alpha);
     }
 
-    public static MakeStyleString(r: number, g: number, b: number, a: number = 1.0): string {
+    public static makeStyleString(r: number, g: number, b: number, a: number = 1.0): string {
       // function clamp(x: number, lo: number, hi: number) { return x < lo ? lo : hi < x ? hi : x; }
       r *= 255; // r = clamp(r, 0, 255);
       g *= 255; // g = clamp(g, 0, 255);
@@ -199,11 +199,11 @@ namespace b2 {
       }
     }
 
-    public Clone(): TypedColor {
+    public clone(): TypedColor {
       return new TypedColor(new Float32Array(this.data));
     }
 
-    public Copy(other: RGBA): this {
+    public copy(other: RGBA): this {
       if (other instanceof TypedColor) {
         this.data.set(other.data);
       }
@@ -216,26 +216,26 @@ namespace b2 {
       return this;
     }
 
-    public IsEqual(color: RGBA): boolean {
+    public isEqual(color: RGBA): boolean {
       return (this.r === color.r) && (this.g === color.g) && (this.b === color.b) && (this.a === color.a);
     }
 
-    public IsZero(): boolean {
+    public isZero(): boolean {
       return (this.r === 0) && (this.g === 0) && (this.b === 0) && (this.a === 0);
     }
 
-    public Set(r: number, g: number, b: number, a: number = this.a): void {
-      this.SetRGBA(r, g, b, a);
+    public set(r: number, g: number, b: number, a: number = this.a): void {
+      this.setRGBA(r, g, b, a);
     }
 
-    public SetByteRGB(r: number, g: number, b: number): this {
+    public setByteRGB(r: number, g: number, b: number): this {
       this.r = r / 0xff;
       this.g = g / 0xff;
       this.b = b / 0xff;
       return this;
     }
 
-    public SetByteRGBA(r: number, g: number, b: number, a: number): this {
+    public setByteRGBA(r: number, g: number, b: number, a: number): this {
       this.r = r / 0xff;
       this.g = g / 0xff;
       this.b = b / 0xff;
@@ -243,14 +243,14 @@ namespace b2 {
       return this;
     }
 
-    public SetRGB(rr: number, gg: number, bb: number): this {
+    public setRGB(rr: number, gg: number, bb: number): this {
       this.r = rr;
       this.g = gg;
       this.b = bb;
       return this;
     }
 
-    public SetRGBA(rr: number, gg: number, bb: number, aa: number): this {
+    public setRGBA(rr: number, gg: number, bb: number, aa: number): this {
       this.r = rr;
       this.g = gg;
       this.b = bb;
@@ -258,7 +258,7 @@ namespace b2 {
       return this;
     }
 
-    public SelfAdd(color: RGBA): this {
+    public selfAdd(color: RGBA): this {
       this.r += color.r;
       this.g += color.g;
       this.b += color.b;
@@ -266,7 +266,7 @@ namespace b2 {
       return this;
     }
 
-    public Add<T extends RGBA>(color: RGBA, out: T): T {
+    public add<T extends RGBA>(color: RGBA, out: T): T {
       out.r = this.r + color.r;
       out.g = this.g + color.g;
       out.b = this.b + color.b;
@@ -274,7 +274,7 @@ namespace b2 {
       return out;
     }
 
-    public SelfSub(color: RGBA): this {
+    public selfSub(color: RGBA): this {
       this.r -= color.r;
       this.g -= color.g;
       this.b -= color.b;
@@ -282,7 +282,7 @@ namespace b2 {
       return this;
     }
 
-    public Sub<T extends RGBA>(color: RGBA, out: T): T {
+    public sub<T extends RGBA>(color: RGBA, out: T): T {
       out.r = this.r - color.r;
       out.g = this.g - color.g;
       out.b = this.b - color.b;
@@ -290,7 +290,7 @@ namespace b2 {
       return out;
     }
 
-    public SelfMul(s: number): this {
+    public selfMul(s: number): this {
       this.r *= s;
       this.g *= s;
       this.b *= s;
@@ -298,7 +298,7 @@ namespace b2 {
       return this;
     }
 
-    public Mul<T extends RGBA>(s: number, out: T): T {
+    public mul<T extends RGBA>(s: number, out: T): T {
       out.r = this.r * s;
       out.g = this.g * s;
       out.b = this.b * s;
@@ -306,29 +306,29 @@ namespace b2 {
       return out;
     }
 
-    public Mix(mixColor: RGBA, strength: number): void {
-      Color.MixColors(this, mixColor, strength);
+    public mix(mixColor: RGBA, strength: number): void {
+      Color.mixColors(this, mixColor, strength);
     }
 
-    public MakeStyleString(alpha: number = this.a): string {
-      return Color.MakeStyleString(this.r, this.g, this.b, alpha);
+    public makeStyleString(alpha: number = this.a): string {
+      return Color.makeStyleString(this.r, this.g, this.b, alpha);
     }
   }
 
   export enum DrawFlags {
-    e_none = 0,
-    e_shapeBit = 0x0001, ///< draw shapes
-    e_jointBit = 0x0002, ///< draw joint connections
-    e_aabbBit = 0x0004, ///< draw axis aligned bounding boxes
-    e_pairBit = 0x0008, ///< draw broad-phase pairs
-    e_centerOfMassBit = 0x0010, ///< draw center of mass frame
+    None = 0,
+    ShapeBit = 0x0001, ///< draw shapes
+    JointBit = 0x0002, ///< draw joint connections
+    AABBBit = 0x0004, ///< draw axis aligned bounding boxes
+    PairBit = 0x0008, ///< draw broad-phase pairs
+    CenterOfMassBit = 0x0010, ///< draw center of mass frame
     // #if ENABLE_PARTICLE
-    e_particleBit = 0x0020, ///< draw particles
+    ParticleBit = 0x0020, ///< draw particles
     // #endif
     // #if ENABLE_CONTROLLER
-    e_controllerBit = 0x0040, /// @see Controller list
+    ControllerBit = 0x0040, /// @see Controller list
     // #endif
-    e_all = 0x003f,
+    All = 0x003f,
   }
 
 /// Implement and register this class with a World to provide debug drawing of physics
@@ -336,43 +336,43 @@ namespace b2 {
   export class Draw {
     public drawFlags: DrawFlags = 0;
 
-    public SetFlags(flags: DrawFlags): void {
+    public setFlags(flags: DrawFlags): void {
       this.drawFlags = flags;
     }
 
-    public GetFlags(): DrawFlags {
+    public getFlags(): DrawFlags {
       return this.drawFlags;
     }
 
-    public AppendFlags(flags: DrawFlags): void {
+    public appendFlags(flags: DrawFlags): void {
       this.drawFlags |= flags;
     }
 
-    public ClearFlags(flags: DrawFlags): void {
+    public clearFlags(flags: DrawFlags): void {
       this.drawFlags &= ~flags;
     }
 
-    public PushTransform(xf: Transform): void{};
+    public pushTransform(xf: Transform): void{};
 
-    public PopTransform(xf: Transform): void{};
+    public popTransform(xf: Transform): void{};
 
-    public DrawPolygon(vertices: XY[], vertexCount: number, color: RGBA): void{};
+    public drawPolygon(vertices: XY[], vertexCount: number, color: RGBA): void{};
 
-    public DrawSolidPolygon(vertices: XY[], vertexCount: number, color: RGBA): void{};
+    public drawSolidPolygon(vertices: XY[], vertexCount: number, color: RGBA): void{};
 
-    public DrawCircle(center: XY, radius: number, color: RGBA): void{};
+    public drawCircle(center: XY, radius: number, color: RGBA): void{};
 
-    public DrawSolidCircle(center: XY, radius: number, axis: XY, color: RGBA): void{};
+    public drawSolidCircle(center: XY, radius: number, axis: XY, color: RGBA): void{};
 
     // #if ENABLE_PARTICLE
-    public DrawParticles(centers: XY[], radius: number, colors: RGBA[], count: number): void{};
+    public drawParticles(centers: XY[], radius: number, colors: RGBA[], count: number): void{};
     // #endif
 
-    public DrawSegment(p1: XY, p2: XY, color: RGBA): void{};
+    public drawSegment(p1: XY, p2: XY, color: RGBA): void{};
 
-    public DrawTransform(xf: Transform): void{};
+    public drawTransform(xf: Transform): void{};
 
-    public DrawPoint(p: XY, size: number, color: RGBA): void{};
+    public drawPoint(p: XY, size: number, color: RGBA): void{};
   }
 
 }
