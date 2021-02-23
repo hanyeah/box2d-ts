@@ -57,15 +57,15 @@ namespace b2 {
       this.collideConnected = true;
     }
 
-    public initialize(bA: Body, bB: Body, groundA: Vec2, groundB: Vec2, anchorA: Vec2, anchorB: Vec2, r: number): void {
+    public initialize(bA: Body, bB: Body, groundA: XY, groundB: XY, anchorA: XY, anchorB: XY, r: number): void {
       this.bodyA = bA;
       this.bodyB = bB;
       this.groundAnchorA.copy(groundA);
       this.groundAnchorB.copy(groundB);
-      this.bodyA.getLocalPoint(anchorA, this.localAnchorA);
-      this.bodyB.getLocalPoint(anchorB, this.localAnchorB);
-      this.lengthA = Vec2.DistanceVV(anchorA, groundA);
-      this.lengthB = Vec2.DistanceVV(anchorB, groundB);
+      this.localAnchorA.copy(anchorA);
+      this.localAnchorB.copy(anchorB);
+      this.lengthA = Vec2.DistanceVV(bA.getWorldPoint(anchorA, {x: 0, y: 0}), groundA);
+      this.lengthB = Vec2.DistanceVV(bB.getWorldPoint(anchorB, {x: 0, y: 0}), groundB);
       this.ratio = r;
       // DEBUG: Assert(this.ratio > epsilon);
     }

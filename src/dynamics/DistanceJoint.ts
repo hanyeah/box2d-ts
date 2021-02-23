@@ -48,9 +48,9 @@ namespace b2 {
     public Initialize(b1: Body, b2: Body, anchor1: XY, anchor2: XY): void {
       this.bodyA = b1;
       this.bodyB = b2;
-      this.bodyA.getLocalPoint(anchor1, this.localAnchorA);
-      this.bodyB.getLocalPoint(anchor2, this.localAnchorB);
-      this.length = Max(Vec2.DistanceVV(anchor1, anchor2), linearSlop);
+      this.localAnchorA.copy(anchor1);
+      this.localAnchorB.copy(anchor2);
+      this.length = Max(Vec2.DistanceVV(b1.getWorldPoint(anchor1, {x: 0, y: 0}), b2.getWorldPoint(anchor1, {x: 0, y: 0})), linearSlop);
       this.minLength = this.length;
       this.maxLength = this.length;
     }

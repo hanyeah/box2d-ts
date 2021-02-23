@@ -69,11 +69,11 @@ namespace b2 {
       super(JointType.RevoluteJoint);
     }
 
-    public initialize(bA: Body, bB: Body, anchor: XY): void {
+    public initialize(bA: Body, bB: Body, anchor1: XY, anchor2: XY): void {
       this.bodyA = bA;
       this.bodyB = bB;
-      this.bodyA.getLocalPoint(anchor, this.localAnchorA);
-      this.bodyB.getLocalPoint(anchor, this.localAnchorB);
+      this.localAnchorA.copy(anchor1);
+      this.localAnchorB.copy(anchor2);
       this.referenceAngle = this.bodyB.getAngle() - this.bodyA.getAngle();
     }
   }

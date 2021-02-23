@@ -73,7 +73,7 @@ var b2;
     b2.aabbMultiplier = 4;
     /// A small length used as a collision and constraint tolerance. Usually it is
     /// chosen to be numerically significant, but visually insignificant.
-    b2.linearSlop = 0.005 * b2.lengthUnitsPerMeter;
+    b2.linearSlop = 0.005 * b2.lengthUnitsPerMeter * 0.001;
     /// A small angle used as a collision and constraint tolerance. Usually it is
     /// chosen to be numerically significant, but visually insignificant.
     b2.angularSlop = 2 / 180 * b2.pi;
@@ -9615,18 +9615,7 @@ var b2;
                 return this.createFixtureDef(a);
             }
         };
-        /// Creates a fixture and attach it to this body. Use this function if you need
-        /// to set some fixture parameters, like friction. Otherwise you can create the
-        /// fixture directly from a shape.
-        /// If the density is non-zero, this function automatically updates the mass of the body.
-        /// Contacts are not created until the next time step.
-        /// @param def the fixture definition.
-        /// @warning This function is locked during callbacks.
-        Body.prototype.createFixtureDef = function (def) {
-            if (this.world.isLocked()) {
-                throw new Error();
-            }
-            var fixture = new b2.Fixture(this, def);
+        Body.prototype.addFixture = function (fixture) {
             if (this.enabledFlag) {
                 fixture.createProxies();
             }
@@ -9641,6 +9630,20 @@ var b2;
             // Let the world know we have a new fixture. This will cause new contacts
             // to be created at the beginning of the next time step.
             this.world.newContacts = true;
+        };
+        /// Creates a fixture and attach it to this body. Use this function if you need
+        /// to set some fixture parameters, like friction. Otherwise you can create the
+        /// fixture directly from a shape.
+        /// If the density is non-zero, this function automatically updates the mass of the body.
+        /// Contacts are not created until the next time step.
+        /// @param def the fixture definition.
+        /// @warning This function is locked during callbacks.
+        Body.prototype.createFixtureDef = function (def) {
+            if (this.world.isLocked()) {
+                throw new Error();
+            }
+            var fixture = new b2.Fixture(this, def);
+            this.addFixture(fixture);
             return fixture;
         };
         Body.prototype.createFixtureShapeDensity = function (shape, density) {
@@ -10833,9 +10836,9 @@ var b2;
         DistanceJointDef.prototype.Initialize = function (b1, b2, anchor1, anchor2) {
             this.bodyA = b1;
             this.bodyB = b2;
-            this.bodyA.getLocalPoint(anchor1, this.localAnchorA);
-            this.bodyB.getLocalPoint(anchor2, this.localAnchorB);
-            this.length = b2_1.Max(b2_1.Vec2.DistanceVV(anchor1, anchor2), b2_1.linearSlop);
+            this.localAnchorA.copy(anchor1);
+            this.localAnchorB.copy(anchor2);
+            this.length = b2_1.Max(b2_1.Vec2.DistanceVV(b1.getWorldPoint(anchor1, { x: 0, y: 0 }), b2.getWorldPoint(anchor1, { x: 0, y: 0 })), b2_1.linearSlop);
             this.minLength = this.length;
             this.maxLength = this.length;
         };
@@ -12755,8 +12758,14 @@ var b2;
             _this.maxForce = 0;
             _this.stiffness = 5;
             _this.damping = 0.7;
+            _this.localAnchorB = new b2.Vec2();
             return _this;
         }
+        MouseJointDef.prototype.initialize = function (bB, anchorB, target) {
+            this.bodyB = bB;
+            this.localAnchorB.copy(anchorB);
+            this.target.copy(target);
+        };
         return MouseJointDef;
     }(b2.JointDef));
     b2.MouseJointDef = MouseJointDef;
@@ -12786,6 +12795,7 @@ var b2;
             _this.lalcB = new b2.Vec2();
             _this.K = new b2.Mat22();
             _this.targetA.copy(b2.maybe(def.target, b2.Vec2.ZERO));
+            _this.localAnchorB.copy(b2.maybe(def.localAnchorB, b2.Vec2.ZERO));
             // DEBUG: Assert(this.targetA.IsValid());
             b2.Transform.mulTXV(_this.bodyB.getTransform(), _this.targetA, _this.localAnchorB);
             _this.maxForce = b2.maybe(def.maxForce, 0);
@@ -13051,12 +13061,12 @@ var b2;
             _this.motorSpeed = 0;
             return _this;
         }
-        PrismaticJointDef.prototype.initialize = function (bA, bB, anchor, axis) {
+        PrismaticJointDef.prototype.initialize = function (bA, bB, anchor1, anchor2, axis) {
             this.bodyA = bA;
             this.bodyB = bB;
-            this.bodyA.getLocalPoint(anchor, this.localAnchorA);
-            this.bodyB.getLocalPoint(anchor, this.localAnchorB);
-            this.bodyA.getLocalVector(axis, this.localAxisA);
+            this.localAnchorA.copy(anchor1);
+            this.localAnchorB.copy(anchor2);
+            this.localAxisA.copy(axis);
             this.referenceAngle = this.bodyB.getAngle() - this.bodyA.getAngle();
         };
         return PrismaticJointDef;
@@ -13737,10 +13747,10 @@ var b2;
             this.bodyB = bB;
             this.groundAnchorA.copy(groundA);
             this.groundAnchorB.copy(groundB);
-            this.bodyA.getLocalPoint(anchorA, this.localAnchorA);
-            this.bodyB.getLocalPoint(anchorB, this.localAnchorB);
-            this.lengthA = b2.Vec2.DistanceVV(anchorA, groundA);
-            this.lengthB = b2.Vec2.DistanceVV(anchorB, groundB);
+            this.localAnchorA.copy(anchorA);
+            this.localAnchorB.copy(anchorB);
+            this.lengthA = b2.Vec2.DistanceVV(bA.getWorldPoint(anchorA, { x: 0, y: 0 }), groundA);
+            this.lengthB = b2.Vec2.DistanceVV(bB.getWorldPoint(anchorB, { x: 0, y: 0 }), groundB);
             this.ratio = r;
             // DEBUG: Assert(this.ratio > epsilon);
         };
@@ -14072,11 +14082,11 @@ var b2;
             _this.maxMotorTorque = 0;
             return _this;
         }
-        RevoluteJointDef.prototype.initialize = function (bA, bB, anchor) {
+        RevoluteJointDef.prototype.initialize = function (bA, bB, anchor1, anchor2) {
             this.bodyA = bA;
             this.bodyB = bB;
-            this.bodyA.getLocalPoint(anchor, this.localAnchorA);
-            this.bodyB.getLocalPoint(anchor, this.localAnchorB);
+            this.localAnchorA.copy(anchor1);
+            this.localAnchorB.copy(anchor2);
             this.referenceAngle = this.bodyB.getAngle() - this.bodyA.getAngle();
         };
         return RevoluteJointDef;
@@ -14540,11 +14550,11 @@ var b2;
             _this.damping = 0;
             return _this;
         }
-        WeldJointDef.prototype.initialize = function (bA, bB, anchor) {
+        WeldJointDef.prototype.initialize = function (bA, bB, anchor1, anchor2) {
             this.bodyA = bA;
             this.bodyB = bB;
-            this.bodyA.getLocalPoint(anchor, this.localAnchorA);
-            this.bodyB.getLocalPoint(anchor, this.localAnchorB);
+            this.localAnchorA.copy(anchor1);
+            this.localAnchorB.copy(anchor2);
             this.referenceAngle = this.bodyB.getAngle() - this.bodyA.getAngle();
         };
         return WeldJointDef;
@@ -15614,6 +15624,15 @@ var b2;
         World.prototype.setDebugDraw = function (debugDraw) {
             this.debugDrawInstance = debugDraw;
         };
+        World.prototype.addBody = function (b) {
+            b.prev = null;
+            b.next = this.bodyList;
+            if (this.bodyList) {
+                this.bodyList.prev = b;
+            }
+            this.bodyList = b;
+            ++this.bodyCount;
+        };
         /// Create a rigid body given a definition. No reference to the definition
         /// is retained.
         /// @warning This function is locked during callbacks.
@@ -15624,13 +15643,7 @@ var b2;
             }
             var b = new b2.Body(def, this);
             // Add to world doubly linked list.
-            b.prev = null;
-            b.next = this.bodyList;
-            if (this.bodyList) {
-                this.bodyList.prev = b;
-            }
-            this.bodyList = b;
-            ++this.bodyCount;
+            this.addBody(b);
             return b;
         };
         /// Destroy a rigid body given a definition. No reference to the definition
@@ -15721,6 +15734,11 @@ var b2;
                 throw new Error();
             }
             var j = World._createJoint(def);
+            this.addJoint(j);
+            // Note: creating a joint doesn't wake the bodies.
+            return j;
+        };
+        World.prototype.addJoint = function (j) {
             // Connect to the world list.
             j.prev = null;
             j.next = this.jointList;
@@ -15759,8 +15777,6 @@ var b2;
                     edge = edge.next;
                 }
             }
-            // Note: creating a joint doesn't wake the bodies.
-            return j;
         };
         /// Destroy a joint. This may cause the connected bodies to begin colliding.
         /// @warning This function is locked during callbacks.

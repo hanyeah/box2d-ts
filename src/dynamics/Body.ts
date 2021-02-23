@@ -272,18 +272,7 @@ namespace b2 {
       }
     }
 
-    /// Creates a fixture and attach it to this body. Use this function if you need
-    /// to set some fixture parameters, like friction. Otherwise you can create the
-    /// fixture directly from a shape.
-    /// If the density is non-zero, this function automatically updates the mass of the body.
-    /// Contacts are not created until the next time step.
-    /// @param def the fixture definition.
-    /// @warning This function is locked during callbacks.
-    public createFixtureDef(def: IFixtureDef): Fixture {
-      if (this.world.isLocked()) { throw new Error(); }
-
-      const fixture: Fixture = new Fixture(this, def);
-
+    public addFixture(fixture: Fixture): void {
       if (this.enabledFlag) {
         fixture.createProxies();
       }
@@ -302,7 +291,19 @@ namespace b2 {
       // Let the world know we have a new fixture. This will cause new contacts
       // to be created at the beginning of the next time step.
       this.world.newContacts = true;
+    }
 
+    /// Creates a fixture and attach it to this body. Use this function if you need
+    /// to set some fixture parameters, like friction. Otherwise you can create the
+    /// fixture directly from a shape.
+    /// If the density is non-zero, this function automatically updates the mass of the body.
+    /// Contacts are not created until the next time step.
+    /// @param def the fixture definition.
+    /// @warning This function is locked during callbacks.
+    public createFixtureDef(def: IFixtureDef): Fixture {
+      if (this.world.isLocked()) { throw new Error(); }
+      const fixture: Fixture = new Fixture(this, def);
+      this.addFixture(fixture);
       return fixture;
     }
 

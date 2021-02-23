@@ -69,12 +69,12 @@ namespace b2 {
       super(JointType.PrismaticJoint);
     }
 
-    public initialize(bA: Body, bB: Body, anchor: Vec2, axis: Vec2): void {
+    public initialize(bA: Body, bB: Body, anchor1: XY, anchor2: XY, axis: XY): void {
       this.bodyA = bA;
       this.bodyB = bB;
-      this.bodyA.getLocalPoint(anchor, this.localAnchorA);
-      this.bodyB.getLocalPoint(anchor, this.localAnchorB);
-      this.bodyA.getLocalVector(axis, this.localAxisA);
+      this.localAnchorA.copy(anchor1);
+      this.localAnchorB.copy(anchor2);
+      this.localAxisA.copy(axis);
       this.referenceAngle = this.bodyB.getAngle() - this.bodyA.getAngle();
     }
   }

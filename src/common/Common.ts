@@ -66,7 +66,7 @@ namespace b2 {
 
 /// A small length used as a collision and constraint tolerance. Usually it is
 /// chosen to be numerically significant, but visually insignificant.
-  export const linearSlop: number = 0.005 * lengthUnitsPerMeter;
+  export const linearSlop: number = 0.005 * lengthUnitsPerMeter * 0.001;
 
 /// A small angle used as a collision and constraint tolerance. Usually it is
 /// chosen to be numerically significant, but visually insignificant.

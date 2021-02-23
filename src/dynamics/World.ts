@@ -96,15 +96,7 @@ namespace b2 {
       this.debugDrawInstance = debugDraw;
     }
 
-    /// Create a rigid body given a definition. No reference to the definition
-    /// is retained.
-    /// @warning This function is locked during callbacks.
-    public createBody(def: IBodyDef = {}): Body {
-      if (this.isLocked()) { throw new Error(); }
-
-      const b: Body = new Body(def, this);
-
-      // Add to world doubly linked list.
+    public addBody(b: Body): void {
       b.prev = null;
       b.next = this.bodyList;
       if (this.bodyList) {
@@ -112,7 +104,16 @@ namespace b2 {
       }
       this.bodyList = b;
       ++this.bodyCount;
+    }
 
+    /// Create a rigid body given a definition. No reference to the definition
+    /// is retained.
+    /// @warning This function is locked during callbacks.
+    public createBody(def: IBodyDef = {}): Body {
+      if (this.isLocked()) { throw new Error(); }
+      const b: Body = new Body(def, this);
+      // Add to world doubly linked list.
+      this.addBody(b);
       return b;
     }
 
@@ -230,9 +231,13 @@ namespace b2 {
     public createJoint(def: IWheelJointDef): WheelJoint;
     public createJoint(def: IJointDef): Joint {
       if (this.isLocked()) { throw new Error(); }
-
       const j: Joint = World._createJoint(def);
+      this.addJoint(j);
+      // Note: creating a joint doesn't wake the bodies.
+      return j;
+    }
 
+    public addJoint(j: Joint): void {
       // Connect to the world list.
       j.prev = null;
       j.next = this.jointList;
@@ -272,10 +277,6 @@ namespace b2 {
           edge = edge.next;
         }
       }
-
-      // Note: creating a joint doesn't wake the bodies.
-
-      return j;
     }
 
     /// Destroy a joint. This may cause the connected bodies to begin colliding.

@@ -24,12 +24,14 @@ namespace b2 {
     stiffness?: number;
 
     damping?: number;
+
+    localAnchorB?: XY;
   }
 
 /// Mouse joint definition. This requires a world target point,
 /// tuning parameters, and the time step.
   export class MouseJointDef extends JointDef implements IMouseJointDef {
-    public readonly target: Vec2 = new Vec2();
+    public target: Vec2 = new Vec2();
 
     public maxForce: number = 0;
 
@@ -37,8 +39,16 @@ namespace b2 {
 
     public damping: number = 0.7;
 
+    public localAnchorB: Vec2 = new Vec2();
+
     constructor() {
       super(JointType.MouseJoint);
+    }
+
+    public initialize(bB: Body, anchorB: XY, target: XY): void {
+      this.bodyB = bB;
+      this.localAnchorB.copy(anchorB);
+      this.target.copy(target);
     }
   }
 
@@ -71,6 +81,7 @@ namespace b2 {
       super(def);
 
       this.targetA.copy(maybe(def.target, Vec2.ZERO));
+      this.localAnchorB.copy(maybe(def.localAnchorB, Vec2.ZERO))
       // DEBUG: Assert(this.targetA.IsValid());
       Transform.mulTXV(this.bodyB.getTransform(), this.targetA, this.localAnchorB);
 
@@ -87,7 +98,7 @@ namespace b2 {
       this.gamma = 0;
     }
 
-    public setTarget(target: Vec2): void {
+    public setTarget(target: XY): void {
       if (!this.bodyB.isAwake()) {
         this.bodyB.setAwake(true);
       }

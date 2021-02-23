@@ -1723,6 +1723,7 @@ declare namespace b2 {
         createFixture(def: IFixtureDef): Fixture;
         createFixture(shape: Shape): Fixture;
         createFixture(shape: Shape, density: number): Fixture;
+        addFixture(fixture: Fixture): void;
         createFixtureDef(def: IFixtureDef): Fixture;
         private static createFixtureShapeDensity_s_def;
         createFixtureShapeDensity(shape: Shape, density?: number): Fixture;
@@ -2192,13 +2193,16 @@ declare namespace b2 {
         maxForce?: number;
         stiffness?: number;
         damping?: number;
+        localAnchorB?: XY;
     }
     class MouseJointDef extends JointDef implements IMouseJointDef {
-        readonly target: Vec2;
+        target: Vec2;
         maxForce: number;
         stiffness: number;
         damping: number;
+        localAnchorB: Vec2;
         constructor();
+        initialize(bB: Body, anchorB: XY, target: XY): void;
     }
     class MouseJoint extends Joint {
         readonly localAnchorB: Vec2;
@@ -2221,7 +2225,7 @@ declare namespace b2 {
         readonly lalcB: Vec2;
         readonly K: Mat22;
         constructor(def: IMouseJointDef);
-        setTarget(target: Vec2): void;
+        setTarget(target: XY): void;
         getTarget(): Vec2;
         setMaxForce(maxForce: number): void;
         getMaxForce(): number;
@@ -2282,7 +2286,7 @@ declare namespace b2 {
         maxMotorForce: number;
         motorSpeed: number;
         constructor();
-        initialize(bA: Body, bB: Body, anchor: Vec2, axis: Vec2): void;
+        initialize(bA: Body, bB: Body, anchor1: XY, anchor2: XY, axis: XY): void;
     }
     class PrismaticJoint extends Joint {
         readonly localAnchorA: Vec2;
@@ -2394,7 +2398,7 @@ declare namespace b2 {
         lengthB: number;
         ratio: number;
         constructor();
-        initialize(bA: Body, bB: Body, groundA: Vec2, groundB: Vec2, anchorA: Vec2, anchorB: Vec2, r: number): void;
+        initialize(bA: Body, bB: Body, groundA: XY, groundB: XY, anchorA: XY, anchorB: XY, r: number): void;
     }
     class PulleyJoint extends Joint {
         readonly groundAnchorA: Vec2;
@@ -2472,7 +2476,7 @@ declare namespace b2 {
         motorSpeed: number;
         maxMotorTorque: number;
         constructor();
-        initialize(bA: Body, bB: Body, anchor: XY): void;
+        initialize(bA: Body, bB: Body, anchor1: XY, anchor2: XY): void;
     }
     class RevoluteJoint extends Joint {
         readonly localAnchorA: Vec2;
@@ -2562,7 +2566,7 @@ declare namespace b2 {
         stiffness: number;
         damping: number;
         constructor();
-        initialize(bA: Body, bB: Body, anchor: Vec2): void;
+        initialize(bA: Body, bB: Body, anchor1: XY, anchor2: XY): void;
     }
     class WeldJoint extends Joint {
         stiffness: number;
@@ -2769,6 +2773,7 @@ declare namespace b2 {
         setContactFilter(filter: ContactFilter): void;
         setContactListener(listener: ContactListener): void;
         setDebugDraw(debugDraw: Draw): void;
+        addBody(b: Body): void;
         createBody(def?: IBodyDef): Body;
         destroyBody(b: Body): void;
         private static _createJoint;
@@ -2784,6 +2789,7 @@ declare namespace b2 {
         createJoint(def: IRevoluteJointDef): RevoluteJoint;
         createJoint(def: IWeldJointDef): WeldJoint;
         createJoint(def: IWheelJointDef): WheelJoint;
+        addJoint(j: Joint): void;
         destroyJoint(j: Joint): void;
         createParticleSystem(def: ParticleSystemDef): ParticleSystem;
         destroyParticleSystem(p: ParticleSystem): void;
